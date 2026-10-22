@@ -8,7 +8,7 @@ Quanto custa manter o LiteArt durante um mês, considerando infraestrutura fixa 
 
 ## 2. Escopo da primeira versão
 
-- Um projeto, um cenário mensal e um modelo de IA por execução.
+- Um projeto, um cenário mensal e um modelo da OpenAI, ainda a definir, por execução.
 - Planos de backend e PostgreSQL com mensalidades fixas conhecidas, dentro de seus limites.
 - Feedbacks de texto por meio da API da OpenAI.
 - Conversão de USD para BRL com cotação informada manualmente.
@@ -48,7 +48,8 @@ A preferência por feedback nos erros é uma hipótese de produto baseada em pes
 | Quantidade de unidades de backend | Quantidade | Hipótese de capacidade | Unidades contratadas; inicialmente uma |
 | Preço mensal do plano de banco | USD/mês ou BRL/mês por unidade | Preço pesquisado | Serviço PostgreSQL |
 | Quantidade de unidades de banco | Quantidade | Hipótese de capacidade | Unidades contratadas; inicialmente uma |
-| Modelo da OpenAI | Identificador | Configuração | Modelo usado para pesquisar as tarifas |
+| Provedor da API | Texto | Configuração | OpenAI na primeira versão; identifica quem fornece a API e define as tarifas |
+| Modelo de IA | Identificador | Configuração | Modelo específico da OpenAI na primeira versão, usado para pesquisar as tarifas |
 | Preço de tokens de entrada | USD por 1 milhão de tokens | Preço pesquisado | Tarifa de entrada sem desconto de cache |
 | Preço de tokens de saída | USD por 1 milhão de tokens | Preço pesquisado | Tarifa da saída faturável |
 | Usuários ativos no cenário | Usuários/mês | Hipótese de consumo | Estudantes que respondem questões e estão incluídos na regra de feedback |
@@ -116,11 +117,27 @@ Médias e proporções podem produzir contagens estimadas fracionárias. Não ar
 
 ## 9. Limitações e funcionalidades posteriores
 
+### Limites da primeira versão
+
 A primeira versão não incluirá cobrança excedente aos planos, impostos, tarifas de pagamento, descontos de cache, processamento em lote, ferramentas adicionais da API, imagens, áudio ou novas tentativas. Essas exclusões devem acompanhar a interpretação do resultado.
 
 As mensalidades não comprovam capacidade para atender ao cenário. A necessidade de mudar de plano dependerá de medições e testes futuros.
 
-Comparação automatizada de provedores, cenários de crescimento, evolução mensal, gráficos, dashboard, receita Premium e ponto de equilíbrio serão desenvolvidos depois da calculadora básica.
+### Evoluções futuras
+
+- Organizar preços em CSV e comparar serviços e cenários com Pandas.
+- Permitir selecionar e comparar custos de modelos de diferentes provedores, incluindo Claude, Qwen e Gemini, além dos modelos da OpenAI.
+- Simular crescimento e evolução mensal das despesas.
+- Criar gráficos com Plotly e uma interface com Streamlit.
+- Estimar receita Premium, custo por usuário e ponto de equilíbrio.
+
+Para cada nova opção de IA, pesquisar o modelo específico, o provedor que fornece a API, os preços oficiais, a moeda, as unidades e as regras de cobrança. Quando necessário, converter as tarifas para uma unidade comum, preservando o valor e a unidade originais no registro da fonte.
+
+A comparação usará a mesma tarefa pedagógica e o mesmo volume de feedbacks. O consumo médio de tokens deverá ser uma hipótese específica de cada modelo; usar a mesma quantidade para todos será apenas uma simplificação declarada. O menor custo estimado, isoladamente, não comprova qualidade pedagógica equivalente.
+
+Essas comparações continuarão sendo simulações baseadas em dados de preços e hipóteses, sem exigir chamadas reais às APIs. Os campos de provedor e modelo identificam as entradas; não implementaremos integrações com vários provedores nesta etapa.
+
+Testes e documentação acompanharão os primeiros cálculos. A etapa final consolidará a validação e a publicação da aplicação. O versionamento e o envio da documentação ao GitHub podem começar antes de existir um dashboard.
 
 ## 10. Próximas definições
 
