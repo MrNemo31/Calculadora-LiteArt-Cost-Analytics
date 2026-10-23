@@ -14,14 +14,14 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 
 ## Situação atual
 
-**Etapa 1 — Planejamento.** O projeto possui documentação inicial. Ainda não há uma calculadora executável, dados de preços coletados ou dashboard.
+**Etapa 1 — Planejamento.** O projeto possui documentação inicial, um cenário didático definido e uma pesquisa inicial de preços de IA registrada no planejamento. O GPT-6 Luna foi escolhido como referência inicial de custo. A Etapa 2 foi iniciada com o arquivo `calculadora.py`, que calcula o volume estimado de feedbacks. A execução local ainda está pendente de uma instalação Python utilizável; custos e dashboard ainda não foram implementados.
 
 ## Primeira versão planejada
 
 A primeira entrega funcional será uma calculadora em Python puro, com um cenário por execução, considerando:
 
 - Mensalidades de backend e banco de dados.
-- Um modelo da API da OpenAI, ainda a definir.
+- GPT-6 Luna (`gpt-6-luna`) como modelo de referência da API da OpenAI.
 - Consumo de IA estimado a partir das respostas dos estudantes.
 - Feedback em cada resposta errada e feedback opcional nos acertos.
 - Custos mensais por categoria, total mensal em reais e projeção anual constante.
