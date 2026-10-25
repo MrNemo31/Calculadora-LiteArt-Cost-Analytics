@@ -7,7 +7,7 @@ Modelo registrado pelo autor para essas interações: **GPT-6.1 Sol, com esforç
 ## Como ler este registro
 
 - Os blocos de citação contêm palavras do autor, preservadas sem correções de escrita.
-- O registro 1 reúne trechos do pedido inicial. Os registros 2 a 5 contêm pedidos completos. Os registros 6 a 8 sintetizam pedidos relacionados, sem reproduzir literalmente cada mensagem.
+- O registro 1 reúne trechos do pedido inicial. Os registros 2 a 5 contêm pedidos completos. Os registros a partir do 6 sintetizam pedidos relacionados, sem reproduzir literalmente cada mensagem.
 - As descrições de objetivo e contribuição são notas de organização, não fazem parte dos prompts originais.
 - As respostas da IA não estão reproduzidas. As decisões atuais estão no [README](README.md) e no [planejamento](PLANEJAMENTO.md), que devem prevalecer caso o projeto evolua.
 - Novos registros serão incluídos quando ajudarem a entender uma decisão, um aprendizado ou uma mudança relevante no projeto.
@@ -122,6 +122,32 @@ Avaliar a criação de funções após o cálculo anual. Explicar uma primeira f
 
 **Contribuição para o projeto:** os cálculos foram organizados em seis funções: `calcular_respostas_mensais`, `calcular_feedbacks_mensais`, `calcular_tokens_mensais`, `calcular_custo_tokens`, `calcular_real` e `calcular_custo_anual`. A cotação foi centralizada em uma variável e os resultados permaneceram separados dos `print()`. O nome inicial da função de tokens era `calcular_tokens_por_feedback`; o autor passou a usar `calcular_tokens_mensais` para expressar melhor os totais devolvidos.
 
-O cenário didático e casos com consumo zero e feedback em 0% ou 100% dos acertos foram conferidos durante a refatoração. As funções ainda pressupõem entradas válidas: a validação será o próximo incremento.
+O cenário didático e casos com consumo zero e feedback em 0% ou 100% dos acertos foram conferidos durante a refatoração. Naquele marco, as funções ainda pressupunham entradas válidas; a implementação das validações está registrada na seção 9.
 
-**Marco deste registro:** documentação atualizada em 2026-10-25, até os cálculos anuais e a organização em funções.
+**Marco anterior:** cálculos anuais e organização em funções, registrado em 2026-10-25.
+
+## 9. Validação das entradas da calculadora
+
+**Etapa:** validação dos argumentos das seis funções da calculadora básica.
+
+**Objetivo dos pedidos:** impedir cálculos com tipos inadequados e valores incompatíveis com o cenário, aprendendo cada regra por pequenas alterações e testes.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Antes de alterar o código, explicar quais entradas devem ser validadas e por quê. Começar em `calcular_respostas_mensais`, recusando negativos, depois textos e usuários fracionários, e então infinito e NaN. Explicar o funcionamento de `if`, `raise`, `TypeError`, `ValueError` e da verificação de valores finitos. Validar em seguida as taxas entre 0 e 1 e os tipos de `calcular_feedbacks_mensais`, incluindo respostas mensais. Proteger também esse volume contra negativos e valores não finitos. Aplicar o mesmo processo aos três argumentos de `calcular_tokens_mensais`. Após compreender o padrão, completar as validações das funções monetárias e revisar a consistência das regras anteriores. Atualizar a documentação para registrar esse marco antes de fazer um novo commit.
+
+**Participação e aprendizado:** o autor executou os exemplos de testes no VS Code após cada alteração e confirmou os resultados. A comparação com NaN na documentação do PostgreSQL ajudou a discutir a diferença entre um valor especial e uma operação que levanta uma exceção em Python. Os testes foram apresentados aos poucos para distinguir tipos inválidos, valores negativos, limites permitidos e valores não finitos.
+
+**Decisões registradas:**
+
+- Usuários ativos devem ser `int` e não negativos.
+- Médias e volumes estimados aceitam `int` ou `float`, inclusive frações finitas, sem valores negativos.
+- As taxas recebem proporções entre 0 e 1, com os dois limites permitidos.
+- Preços e custos monetários devem ser `Decimal`, finitos e não negativos.
+- A cotação aceita `int`, `float` ou `Decimal`, é convertida internamente para `Decimal` e deve ser finita e maior que zero.
+- Textos passados diretamente, `None` e booleanos são recusados. Zero continua válido para consumo e custos.
+- `TypeError` identifica tipos não permitidos; `ValueError` identifica valores que desrespeitam as regras.
+
+**Contribuição para o projeto:** todas as seis funções passaram a validar seus argumentos antes dos cálculos. Um roteiro de verificação executado durante o desenvolvimento conferiu 110 casos, incluindo as funções monetárias e regras anteriores, sem alterar os resultados do cenário didático. Esse roteiro ainda não está salvo como suíte de testes no repositório. As funções sinalizam erros; o tratamento dessas mensagens em uma interface ainda será desenvolvido.
+
+**Marco deste registro:** documentação atualizada em 2026-10-25, até a validação das entradas. Os cálculos continuam usando hipóteses didáticas e não fazem chamadas reais à API.

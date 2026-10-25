@@ -24,6 +24,7 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 - Conversão dos custos para reais com cotação didática informada no código.
 - Projeção anual em dólares e reais, mantendo consumo, preços e câmbio constantes.
 - Apresentação dos resultados com os símbolos US$ e R$.
+- Validação de tipos, valores negativos, taxas fora do intervalo, infinito e NaN nos argumentos das funções.
 
 ### Organização das funções
 
@@ -68,9 +69,34 @@ Esses valores conferem a aritmética do cenário. Não são despesas reais nem m
 
 Abra `calculadora.py` e execute o arquivo com seu interpretador Python 3. No ambiente usado durante o desenvolvimento, a execução foi realizada pelo VS Code. Não há dependências externas nesta etapa: `decimal` faz parte da biblioteca padrão.
 
-### Próximo incremento
+### Validação das entradas
 
-Implementar a validação das entradas. As funções atuais pressupõem valores válidos; a conferência de cenários não significa que entradas inválidas já sejam recusadas.
+As seis funções verificam seus argumentos antes de calcular. Tipos não permitidos geram `TypeError`; valores fora das regras geram `ValueError`, com mensagens que identificam o argumento inválido.
+
+| Entrada | Tipos aceitos | Regras |
+|---|---|---|
+| Usuários ativos | `int` | Maior ou igual a zero; valores fracionários e `100.0` são recusados |
+| Média de respostas por usuário e total de respostas mensais | `int` ou `float` | Finitos e maiores ou iguais a zero |
+| Taxa de acerto e parcela dos acertos com feedback | `int` ou `float` | Entre 0 e 1, inclusive; infinito e NaN são recusados pelas regras de intervalo |
+| Tokens por feedback, feedbacks mensais e total de tokens | `int` ou `float` | Finitos e maiores ou iguais a zero; médias e estimativas fracionárias são permitidas |
+| Preço por milhão de tokens e custos monetários | `Decimal` | Finitos e maiores ou iguais a zero |
+| Cotação em BRL por USD | `int`, `float` ou `Decimal` | Finita e maior que zero; convertida internamente para `Decimal` |
+
+Textos passados diretamente, `None` e valores booleanos (`True` e `False`) são recusados. As funções não convertem automaticamente textos numéricos. Construir explicitamente `Decimal("5.00")` continua sendo válido.
+
+Zero é permitido para consumo, quantidades, preços e custos. A cotação é a exceção: precisa ser positiva. Valores especiais como infinito e NaN são recusados; para `float`, usamos `math.isfinite`, e para `Decimal`, `.is_finite()`.
+
+As validações são aplicadas aos argumentos das funções, mesmo quando elas são chamadas fora do cenário principal. Elas verificam as regras definidas para as entradas; não demonstram que as hipóteses representam o consumo real do LiteArt.
+
+### Verificações realizadas
+
+O autor executou casos manualmente no VS Code durante o aprendizado. Após completar as funções monetárias, um roteiro de verificação executou 110 casos envolvendo entradas válidas, tipos inadequados, negativos, zero, limites das taxas, infinito e NaN, incluindo regras anteriores. Os casos passaram e os resultados do cenário didático foram preservados.
+
+Esse roteiro foi executado durante o desenvolvimento e ainda não está salvo no repositório como uma suíte de testes reproduzível. Exceções ainda não são tratadas em uma interface: uma chamada inválida pode interromper o script com a mensagem do erro.
+
+### Próximos incrementos
+
+Organizar as verificações em testes automatizados reproduzíveis e definir o próximo incremento da calculadora. O tratamento das mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
 
 Custos de infraestrutura, leitura de CSV, comparação automatizada de cenários, gráficos e dashboard ainda serão implementados.
 
