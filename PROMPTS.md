@@ -7,7 +7,7 @@ Modelo registrado pelo autor para essas interações: **GPT-6.1 Sol, com esforç
 ## Como ler este registro
 
 - Os blocos de citação contêm palavras do autor, preservadas sem correções de escrita.
-- O primeiro registro reúne trechos do pedido inicial, identificados separadamente. Os demais contêm o texto integral dos pedidos selecionados.
+- O registro 1 reúne trechos do pedido inicial. Os registros 2 a 5 contêm pedidos completos. Os registros 6 a 8 sintetizam pedidos relacionados, sem reproduzir literalmente cada mensagem.
 - As descrições de objetivo e contribuição são notas de organização, não fazem parte dos prompts originais.
 - As respostas da IA não estão reproduzidas. As decisões atuais estão no [README](README.md) e no [planejamento](PLANEJAMENTO.md), que devem prevalecer caso o projeto evolua.
 - Novos registros serão incluídos quando ajudarem a entender uma decisão, um aprendizado ou uma mudança relevante no projeto.
@@ -85,3 +85,43 @@ Modelo registrado pelo autor para essas interações: **GPT-6.1 Sol, com esforç
 > Agora vamos revisar o PLANEJAMENTO.md juntos. Me explique cada parte e ajuste o que for necessário para ficar alinhado com o README, incluindo a comparação futura de outros modelos de IA.
 
 **Contribuição para o projeto:** explicitou a separação entre provedor e modelo e os cuidados previstos para comparar custos: fontes oficiais, unidades compatíveis, mesma tarefa pedagógica e hipóteses de consumo declaradas para cada modelo.
+
+## 6. Cenário didático, escolha do modelo e consumo de tokens
+
+**Etapa:** conclusão das premissas iniciais e preparação da calculadora.
+
+**Objetivo dos pedidos:** definir um cenário de aprendizado, pesquisar preços oficiais e entender a diferença entre hipóteses de tokens e contagens medidas.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Adotar o cenário de 100 usuários, 40 respostas por usuário, 60% de acerto e feedback em 25% dos acertos. Pesquisar os preços oficiais dos modelos da OpenAI, inicialmente considerando Terra, e usar Luna como referência após a comparação. Preparar um exemplo de feedback curto que explique o que a questão pede e mostre a resolução correta. Manter 500 tokens de entrada e 300 de saída como hipóteses didáticas e esclarecer como uma contagem medida difere de uma estimativa.
+
+**Contribuição para o projeto:** definiu o cenário de 2.200 feedbacks mensais, a referência GPT-6 Luna e as hipóteses de consumo. Preços e fontes foram registrados no planejamento; não foram feitas chamadas à API para medir os tokens.
+
+## 7. Implementação gradual dos cálculos mensais e anuais
+
+**Etapa:** calculadora básica com Python puro.
+
+**Objetivo dos pedidos:** implementar pequenas partes, revisar o código escrito pelo autor e compreender cada fórmula antes de avançar.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar `calculadora.py` e explicar as variáveis, operações e resultados. Revisar os cálculos de tokens mensais implementados pelo autor, corrigindo a base de respostas para feedbacks e deixando a divisão por um milhão para o cálculo dos custos. Acrescentar as tarifas do Luna, explicar o uso de `Decimal`, conferir a conversão com cotação didática de R$ 5,00 por dólar e apresentar os símbolos monetários. Revisar a projeção anual em dólares e reais, mantendo preços, consumo e câmbio constantes.
+
+**Contribuição para o projeto:** o autor corrigiu os cálculos de tokens e acrescentou a conversão cambial e a projeção anual. A revisão com apoio de IA ajudou a conferir as fórmulas, adicionar os custos de IA e explicar os conceitos. O cenário resultou em US$ 0,44 ou R$ 2,20 por mês e US$ 5,28 ou R$ 26,40 por ano, apenas para IA e sob as hipóteses registradas.
+
+## 8. Organização dos cálculos em funções
+
+**Etapa:** refatoração da calculadora básica.
+
+**Objetivo dos pedidos:** tornar os cálculos reutilizáveis, entendendo parâmetros, retorno de valores e organização das responsabilidades.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Avaliar a criação de funções após o cálculo anual. Explicar uma primeira função de projeção anual e revisar as funções de conversão para reais e de tokens implementadas pelo autor. Acrescentar as funções restantes para respostas, feedbacks e custo de tokens, explicando cada uma e preservando os resultados. Atualizar a documentação para registrar esse marco antes de iniciar a validação das entradas.
+
+**Contribuição para o projeto:** os cálculos foram organizados em seis funções: `calcular_respostas_mensais`, `calcular_feedbacks_mensais`, `calcular_tokens_mensais`, `calcular_custo_tokens`, `calcular_real` e `calcular_custo_anual`. A cotação foi centralizada em uma variável e os resultados permaneceram separados dos `print()`. O nome inicial da função de tokens era `calcular_tokens_por_feedback`; o autor passou a usar `calcular_tokens_mensais` para expressar melhor os totais devolvidos.
+
+O cenário didático e casos com consumo zero e feedback em 0% ou 100% dos acertos foram conferidos durante a refatoração. As funções ainda pressupõem entradas válidas: a validação será o próximo incremento.
+
+**Marco deste registro:** documentação atualizada em 2026-10-25, até os cálculos anuais e a organização em funções.

@@ -14,7 +14,65 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 
 ## Situação atual
 
-**Etapa 2 — Calculadora básica iniciada.** O projeto possui documentação inicial, um cenário didático definido e uma pesquisa inicial de preços de IA registrada no planejamento. O GPT-6 Luna foi escolhido como referência inicial de custo. O arquivo `calculadora.py` calcula feedbacks, consumo mensal de tokens e custo estimado de IA em dólares. A execução do cenário didático foi conferida: 2.200 feedbacks, 1.100.000 tokens de entrada, 660.000 de saída e US$ 0,44 de custo mensal de IA. Os valores de consumo são hipóteses didáticas; conversão cambial, infraestrutura e dashboard ainda não foram implementados.
+**Etapa 2 — Calculadora básica em desenvolvimento.** O arquivo `calculadora.py` já organiza os cálculos de consumo e custos de IA em funções, usando GPT-6 Luna como referência inicial. Os valores do cenário são definidos diretamente no código; ainda não há entrada interativa.
+
+### Funcionalidades implementadas
+
+- Volume mensal de respostas, acertos, erros e feedbacks.
+- Consumo mensal estimado de tokens de entrada e saída.
+- Custos mensais de entrada e saída de IA em dólares, com `Decimal`.
+- Conversão dos custos para reais com cotação didática informada no código.
+- Projeção anual em dólares e reais, mantendo consumo, preços e câmbio constantes.
+- Apresentação dos resultados com os símbolos US$ e R$.
+
+### Organização das funções
+
+| Função | Responsabilidade |
+|---|---|
+| `calcular_respostas_mensais` | Estimar o volume de respostas |
+| `calcular_feedbacks_mensais` | Calcular acertos, erros e feedbacks |
+| `calcular_tokens_mensais` | Estimar os totais de tokens de entrada e saída |
+| `calcular_custo_tokens` | Calcular custo em USD a partir da tarifa por milhão de tokens |
+| `calcular_real` | Converter um custo em USD para BRL |
+| `calcular_custo_anual` | Projetar 12 meses de custo constante |
+
+As funções retornam valores; os `print()` apresentam os resultados separadamente.
+
+### Cenário didático de referência
+
+| Entrada | Hipótese |
+|---|---:|
+| Usuários ativos por mês | 100 |
+| Respostas por usuário no mês | 40 |
+| Taxa de acerto | 60% |
+| Parcela dos acertos com feedback | 25% |
+| Tokens de entrada por feedback | 500 |
+| Tokens de saída faturáveis por feedback | 300 |
+| Cotação didática | R$ 5,00 por US$ 1,00 |
+
+As tarifas pesquisadas do Luna são US$ 0,10 por milhão de tokens de entrada sem cache e US$ 0,50 por milhão de saída, no processamento Standard e nas condições registradas no planejamento. Fontes e data de consulta (2026-10-23) estão no [PLANEJAMENTO.md](PLANEJAMENTO.md).
+
+| Resultado do cenário | Valor |
+|---|---:|
+| Feedbacks mensais | 2.200 |
+| Tokens mensais de entrada | 1.100.000 |
+| Tokens mensais de saída | 660.000 |
+| Custo mensal estimado de IA em USD | US$ 0,44 |
+| Custo mensal estimado de IA em BRL | R$ 2,20 |
+| Custo anual estimado de IA em USD | US$ 5,28 |
+| Custo anual estimado de IA em BRL | R$ 26,40 |
+
+Esses valores conferem a aritmética do cenário. Não são despesas reais nem medições do consumo de uma API. A calculadora não realiza chamadas à OpenAI.
+
+### Como executar a versão atual
+
+Abra `calculadora.py` e execute o arquivo com seu interpretador Python 3. No ambiente usado durante o desenvolvimento, a execução foi realizada pelo VS Code. Não há dependências externas nesta etapa: `decimal` faz parte da biblioteca padrão.
+
+### Próximo incremento
+
+Implementar a validação das entradas. As funções atuais pressupõem valores válidos; a conferência de cenários não significa que entradas inválidas já sejam recusadas.
+
+Custos de infraestrutura, leitura de CSV, comparação automatizada de cenários, gráficos e dashboard ainda serão implementados.
 
 ## Primeira versão planejada
 
@@ -61,6 +119,8 @@ A calculadora simulará os custos dessas APIs; não será necessário fazer cham
 ## Documentação
 
 Consulte o [planejamento do projeto](PLANEJAMENTO.md) para conhecer as entradas, regras de negócio, fórmulas e limitações da primeira versão.
+
+O [registro de prompts](PROMPTS.md) documenta pedidos e decisões relevantes do desenvolvimento com apoio de IA.
 
 ## Aprendizado e uso de IA
 
