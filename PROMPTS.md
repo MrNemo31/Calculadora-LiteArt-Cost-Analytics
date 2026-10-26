@@ -150,4 +150,30 @@ Antes de alterar o código, explicar quais entradas devem ser validadas e por qu
 
 **Contribuição para o projeto:** todas as seis funções passaram a validar seus argumentos antes dos cálculos. Um roteiro de verificação executado durante o desenvolvimento conferiu 110 casos, incluindo as funções monetárias e regras anteriores, sem alterar os resultados do cenário didático. Esse roteiro ainda não está salvo como suíte de testes no repositório. As funções sinalizam erros; o tratamento dessas mensagens em uma interface ainda será desenvolvido.
 
-**Marco deste registro:** documentação atualizada em 2026-10-25, até a validação das entradas. Os cálculos continuam usando hipóteses didáticas e não fazem chamadas reais à API.
+**Marco anterior:** validação das entradas, registrada em 2026-10-25. A reutilização dessas regras está documentada na seção 10.
+
+## 10. Refatoração com a auxiliar de validação
+
+**Etapa:** reutilização das validações na calculadora básica.
+
+**Objetivo dos pedidos:** reduzir a repetição das condições de validação, preservando os tipos aceitos e os resultados, com explicações e testes por pequenas alterações.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Após salvar as validações em um commit, criar a primeira função auxiliar e aplicá-la em apenas uma função da calculadora. Entender por que a auxiliar recebe um valor e um nome, o papel desse rótulo nas mensagens e por que essa validação não precisa devolver um resultado. Reutilizar a auxiliar na função de respostas mensais, mantendo a exigência de usuários inteiros. Em seguida, aplicá-la às funções restantes, explicando as adaptações necessárias para tipos monetários e preservando as regras específicas. Registrar a refatoração na documentação antes de fazer um novo commit.
+
+**Participação e aprendizado:** o autor testou as primeiras aplicações da auxiliar e pediu esclarecimentos sobre parâmetros, retorno e mensagens de erro. A explicação distinguiu o papel de uma função auxiliar da decisão de usar ou não `return`: funções auxiliares também podem processar e retornar valores; esta apenas valida e sinaliza erros.
+
+**Decisões registradas:**
+
+- Criar `validar_numero_nao_negativo` para centralizar tipos permitidos, valores finitos e ausência de negativos.
+- Usar `nome` como rótulo legível do campo na mensagem de erro; não é necessário que o texto seja igual ao nome da variável.
+- Aplicar inicialmente a auxiliar em `calcular_tokens_mensais` e depois em `calcular_respostas_mensais`, preservando a regra de usuários inteiros.
+- Acrescentar `tipos_permitidos=(int, float)` como parâmetro opcional para reutilizar a auxiliar nas funções monetárias sem alterar seus contratos.
+- Exigir `(Decimal,)` para preços e custos e aceitar `(int, float, Decimal)` para a cotação.
+- Manter verificações específicas de usuários inteiros, taxas até 1 e cotação maior que zero nas funções de cálculo.
+- Preservar as fórmulas; padronizar as mensagens de validação com o rótulo de cada campo.
+
+**Contribuição para o projeto:** as seis funções de cálculo passaram a reutilizar a auxiliar. A última conferência executou 232 casos de tipos, limites e valores especiais, além de conferir frações válidas e o cenário original. Os resultados permaneceram em US$ 0,44 e R$ 2,20 por mês e US$ 5,28 e R$ 26,40 por ano, nas hipóteses didáticas registradas. Os roteiros de verificação ainda não estão salvos como uma suíte de testes no repositório.
+
+**Marco deste registro:** documentação atualizada em 2026-10-26, até a refatoração com a auxiliar de validação, sem novas dependências ou chamadas reais à API.

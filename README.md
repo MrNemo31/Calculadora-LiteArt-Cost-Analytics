@@ -36,8 +36,21 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 | `calcular_custo_tokens` | Calcular custo em USD a partir da tarifa por milhão de tokens |
 | `calcular_real` | Converter um custo em USD para BRL |
 | `calcular_custo_anual` | Projetar 12 meses de custo constante |
+| `validar_numero_nao_negativo` | Centralizar a validação de tipo permitido, valor finito e ausência de negativos |
 
-As funções retornam valores; os `print()` apresentam os resultados separadamente.
+As funções de cálculo retornam valores; os `print()` apresentam os resultados separadamente. A auxiliar de validação sinaliza erros com exceções; quando a entrada é válida, termina sem retorno explícito (`None`).
+
+### Auxiliar de validação
+
+A função `validar_numero_nao_negativo(valor, nome, tipos_permitidos=(int, float))` centraliza as regras compartilhadas pelas seis funções de cálculo:
+
+- `valor`: dado que será verificado.
+- `nome`: rótulo do campo usado nas mensagens de erro, sem participar do cálculo.
+- `tipos_permitidos`: parâmetro opcional que aceita `int` e `float` por padrão. Preços e custos informam `(Decimal,)`; a cotação informa `(int, float, Decimal)`.
+
+A auxiliar rejeita tipos não permitidos, infinito, NaN e negativos, sem converter o valor. Para conferir valores finitos, usa `math.isfinite` com `float` e `.is_finite()` com `Decimal`. As mensagens seguem um formato compartilhado e identificam o campo.
+
+Regras específicas permanecem nas funções de cálculo: usuários devem ser inteiros, taxas não podem ultrapassar 1 e a cotação deve ser maior que zero. A auxiliar já garante o limite inferior de zero para as taxas. As fórmulas, os tipos aceitos e os resultados do cenário didático foram preservados.
 
 ### Cenário didático de referência
 
@@ -71,13 +84,13 @@ Abra `calculadora.py` e execute o arquivo com seu interpretador Python 3. No amb
 
 ### Validação das entradas
 
-As seis funções verificam seus argumentos antes de calcular. Tipos não permitidos geram `TypeError`; valores fora das regras geram `ValueError`, com mensagens que identificam o argumento inválido.
+As seis funções usam a auxiliar compartilhada e verificações específicas antes de calcular. Tipos não permitidos geram `TypeError`; valores fora das regras geram `ValueError`, com mensagens que identificam o argumento inválido.
 
 | Entrada | Tipos aceitos | Regras |
 |---|---|---|
 | Usuários ativos | `int` | Maior ou igual a zero; valores fracionários e `100.0` são recusados |
 | Média de respostas por usuário e total de respostas mensais | `int` ou `float` | Finitos e maiores ou iguais a zero |
-| Taxa de acerto e parcela dos acertos com feedback | `int` ou `float` | Entre 0 e 1, inclusive; infinito e NaN são recusados pelas regras de intervalo |
+| Taxa de acerto e parcela dos acertos com feedback | `int` ou `float` | Entre 0 e 1, inclusive; a auxiliar rejeita negativos e valores não finitos, e a função verifica o limite superior |
 | Tokens por feedback, feedbacks mensais e total de tokens | `int` ou `float` | Finitos e maiores ou iguais a zero; médias e estimativas fracionárias são permitidas |
 | Preço por milhão de tokens e custos monetários | `Decimal` | Finitos e maiores ou iguais a zero |
 | Cotação em BRL por USD | `int`, `float` ou `Decimal` | Finita e maior que zero; convertida internamente para `Decimal` |
@@ -90,9 +103,9 @@ As validações são aplicadas aos argumentos das funções, mesmo quando elas s
 
 ### Verificações realizadas
 
-O autor executou casos manualmente no VS Code durante o aprendizado. Após completar as funções monetárias, um roteiro de verificação executou 110 casos envolvendo entradas válidas, tipos inadequados, negativos, zero, limites das taxas, infinito e NaN, incluindo regras anteriores. Os casos passaram e os resultados do cenário didático foram preservados.
+O autor executou casos manualmente no VS Code durante o aprendizado. A implementação inicial das validações foi conferida com um roteiro de 110 casos. Após a refatoração com a auxiliar, um novo roteiro verificou 232 casos de tipos, limites e valores especiais, além de conferir frações válidas e os resultados originais. Os casos passaram e o cenário didático foi preservado.
 
-Esse roteiro foi executado durante o desenvolvimento e ainda não está salvo no repositório como uma suíte de testes reproduzível. Exceções ainda não são tratadas em uma interface: uma chamada inválida pode interromper o script com a mensagem do erro.
+Esses roteiros foram executados durante o desenvolvimento e ainda não estão salvos no repositório como uma suíte de testes reproduzível. Exceções ainda não são tratadas em uma interface: uma chamada inválida pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
