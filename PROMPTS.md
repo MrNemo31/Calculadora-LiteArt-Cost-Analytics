@@ -177,3 +177,30 @@ Após salvar as validações em um commit, criar a primeira função auxiliar e 
 **Contribuição para o projeto:** as seis funções de cálculo passaram a reutilizar a auxiliar. A última conferência executou 232 casos de tipos, limites e valores especiais, além de conferir frações válidas e o cenário original. Os resultados permaneceram em US$ 0,44 e R$ 2,20 por mês e US$ 5,28 e R$ 26,40 por ano, nas hipóteses didáticas registradas. Os roteiros de verificação ainda não estão salvos como uma suíte de testes no repositório.
 
 **Marco deste registro:** documentação atualizada em 2026-10-26, até a refatoração com a auxiliar de validação, sem novas dependências ou chamadas reais à API.
+
+## 11. Separação da execução e testes automatizados
+
+**Etapa:** testes reproduzíveis da calculadora básica.
+
+**Objetivo dos pedidos:** importar as funções sem executar o cenário didático e transformar as conferências manuais em testes salvos no repositório, compreendendo cada alteração.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Adicionar `if __name__ == "__main__":` e explicar a diferença entre executar e importar a calculadora. Criar os primeiros testes de respostas mensais, começando pelo cenário didático, zero usuários e usuários negativos. Acrescentar testes para usuários fracionários, textos, infinito e NaN. Explicar por que uma exceção esperada é capturada por `assertRaises` e aparece como teste aprovado. Testar em seguida feedbacks mensais, incluindo os resultados, taxas nos limites e fora do intervalo, tipos e valores não finitos nos três argumentos. Completar os testes das funções de tokens, custo de tokens, conversão para reais e custo anual. Explicar `for`, `subTest`, tipos monetários e como executar um teste, uma classe ou a suíte completa. Atualizar README e registro de prompts antes do próximo commit.
+
+**Participação e aprendizado:** o autor executou os testes no terminal após cada incremento e confirmou os resultados. Pediu esclarecimentos sobre a captura de `ValueError`, o percurso do laço pelos subtestes e a conversão com cotações representadas como `int`, `float` e `Decimal`.
+
+**Decisões registradas:**
+
+- Proteger o cenário e os `print()` com `if __name__ == "__main__":`; manter as funções disponíveis na importação.
+- Usar `unittest`, incluído no Python, sem dependências externas.
+- Manter os testes em `test_calculadora.py`, com uma classe para cada função de cálculo.
+- Conferir resultados com `assertEqual`, tipos de retorno com `assertIsInstance` e exceções com `assertRaises`.
+- Introduzir `subTest` nos novos grupos para verificar várias entradas sem repetir um método para cada valor e identificar a tentativa que falhar.
+- Testar consumo e custos zero quando permitidos; exigir cotação maior que zero.
+- Preservar as diferenças de contrato: volumes aceitam `int` ou `float`, preços e custos exigem `Decimal`, e cotação aceita os três tipos.
+- Cobrir tipos inválidos, negativos, infinito e NaN nos argumentos das quatro funções de cálculo restantes, além dos resultados didáticos e estimativas fracionárias permitidas.
+
+**Contribuição para o projeto:** o repositório passou a conter uma suíte reproduzível com 59 métodos de teste, distribuídos em seis classes. Parte dos métodos executa vários subtestes, que não aumentam a contagem exibida em `Ran 59 tests`. A execução completa passou; a auxiliar de validação também é exercitada indiretamente. Os roteiros temporários de 110 e 232 casos, mencionados nos marcos anteriores, continuam sendo registros históricos distintos dessa suíte.
+
+**Marco deste registro:** documentação atualizada em 2026-10-27, até os testes automatizados das seis funções de cálculo, sem dependências externas ou chamadas reais à API.

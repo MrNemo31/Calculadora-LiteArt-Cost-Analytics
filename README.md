@@ -25,6 +25,7 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 - Projeção anual em dólares e reais, mantendo consumo, preços e câmbio constantes.
 - Apresentação dos resultados com os símbolos US$ e R$.
 - Validação de tipos, valores negativos, taxas fora do intervalo, infinito e NaN nos argumentos das funções.
+- Testes automatizados reproduzíveis das seis funções de cálculo, usando unittest.
 
 ### Organização das funções
 
@@ -80,7 +81,9 @@ Esses valores conferem a aritmética do cenário. Não são despesas reais nem m
 
 ### Como executar a versão atual
 
-Abra `calculadora.py` e execute o arquivo com seu interpretador Python 3. No ambiente usado durante o desenvolvimento, a execução foi realizada pelo VS Code. Não há dependências externas nesta etapa: `decimal` faz parte da biblioteca padrão.
+Abra `calculadora.py` e execute o arquivo com seu interpretador Python 3. No ambiente usado durante o desenvolvimento, a execução foi realizada pelo VS Code. Não há dependências externas nesta etapa: `decimal`, `math` e `unittest` fazem parte da biblioteca padrão.
+
+O cenário didático e os `print()` ficam dentro de `if __name__ == "__main__":`. Ao executar o arquivo diretamente, o cenário é calculado e apresentado. Ao importar suas funções, esse bloco não é executado, permitindo reutilizá-las nos testes sem imprimir os resultados do cenário.
 
 ### Validação das entradas
 
@@ -101,17 +104,48 @@ Zero é permitido para consumo, quantidades, preços e custos. A cotação é a 
 
 As validações são aplicadas aos argumentos das funções, mesmo quando elas são chamadas fora do cenário principal. Elas verificam as regras definidas para as entradas; não demonstram que as hipóteses representam o consumo real do LiteArt.
 
-### Verificações realizadas
+### Testes automatizados
 
-O autor executou casos manualmente no VS Code durante o aprendizado. A implementação inicial das validações foi conferida com um roteiro de 110 casos. Após a refatoração com a auxiliar, um novo roteiro verificou 232 casos de tipos, limites e valores especiais, além de conferir frações válidas e os resultados originais. Os casos passaram e o cenário didático foi preservado.
+O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest`, da biblioteca padrão do Python. São 59 métodos de teste, distribuídos em seis classes, uma para cada função de cálculo. Parte dos métodos usa `subTest` para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
 
-Esses roteiros foram executados durante o desenvolvimento e ainda não estão salvos no repositório como uma suíte de testes reproduzível. Exceções ainda não são tratadas em uma interface: uma chamada inválida pode interromper o script com a mensagem do erro.
+A suíte verifica:
+
+- Resultados conhecidos do cenário didático: respostas, feedbacks, tokens e custos mensais e anuais.
+- Taxas nos limites 0 e 1 e rejeição de taxas fora do intervalo.
+- Tipos inválidos, incluindo textos e booleanos, e valores especiais como infinito e NaN.
+- Nos cálculos de tokens e custos: negativos, zeros permitidos e estimativas fracionárias válidas.
+- Exigência de `Decimal` para preços e custos e manutenção desse tipo nos resultados monetários.
+- Cotação positiva nos três tipos permitidos (`int`, `float` e `Decimal`), com rejeição de zero, negativos e valores não finitos.
+- Valores especiais de `Decimal`, incluindo `NaN` e `sNaN`, nos campos monetários.
+
+A auxiliar de validação é exercitada pelas chamadas às funções de cálculo. A suíte cobre os casos descritos; não é uma verificação exaustiva de todas as entradas possíveis nem uma medição de consumo real da API.
+
+No terminal, dentro da pasta do projeto, use seu interpretador Python 3:
+
+```powershell
+python -m unittest -v test_calculadora
+```
+
+Para executar somente uma classe, por exemplo a conversão cambial:
+
+```powershell
+python -m unittest -v test_calculadora.TestCalcularReal
+```
+
+Se `python` não estiver disponível no terminal, utilize o caminho do interpretador configurado no VS Code. Também é possível executar `test_calculadora.py` diretamente com esse interpretador.
+
+A última execução retornou `Ran 59 tests` e `OK`. `assertEqual` confere resultados, `assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
+
+Antes da criação dessa suíte, foram executados roteiros temporários de 110 e 232 casos durante a implementação e a refatoração das validações. Esses números são registros históricos e não representam a quantidade de testes salvos atualmente.
+
+Exceções ainda não são tratadas em uma interface: fora dos testes, uma chamada inválida sem tratamento pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
-Organizar as verificações em testes automatizados reproduzíveis e definir o próximo incremento da calculadora. O tratamento das mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
+Revisar casos adicionais de limite nas funções de respostas e feedbacks e definir o próximo incremento da calculadora. O tratamento das mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
 
 Custos de infraestrutura, leitura de CSV, comparação automatizada de cenários, gráficos e dashboard ainda serão implementados.
+
 
 ## Primeira versão planejada
 
