@@ -204,3 +204,33 @@ Adicionar `if __name__ == "__main__":` e explicar a diferença entre executar e 
 **Contribuição para o projeto:** o repositório passou a conter uma suíte reproduzível com 59 métodos de teste, distribuídos em seis classes. Parte dos métodos executa vários subtestes, que não aumentam a contagem exibida em `Ran 59 tests`. A execução completa passou; a auxiliar de validação também é exercitada indiretamente. Os roteiros temporários de 110 e 232 casos, mencionados nos marcos anteriores, continuam sendo registros históricos distintos dessa suíte.
 
 **Marco deste registro:** documentação atualizada em 2026-10-27, até os testes automatizados das seis funções de cálculo, sem dependências externas ou chamadas reais à API.
+
+## 12. Custos fixos de infraestrutura e total com IA
+
+**Etapa:** ampliação da calculadora básica para incluir backend e banco de dados.
+
+**Objetivo dos pedidos:** compreender a cobrança de hospedagem e PostgreSQL, calcular mensalidades fixas e somá-las ao custo variável de IA, com valores didáticos e testes.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Explicar o que representam as cobranças de backend e banco de dados. Criar calcular_custo_servico e seus testes, reutilizando a auxiliar de validação. Usar a função no cenário principal com preços inventados para aprendizado, converter os custos para reais e apresentar infraestrutura, IA e totais mensais e anuais. Explicar cada alteração e como conferir os resultados, incluindo o comportamento com zero usuários. Atualizar README e registro de prompts antes de fazer um novo commit.
+
+**Participação e aprendizado:** o autor executou os testes da nova função e o cenário integrado e confirmou os resultados. As explicações distinguiram preço por unidade, quantidade contratada, custo fixo de infraestrutura e custo variável de IA.
+
+**Decisões registradas:**
+
+- Criar `calcular_custo_servico(preco_mensal_por_unidade, quantidade)`, retornando preço mensal multiplicado pela quantidade, na mesma moeda do preço.
+- Exigir preço `Decimal`, finito e não negativo, e quantidade `int` não negativa; recusar booleanos e quantidades como `2.0`.
+- Permitir preço gratuito e zero unidades.
+- Adotar backend a US$ 5,00 por unidade, com duas unidades, e banco a US$ 3,00 por unidade, com uma unidade. São preços didáticos, sem fonte comercial ou comprovação de capacidade.
+- Converter os custos com a cotação didática de R$ 5,00 por dólar e somar apenas valores na mesma moeda.
+- Preservar a projeção anual de 12 meses constantes, sem arredondar etapas intermediárias.
+- Manter a infraestrutura contratada mesmo quando o consumo de IA for zero.
+- Registrar serviços incluídos em um mesmo pacote para evitar duplicar cobranças quando forem pesquisados planos reais.
+
+**Contribuição para o projeto:** a calculadora passou a incluir sete funções de cálculo. O cenário apresenta infraestrutura de US$ 13,00 ou R$ 65,00 mensais e IA de US$ 0,44 ou R$ 2,20 mensais. O total é US$ 13,44 ou R$ 67,20 por mês e US$ 161,28 ou R$ 806,40 por ano, sob as hipóteses registradas.
+
+Foram acrescentados oito métodos de teste para o serviço, levando a suíte a 67 métodos em sete classes. A execução completa passou. Uma conferência adicional do cenário principal, realizada em memória e não salva como teste na suíte, confirmou os totais com 100 usuários e, com zero usuários, IA zero e infraestrutura de US$ 13,00 ou R$ 65,00 mensais. O autor também confirmou a execução no terminal.
+
+**Marco deste registro:** documentação atualizada em 2026-10-28, até a integração de infraestrutura e IA, sem novas dependências ou chamadas reais à API.
+

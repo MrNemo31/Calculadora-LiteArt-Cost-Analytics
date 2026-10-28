@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from calculadora import (
     calcular_custo_anual,
+    calcular_custo_servico,
     calcular_custo_tokens,
     calcular_feedbacks_mensais,
     calcular_real,
@@ -320,6 +321,53 @@ class TestCalcularCustoAnual(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     calcular_custo_anual(valor)
 
+
+
+class TestCalcularCustoServico(unittest.TestCase):
+    # Preços inventados para aprendizado, sem representar planos pesquisados.
+    def test_calcula_backend_didatico(self):
+        resultado = calcular_custo_servico(Decimal("5.00"), 2)
+        self.assertEqual(resultado, Decimal("10.00"))
+        self.assertIsInstance(resultado, Decimal)
+
+    def test_calcula_banco_didatico(self):
+        resultado = calcular_custo_servico(Decimal("3.00"), 1)
+        self.assertEqual(resultado, Decimal("3.00"))
+        self.assertIsInstance(resultado, Decimal)
+
+    def test_zero_unidades_retorna_zero(self):
+        resultado = calcular_custo_servico(Decimal("5.00"), 0)
+        self.assertEqual(resultado, Decimal("0"))
+        self.assertIsInstance(resultado, Decimal)
+
+    def test_preco_gratuito_retorna_zero(self):
+        resultado = calcular_custo_servico(Decimal("0"), 2)
+        self.assertEqual(resultado, Decimal("0"))
+        self.assertIsInstance(resultado, Decimal)
+
+    def test_preco_exige_decimal(self):
+        for valor in ("5.00", 5, 5.0, True, False, None, 1j, []):
+            with self.subTest(valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_custo_servico(valor, 2)
+
+    def test_recusa_preco_negativo_infinito_e_nan(self):
+        for valor in (Decimal("-5.00"), Decimal("Infinity"), Decimal("-Infinity"),
+                      Decimal("NaN"), Decimal("sNaN")):
+            with self.subTest(valor=valor):
+                with self.assertRaises(ValueError):
+                    calcular_custo_servico(valor, 2)
+
+    def test_quantidade_exige_inteiro(self):
+        for valor in (1.5, 2.0, "2", True, False, None, Decimal("2"), 1j, [],
+                      float("inf"), float("-inf"), float("nan")):
+            with self.subTest(valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_custo_servico(Decimal("5.00"), valor)
+
+    def test_recusa_quantidade_negativa(self):
+        with self.assertRaises(ValueError):
+            calcular_custo_servico(Decimal("5.00"), -1)
 
 
 if __name__ == "__main__":

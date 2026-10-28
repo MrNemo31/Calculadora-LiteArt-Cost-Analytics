@@ -86,6 +86,17 @@ def calcular_custo_anual(custo_mensal):
     return custo_mensal * Decimal("12")
 
 
+def calcular_custo_servico(preco_mensal_por_unidade, quantidade):
+    """Calcula a mensalidade na moeda do preço; recebe Decimal e quantidade int."""
+    validar_numero_nao_negativo(preco_mensal_por_unidade, "Preço mensal por unidade", (Decimal,))
+
+    if type(quantidade) is not int:
+        raise TypeError("A quantidade de unidades deve ser um número inteiro (int).")
+
+    validar_numero_nao_negativo(quantidade, "Quantidade de unidades")
+    return preco_mensal_por_unidade * quantidade
+
+
 if __name__ == "__main__":
     # Cenário didático: hipóteses de consumo, não dados reais do LiteArt.
     usuarios_ativos = 100
@@ -97,6 +108,12 @@ if __name__ == "__main__":
 
     # Cotação didática em reais por dólar, não uma cotação pesquisada.
     taxa_cambio = Decimal("5.00")
+
+    # Infraestrutura didática em USD: preços inventados, não planos pesquisados.
+    preco_backend_mensal_usd = Decimal("5.00")
+    quantidade_backend = 2
+    preco_banco_mensal_usd = Decimal("3.00")
+    quantidade_banco = 1
 
     # Cada erro gera feedback; apenas parte dos acertos recebe feedback.
     respostas_mensais = calcular_respostas_mensais(usuarios_ativos, respostas_por_usuario)
@@ -127,6 +144,25 @@ if __name__ == "__main__":
     custo_ia_anual_br = calcular_custo_anual(custo_ia_mensal_br)
 
 
+    # Mensalidades fixas de infraestrutura, independentes do consumo de IA.
+    custo_backend_mensal_usd = calcular_custo_servico(preco_backend_mensal_usd, quantidade_backend)
+    custo_banco_mensal_usd = calcular_custo_servico(preco_banco_mensal_usd, quantidade_banco)
+    custo_infra_mensal_usd = custo_backend_mensal_usd + custo_banco_mensal_usd
+
+    custo_backend_mensal_br = calcular_real(custo_backend_mensal_usd, taxa_cambio)
+    custo_banco_mensal_br = calcular_real(custo_banco_mensal_usd, taxa_cambio)
+    custo_infra_mensal_br = calcular_real(custo_infra_mensal_usd, taxa_cambio)
+
+    # Somar apenas custos na mesma moeda, sem arredondar etapas intermediárias.
+    custo_total_mensal_usd = custo_infra_mensal_usd + custo_ia_mensal_usd
+    custo_total_mensal_br = custo_infra_mensal_br + custo_ia_mensal_br
+
+    # Projeção de 12 meses com serviços, consumo, preços e câmbio constantes.
+    custo_infra_anual_usd = calcular_custo_anual(custo_infra_mensal_usd)
+    custo_infra_anual_br = calcular_custo_anual(custo_infra_mensal_br)
+    custo_total_anual_usd = calcular_custo_anual(custo_total_mensal_usd)
+    custo_total_anual_br = calcular_custo_anual(custo_total_mensal_br)
+
     # Exibição dos resultados para conferência manual.
     print("Respostas no mês:", respostas_mensais)
     print("Acertos estimados:", acertos_mensais)
@@ -146,3 +182,19 @@ if __name__ == "__main__":
     print("Custo anual ignorando a variação de preços e câmbio, apenas para conferência didática.")
     print(f"Custo anual estimado de IA (USD): US$ {custo_ia_anual_usd:.2f}")
     print(f"Custo anual estimado de IA (BRL): R$ {custo_ia_anual_br:.2f}")
+
+    print("Infraestrutura com preços didáticos, sem comprovação de capacidade dos planos.")
+    print(f"Custo mensal estimado de backend (USD): US$ {custo_backend_mensal_usd:.2f}")
+    print(f"Custo mensal estimado de backend (BRL): R$ {custo_backend_mensal_br:.2f}")
+    print(f"Custo mensal estimado de banco (USD): US$ {custo_banco_mensal_usd:.2f}")
+    print(f"Custo mensal estimado de banco (BRL): R$ {custo_banco_mensal_br:.2f}")
+    print(f"Custo mensal estimado de infraestrutura (USD): US$ {custo_infra_mensal_usd:.2f}")
+    print(f"Custo mensal estimado de infraestrutura (BRL): R$ {custo_infra_mensal_br:.2f}")
+    print(f"Custo anual estimado de infraestrutura (USD): US$ {custo_infra_anual_usd:.2f}")
+    print(f"Custo anual estimado de infraestrutura (BRL): R$ {custo_infra_anual_br:.2f}")
+
+    print("Total do cenário: infraestrutura e IA, com as hipóteses e exclusões do planejamento.")
+    print(f"Custo total mensal estimado (USD): US$ {custo_total_mensal_usd:.2f}")
+    print(f"Custo total mensal estimado (BRL): R$ {custo_total_mensal_br:.2f}")
+    print(f"Custo total anual estimado (USD): US$ {custo_total_anual_usd:.2f}")
+    print(f"Custo total anual estimado (BRL): R$ {custo_total_anual_br:.2f}")
