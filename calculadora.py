@@ -97,6 +97,49 @@ def calcular_custo_servico(preco_mensal_por_unidade, quantidade):
     return preco_mensal_por_unidade * quantidade
 
 
+def calcular_consumo_cenario(hipoteses_consumo):
+    """Recebe as seis hipóteses e retorna o consumo estimado sem alterar a entrada."""
+    if type(hipoteses_consumo) is not dict:
+        raise TypeError("As hipóteses de consumo devem ser um dicionário (dict).")
+
+    chaves_obrigatorias = (
+        "usuarios_ativos",
+        "respostas_por_usuario",
+        "taxa_acerto",
+        "proporcao_acertos_com_feedback",
+        "tokens_entrada",
+        "tokens_saida",
+    )
+    for chave in chaves_obrigatorias:
+        if chave not in hipoteses_consumo:
+            raise ValueError(f"Hipóteses de consumo: chave obrigatória ausente: {chave}.")
+
+    respostas_mensais = calcular_respostas_mensais(
+        hipoteses_consumo["usuarios_ativos"],
+        hipoteses_consumo["respostas_por_usuario"],
+    )
+    acertos_mensais, erros_mensais, feedbacks_nos_acertos, feedbacks_mensais = calcular_feedbacks_mensais(
+        respostas_mensais,
+        hipoteses_consumo["taxa_acerto"],
+        hipoteses_consumo["proporcao_acertos_com_feedback"],
+    )
+    tokens_entrada_total, tokens_saida_total = calcular_tokens_mensais(
+        hipoteses_consumo["tokens_entrada"],
+        hipoteses_consumo["tokens_saida"],
+        feedbacks_mensais,
+    )
+
+    return {
+        "respostas_mensais": respostas_mensais,
+        "acertos_mensais": acertos_mensais,
+        "erros_mensais": erros_mensais,
+        "feedbacks_nos_acertos": feedbacks_nos_acertos,
+        "feedbacks_mensais": feedbacks_mensais,
+        "tokens_entrada_total": tokens_entrada_total,
+        "tokens_saida_total": tokens_saida_total,
+    }
+
+
 if __name__ == "__main__":
     # Cenário didático: hipóteses de consumo, não dados reais do LiteArt.
     hipoteses_consumo = {
@@ -123,21 +166,15 @@ if __name__ == "__main__":
     quantidade_backend = 2
     quantidade_banco = 1
 
-    # Cada erro gera feedback; apenas parte dos acertos recebe feedback.
-    respostas_mensais = calcular_respostas_mensais(
-        hipoteses_consumo["usuarios_ativos"],
-        hipoteses_consumo["respostas_por_usuario"],
-    )
-    acertos_mensais, erros_mensais, feedbacks_nos_acertos, feedbacks_mensais = calcular_feedbacks_mensais(
-        respostas_mensais,
-        hipoteses_consumo["taxa_acerto"],
-        hipoteses_consumo["proporcao_acertos_com_feedback"],
-    )
-    tokens_entrada_total, tokens_saida_total = calcular_tokens_mensais(
-        hipoteses_consumo["tokens_entrada"],
-        hipoteses_consumo["tokens_saida"],
-        feedbacks_mensais,
-    )
+    # Calcular consumo a partir das hipóteses, antes de aplicar os preços.
+    consumo_cenario = calcular_consumo_cenario(hipoteses_consumo)
+    respostas_mensais = consumo_cenario["respostas_mensais"]
+    acertos_mensais = consumo_cenario["acertos_mensais"]
+    erros_mensais = consumo_cenario["erros_mensais"]
+    feedbacks_nos_acertos = consumo_cenario["feedbacks_nos_acertos"]
+    feedbacks_mensais = consumo_cenario["feedbacks_mensais"]
+    tokens_entrada_total = consumo_cenario["tokens_entrada_total"]
+    tokens_saida_total = consumo_cenario["tokens_saida_total"]
 
     # Preços pesquisados: GPT-6 Luna, Standard, entrada sem cache.
     # Fonte: https://developers.openai.com/api/docs/models/gpt-6-luna

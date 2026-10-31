@@ -288,3 +288,31 @@ Criar um dicionário com as hipóteses de consumo e adaptar as chamadas das fun�
 **Contribuição para o projeto:** quatro dicionários passaram a organizar as entradas no bloco principal. A conferência da última refatoração comparou a saída completa antes e depois e confirmou sua preservação; os 67 métodos de teste passaram. O total permaneceu em US$ 13,44 ou R$ 67,20 por mês e US$ 161,28 ou R$ 806,40 por ano. A organização prepara comparações futuras, mas ainda não implementa uma função de cenário completo nem importação de dados.
 
 **Marco deste registro:** documentação atualizada em 2026-10-31, até a organização de hipóteses, preços e cotação em dicionários, sem novas dependências ou consulta automática de câmbio.
+
+## 15. Função de consumo do cenário e seus testes
+
+**Etapa:** reutilização da sequência de cálculos de consumo.
+
+**Objetivo dos pedidos:** receber as hipóteses em um dicionário, coordenar as funções existentes e retornar os resultados de consumo, mantendo validações e apresentação separadas.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Antes de implementar a nova função, esclarecer a diferença entre dicionário Python e JSON, a consulta por chave e a passagem de um valor individual ou de um dicionário inteiro a uma função. Criar calcular_consumo_cenario e seus testes, explicando cada parte e como executar aos poucos. Atualizar README e registro de prompts antes do próximo commit.
+
+**Participação e aprendizado:** o autor pediu esclarecimentos sobre dicionários e acesso aos dados antes da implementação. Depois, executou os testes e confirmou os resultados. As explicações abordaram validação de chaves, reutilização de funções, propagação de exceções, retorno de um novo dicionário e preservação da entrada.
+
+**Decisões registradas:**
+
+- Criar `calcular_consumo_cenario(hipoteses_consumo)` para coordenar respostas mensais, feedbacks e tokens, reutilizando as funções existentes.
+- Exigir um `dict`, com `TypeError` para outros tipos, e as seis chaves obrigatórias, com `ValueError` identificando o campo ausente.
+- Manter a validação dos números nas funções de cálculo, propagando suas exceções.
+- Permitir chaves adicionais sem utilizá-las nos cálculos.
+- Retornar um novo dicionário com sete resultados, sem modificar as hipóteses recebidas.
+- Integrar o retorno ao bloco principal, preservando os cálculos monetários e os `print()`.
+- Acrescentar `TestCalcularConsumoCenario`, com dez métodos de teste e uma auxiliar que cria hipóteses independentes para cada caso.
+- Conferir cenário didático, zero usuários, zero respostas, tipo do argumento, cada chave ausente, tipos e valores inválidos nos campos, preservação da entrada e aceitação de chave adicional.
+
+**Contribuição para o projeto:** o consumo passou a ser calculado por uma função reutilizável que recebe e devolve dicionários. A suíte passou de 67 para 77 métodos, distribuídos em oito classes; a execução completa passou. A comparação da saída do cenário antes e depois da integração confirmou sua preservação. Os totais continuam em US$ 13,44 ou R$ 67,20 por mês e US$ 161,28 ou R$ 806,40 por ano, sob as hipóteses didáticas. A função de cenário completo, incluindo custos, ainda não foi implementada.
+
+**Marco deste registro:** documentação atualizada em 2026-10-31, até a função de consumo do cenário e seus testes, sem novas dependências ou chamadas externas.
+

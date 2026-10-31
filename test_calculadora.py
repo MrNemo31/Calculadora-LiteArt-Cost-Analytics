@@ -3,6 +3,7 @@ import unittest
 from decimal import Decimal
 
 from calculadora import (
+    calcular_consumo_cenario,
     calcular_custo_anual,
     calcular_custo_servico,
     calcular_custo_tokens,
@@ -368,6 +369,118 @@ class TestCalcularCustoServico(unittest.TestCase):
     def test_recusa_quantidade_negativa(self):
         with self.assertRaises(ValueError):
             calcular_custo_servico(Decimal("5.00"), -1)
+
+
+class TestCalcularConsumoCenario(unittest.TestCase):
+    def criar_hipoteses(self):
+        # Cada chamada cria um dicionário independente para o teste.
+        return {
+            "usuarios_ativos": 100,
+            "respostas_por_usuario": 40,
+            "taxa_acerto": 0.6,
+            "proporcao_acertos_com_feedback": 0.25,
+            "tokens_entrada": 500,
+            "tokens_saida": 300,
+        }
+
+    def test_calcula_cenario_didatico(self):
+        resultado = calcular_consumo_cenario(self.criar_hipoteses())
+        esperado = {
+            "respostas_mensais": 4000,
+            "acertos_mensais": 2400,
+            "erros_mensais": 1600,
+            "feedbacks_nos_acertos": 600,
+            "feedbacks_mensais": 2200,
+            "tokens_entrada_total": 1_100_000,
+            "tokens_saida_total": 660_000,
+        }
+        self.assertEqual(resultado, esperado)
+
+    def test_zero_usuarios_produz_consumo_zero(self):
+        hipoteses = self.criar_hipoteses()
+        hipoteses["usuarios_ativos"] = 0
+        resultado = calcular_consumo_cenario(hipoteses)
+        for campo, valor in resultado.items():
+            with self.subTest(campo=campo):
+                self.assertEqual(valor, 0)
+
+    def test_zero_respostas_produz_consumo_zero(self):
+        hipoteses = self.criar_hipoteses()
+        hipoteses["respostas_por_usuario"] = 0
+        resultado = calcular_consumo_cenario(hipoteses)
+        for campo, valor in resultado.items():
+            with self.subTest(campo=campo):
+                self.assertEqual(valor, 0)
+
+    def test_exige_dicionario(self):
+        for valor in (None, [], "cenario", 100, True):
+            with self.subTest(valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_consumo_cenario(valor)
+
+    def test_recusa_chaves_ausentes(self):
+        with self.assertRaises(ValueError):
+            calcular_consumo_cenario({})
+        for chave in self.criar_hipoteses():
+            hipoteses = self.criar_hipoteses()
+            del hipoteses[chave]
+            with self.subTest(chave=chave):
+                with self.assertRaises(ValueError) as erro:
+                    calcular_consumo_cenario(hipoteses)
+                self.assertIn(chave, str(erro.exception))
+
+    def test_propaga_erros_de_tipo_dos_campos(self):
+        for chave in self.criar_hipoteses():
+            for valor in ("100", True, False, None, Decimal("1")):
+                hipoteses = self.criar_hipoteses()
+                hipoteses[chave] = valor
+                with self.subTest(chave=chave, valor=valor):
+                    with self.assertRaises(TypeError):
+                        calcular_consumo_cenario(hipoteses)
+        for valor in (1.5, 100.0, float("inf"), float("-inf"), float("nan")):
+            hipoteses = self.criar_hipoteses()
+            hipoteses["usuarios_ativos"] = valor
+            with self.subTest(chave="usuarios_ativos", valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_consumo_cenario(hipoteses)
+
+    def test_propaga_erros_de_negativos_e_taxas_acima_de_um(self):
+        for chave in self.criar_hipoteses():
+            hipoteses = self.criar_hipoteses()
+            hipoteses[chave] = -1
+            with self.subTest(chave=chave):
+                with self.assertRaises(ValueError):
+                    calcular_consumo_cenario(hipoteses)
+        for chave in ("taxa_acerto", "proporcao_acertos_com_feedback"):
+            hipoteses = self.criar_hipoteses()
+            hipoteses[chave] = 1.1
+            with self.subTest(chave=chave, valor=1.1):
+                with self.assertRaises(ValueError):
+                    calcular_consumo_cenario(hipoteses)
+
+    def test_propaga_erros_de_infinito_e_nan_nos_campos_float(self):
+        for chave in ("respostas_por_usuario", "taxa_acerto",
+                      "proporcao_acertos_com_feedback", "tokens_entrada", "tokens_saida"):
+            for valor in (float("inf"), float("-inf"), float("nan")):
+                hipoteses = self.criar_hipoteses()
+                hipoteses[chave] = valor
+                with self.subTest(chave=chave, valor=valor):
+                    with self.assertRaises(ValueError):
+                        calcular_consumo_cenario(hipoteses)
+
+    def test_nao_altera_as_hipoteses(self):
+        hipoteses = self.criar_hipoteses()
+        copia = hipoteses.copy()
+        resultado = calcular_consumo_cenario(hipoteses)
+        self.assertEqual(hipoteses, copia)
+        self.assertIsNot(resultado, hipoteses)
+
+    def test_aceita_chave_adicional_sem_mudar_o_consumo(self):
+        hipoteses = self.criar_hipoteses()
+        esperado = calcular_consumo_cenario(hipoteses)
+        hipoteses["nome"] = "Cenário didático"
+        self.assertEqual(calcular_consumo_cenario(hipoteses), esperado)
+        self.assertEqual(hipoteses["nome"], "Cenário didático")
 
 
 if __name__ == "__main__":

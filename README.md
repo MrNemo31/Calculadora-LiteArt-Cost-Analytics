@@ -19,6 +19,7 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 ### Funcionalidades implementadas
 
 - Organização das hipóteses de consumo, preços e cotação em dicionários separados.
+- Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
 - Consumo mensal estimado de tokens de entrada e saída.
 - Custos mensais de entrada e saída de IA em dólares, com `Decimal`.
@@ -28,7 +29,7 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 - Projeção anual em dólares e reais, mantendo consumo, preços e câmbio constantes.
 - Apresentação dos resultados com os símbolos US$ e R$.
 - Validação de tipos, valores negativos, taxas fora do intervalo, infinito e NaN nos argumentos das funções.
-- Testes automatizados reproduzíveis das sete funções de cálculo, usando `unittest`.
+- Testes automatizados reproduzíveis das sete funções de cálculo e da função coordenadora de consumo, usando `unittest`.
 
 ### Organização das entradas em dicionários
 
@@ -43,17 +44,35 @@ Dentro do bloco principal, as entradas estão agrupadas por finalidade:
 
 Os preços e a cotação mantêm o tipo `Decimal`. As quantidades `quantidade_backend` e `quantidade_banco` continuam como variáveis separadas: são hipóteses de capacidade, não preços.
 
-As chamadas buscam os valores pelas chaves, como `hipoteses_consumo["usuarios_ativos"]` e `cotacao["brl_por_usd"]`. As funções recebem os valores individuais, validam seus argumentos e retornam resultados. Os resultados calculados permanecem em variáveis próprias; não são armazenados nos dicionários de entrada.
+As funções de cálculo recebem valores individuais. A função coordenadora `calcular_consumo_cenario` recebe o dicionário inteiro de hipóteses, busca os valores pelas chaves e retorna um novo dicionário de resultados. Preços e cotação continuam sendo consultados no bloco principal. Os resultados não são gravados nos dicionários de entrada.
 
 Essa organização prepara a reutilização dos cálculos em diferentes cenários. Ainda não há função que receba um cenário completo, leitura de CSV ou consulta automática de câmbio.
 
-Na última refatoração, a saída completa foi comparada antes e depois e permaneceu idêntica. Os 67 métodos de teste também passaram. Os testes das funções usam entradas próprias; alterações nos dicionários do cenário devem ser conferidas executando também `calculadora.py`.
+Na última refatoração, a saída completa foi comparada antes e depois e permaneceu idêntica. Os 77 métodos de teste também passaram. Os testes das funções usam entradas próprias; alterações nos dicionários do cenário devem ser conferidas executando também `calculadora.py`.
+
+
+### Cálculo do consumo de um cenário
+
+A função `calcular_consumo_cenario(hipoteses_consumo)` recebe o dicionário inteiro e coordena as funções de respostas, feedbacks e tokens. Ela não calcula custos nem imprime resultados.
+
+Antes dos cálculos, exige um `dict` e confere as seis chaves obrigatórias: `usuarios_ativos`, `respostas_por_usuario`, `taxa_acerto`, `proporcao_acertos_com_feedback`, `tokens_entrada` e `tokens_saida`.
+
+- Argumento que não seja `dict`: `TypeError`.
+- Chave obrigatória ausente: `ValueError` com o nome do campo.
+- Valor inválido: a exceção da função de cálculo é propagada.
+- Chaves adicionais: permitidas, sem participar do consumo.
+- Entrada: preservada, sem acrescentar resultados nem alterar seus valores.
+
+O retorno é um novo dicionário com `respostas_mensais`, `acertos_mensais`, `erros_mensais`, `feedbacks_nos_acertos`, `feedbacks_mensais`, `tokens_entrada_total` e `tokens_saida_total`.
+
+No bloco principal, `consumo_cenario` recebe esse retorno. Seus valores alimentam os cálculos de custos e os `print()` existentes. O cenário permanece com 4.000 respostas, 2.200 feedbacks e 1.100.000/660.000 tokens de entrada/saída. Ainda não há uma função que reúna consumo, preços, infraestrutura e câmbio em um cenário completo.
 
 
 ### Organização das funções
 
 | Função | Responsabilidade |
 |---|---|
+| `calcular_consumo_cenario` | Coordenar respostas, feedbacks e tokens a partir das hipóteses |
 | `calcular_respostas_mensais` | Estimar o volume de respostas |
 | `calcular_feedbacks_mensais` | Calcular acertos, erros e feedbacks |
 | `calcular_tokens_mensais` | Estimar os totais de tokens de entrada e saída |
@@ -153,7 +172,7 @@ O cenário didático e os `print()` ficam dentro de `if __name__ == "__main__":`
 
 ### Validação das entradas
 
-As sete funções usam a auxiliar compartilhada e verificações específicas antes de calcular. Tipos não permitidos geram `TypeError`; valores fora das regras geram `ValueError`, com mensagens que identificam o argumento inválido.
+As sete funções de cálculo usam a auxiliar compartilhada e verificações específicas antes de calcular. A coordenadora de consumo valida o dicionário e suas chaves e reutiliza as validações numéricas por meio dessas funções. Tipos não permitidos geram `TypeError`; valores fora das regras geram `ValueError`, com mensagens que identificam o argumento inválido.
 
 | Entrada | Tipos aceitos | Regras |
 |---|---|---|
@@ -172,7 +191,7 @@ As validações são aplicadas aos argumentos das funções, mesmo quando elas s
 
 ### Testes automatizados
 
-O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest`, da biblioteca padrão do Python. São 67 métodos de teste, distribuídos em sete classes, uma para cada função de cálculo. Parte dos métodos usa `subTest` para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
+O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest`, da biblioteca padrão do Python. São 77 métodos de teste, distribuídos em oito classes: sete para os cálculos e uma para a função coordenadora de consumo. Parte dos métodos usa `subTest` para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
 
 A suíte verifica:
 
@@ -184,6 +203,7 @@ A suíte verifica:
 - Cotação positiva nos três tipos permitidos (`int`, `float` e `Decimal`), com rejeição de zero, negativos e valores não finitos.
 - Valores especiais de `Decimal`, incluindo `NaN` e `sNaN`, nos campos monetários.
 - Oito métodos para serviços: exemplos de backend e banco, zero unidades, preço gratuito e rejeição de tipos e valores inválidos.
+- Dez métodos para consumo do cenário: resultados, zeros, estrutura do dicionário, propagação de exceções, preservação da entrada e chaves adicionais.
 
 A auxiliar de validação é exercitada pelas chamadas às funções de cálculo. A suíte cobre os casos descritos; não é uma verificação exaustiva de todas as entradas possíveis nem uma medição de consumo real da API.
 
@@ -201,7 +221,7 @@ python -m unittest -v test_calculadora.TestCalcularReal
 
 Se `python` não estiver disponível no terminal, utilize o caminho do interpretador configurado no VS Code. Também é possível executar `test_calculadora.py` diretamente com esse interpretador.
 
-A última execução retornou `Ran 67 tests` e `OK`. `assertEqual` confere resultados, `assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
+A última execução retornou `Ran 77 tests` e `OK`. `assertEqual` confere resultados, `assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
 
 Além da suíte, foi conferida a execução do cenário principal com 100 e zero usuários: os totais mensais foram, respectivamente, US$ 13,44 / R$ 67,20 e US$ 13,00 / R$ 65,00. Essa conferência adicional foi executada em memória durante o desenvolvimento e não está salva como teste automatizado no repositório.
 
