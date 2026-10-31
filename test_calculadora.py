@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from calculadora import (
     calcular_consumo_cenario,
+    calcular_custo_ia_cenario,
     calcular_custo_anual,
     calcular_custo_servico,
     calcular_custo_tokens,
@@ -481,6 +482,149 @@ class TestCalcularConsumoCenario(unittest.TestCase):
         hipoteses["nome"] = "Cenário didático"
         self.assertEqual(calcular_consumo_cenario(hipoteses), esperado)
         self.assertEqual(hipoteses["nome"], "Cenário didático")
+
+
+class TestCalcularCustoIaCenario(unittest.TestCase):
+    def criar_entradas(self):
+        consumo = {"tokens_entrada_total": 1_100_000, "tokens_saida_total": 660_000}
+        precos = {
+            "entrada_por_milhao_usd": Decimal("0.10"),
+            "saida_por_milhao_usd": Decimal("0.50"),
+        }
+        cotacao = {"brl_por_usd": Decimal("5.00")}
+        return consumo, precos, cotacao
+
+    def test_calcula_custos_do_cenario_didatico(self):
+        consumo, precos, cotacao = self.criar_entradas()
+        resultado = calcular_custo_ia_cenario(consumo, precos, cotacao)
+        esperado = {
+            "custo_entrada_usd": Decimal("0.11"),
+            "custo_saida_usd": Decimal("0.33"),
+            "custo_ia_mensal_usd": Decimal("0.44"),
+            "custo_entrada_br": Decimal("0.55"),
+            "custo_saida_br": Decimal("1.65"),
+            "custo_ia_mensal_br": Decimal("2.20"),
+            "custo_ia_anual_usd": Decimal("5.28"),
+            "custo_ia_anual_br": Decimal("26.40"),
+        }
+        self.assertEqual(resultado, esperado)
+        for campo, valor in resultado.items():
+            with self.subTest(campo=campo):
+                self.assertIsInstance(valor, Decimal)
+
+    def test_zero_tokens_em_cada_canal_e_nos_dois(self):
+        for entrada, saida, esperado in ((0, 660_000, "0.33"),
+                                        (1_100_000, 0, "0.11"), (0, 0, "0")):
+            consumo, precos, cotacao = self.criar_entradas()
+            consumo["tokens_entrada_total"] = entrada
+            consumo["tokens_saida_total"] = saida
+            with self.subTest(entrada=entrada, saida=saida):
+                resultado = calcular_custo_ia_cenario(consumo, precos, cotacao)
+                self.assertEqual(resultado["custo_ia_mensal_usd"], Decimal(esperado))
+
+    def test_precos_gratuitos_em_cada_canal_e_nos_dois(self):
+        for entrada, saida, esperado in (("0", "0.50", "0.33"),
+                                        ("0.10", "0", "0.11"), ("0", "0", "0")):
+            consumo, precos, cotacao = self.criar_entradas()
+            precos["entrada_por_milhao_usd"] = Decimal(entrada)
+            precos["saida_por_milhao_usd"] = Decimal(saida)
+            with self.subTest(entrada=entrada, saida=saida):
+                resultado = calcular_custo_ia_cenario(consumo, precos, cotacao)
+                self.assertEqual(resultado["custo_ia_mensal_usd"], Decimal(esperado))
+
+    def test_aceita_tokens_fracionarios(self):
+        consumo, precos, cotacao = self.criar_entradas()
+        consumo["tokens_entrada_total"] = 0.5
+        consumo["tokens_saida_total"] = 0.5
+        resultado = calcular_custo_ia_cenario(consumo, precos, cotacao)
+        self.assertEqual(resultado["custo_ia_mensal_usd"], Decimal("0.00000030"))
+
+    def test_cotacao_aceita_tres_tipos_e_altera_apenas_os_valores_em_reais(self):
+        for taxa in (5, 5.0, Decimal("5.00"), Decimal("6.00")):
+            consumo, precos, cotacao = self.criar_entradas()
+            cotacao["brl_por_usd"] = taxa
+            with self.subTest(taxa=taxa, tipo=type(taxa).__name__):
+                resultado = calcular_custo_ia_cenario(consumo, precos, cotacao)
+                self.assertEqual(resultado["custo_ia_mensal_usd"], Decimal("0.44"))
+                self.assertEqual(resultado["custo_ia_mensal_br"],
+                                 Decimal("0.44") * Decimal(str(taxa)))
+
+    def test_exige_dicionarios_nos_tres_argumentos(self):
+        for valor in (None, [], "cenario", 100, True):
+            consumo, precos, cotacao = self.criar_entradas()
+            with self.subTest(argumento="consumo_cenario", valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_custo_ia_cenario(valor, precos, cotacao)
+            with self.subTest(argumento="precos_ia", valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_custo_ia_cenario(consumo, valor, cotacao)
+            with self.subTest(argumento="cotacao", valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_custo_ia_cenario(consumo, precos, valor)
+
+    def test_recusa_cada_chave_obrigatoria_ausente(self):
+        consumo, precos, cotacao = self.criar_entradas()
+        for grupo, dicionario in (("consumo", consumo), ("precos", precos), ("cotacao", cotacao)):
+            for chave in dicionario.copy():
+                copia = dicionario.copy()
+                del dicionario[chave]
+                with self.subTest(grupo=grupo, chave=chave):
+                    with self.assertRaises(ValueError) as erro:
+                        calcular_custo_ia_cenario(consumo, precos, cotacao)
+                    self.assertIn(chave, str(erro.exception))
+                dicionario[chave] = copia[chave]
+
+    def test_propaga_erros_dos_tokens(self):
+        consumo, precos, cotacao = self.criar_entradas()
+        for chave in consumo.copy():
+            for tipo_erro, valores in ((TypeError, ("100", True, False, None, Decimal("100"), [], 1j)),
+                                      (ValueError, (-1, -0.5, float("inf"), float("-inf"), float("nan")))):
+                for valor in valores:
+                    consumo, precos, cotacao = self.criar_entradas()
+                    consumo[chave] = valor
+                    with self.subTest(chave=chave, valor=valor, erro=tipo_erro.__name__):
+                        with self.assertRaises(tipo_erro):
+                            calcular_custo_ia_cenario(consumo, precos, cotacao)
+
+    def test_propaga_erros_dos_precos(self):
+        consumo, precos, cotacao = self.criar_entradas()
+        for chave in precos.copy():
+            for tipo_erro, valores in ((TypeError, ("0.10", 1, 0.1, True, False, None, [], 1j)),
+                                      (ValueError, (Decimal("-0.1"), Decimal("Infinity"), Decimal("-Infinity"), Decimal("NaN"), Decimal("sNaN")))):
+                for valor in valores:
+                    consumo, precos, cotacao = self.criar_entradas()
+                    precos[chave] = valor
+                    with self.subTest(chave=chave, valor=valor, erro=tipo_erro.__name__):
+                        with self.assertRaises(tipo_erro):
+                            calcular_custo_ia_cenario(consumo, precos, cotacao)
+
+    def test_propaga_erros_dos_cotacao(self):
+        consumo, precos, cotacao = self.criar_entradas()
+        for chave in cotacao.copy():
+            for tipo_erro, valores in ((TypeError, ("5", True, False, None, [], 1j)),
+                                      (ValueError, (0, 0.0, Decimal("0"), -1, -0.5, Decimal("-1"), float("inf"), float("-inf"), float("nan"), Decimal("Infinity"), Decimal("-Infinity"), Decimal("NaN"), Decimal("sNaN")))):
+                for valor in valores:
+                    consumo, precos, cotacao = self.criar_entradas()
+                    cotacao[chave] = valor
+                    with self.subTest(chave=chave, valor=valor, erro=tipo_erro.__name__):
+                        with self.assertRaises(tipo_erro):
+                            calcular_custo_ia_cenario(consumo, precos, cotacao)
+
+    def test_nao_altera_as_tres_entradas(self):
+        consumo, precos, cotacao = self.criar_entradas()
+        antes = (consumo.copy(), precos.copy(), cotacao.copy())
+        resultado = calcular_custo_ia_cenario(consumo, precos, cotacao)
+        self.assertEqual((consumo, precos, cotacao), antes)
+        for entrada in (consumo, precos, cotacao):
+            self.assertIsNot(resultado, entrada)
+
+    def test_aceita_chaves_adicionais_sem_alterar_os_custos(self):
+        consumo, precos, cotacao = self.criar_entradas()
+        esperado = calcular_custo_ia_cenario(consumo, precos, cotacao)
+        consumo["feedbacks_mensais"] = 2200
+        precos["modelo"] = "Modelo de referência"
+        cotacao["origem"] = "Didática"
+        self.assertEqual(calcular_custo_ia_cenario(consumo, precos, cotacao), esperado)
 
 
 if __name__ == "__main__":

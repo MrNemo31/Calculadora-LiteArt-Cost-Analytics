@@ -316,3 +316,29 @@ Antes de implementar a nova função, esclarecer a diferença entre dicionário 
 
 **Marco deste registro:** documentação atualizada em 2026-10-31, até a função de consumo do cenário e seus testes, sem novas dependências ou chamadas externas.
 
+## 16. Função de custos de IA do cenário e seus testes
+
+**Etapa:** reutilização dos cálculos monetários de IA.
+
+**Objetivo dos pedidos:** coordenar os custos de tokens, a conversão e a projeção anual a partir de dicionários, preservando a separação entre cálculo e apresentação.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar calcular_custo_ia_cenario e seus testes, integrar a função ao cenário principal e explicar cada parte e como conferir que os resultados continuam iguais. Retomar a explicação da função e dos testes após a implementação, distinguindo validação dos dicionários, cálculo, retorno e execução no terminal. Atualizar README e registro de prompts antes do próximo commit.
+
+**Participação e aprendizado:** o autor executou os testes e confirmou os resultados. As explicações abordaram passagem de três dicionários, chaves obrigatórias, propagação das exceções, retorno de valores Decimal e uso de entradas independentes nos testes.
+
+**Decisões registradas:**
+
+- Criar `calcular_custo_ia_cenario(consumo_cenario, precos_ia, cotacao)`, reutilizando as funções de custo de tokens, conversão e projeção anual.
+- Exigir três argumentos do tipo `dict` e cinco chaves no total; sinalizar tipos incorretos com `TypeError` e chaves ausentes com `ValueError`.
+- Manter as validações numéricas nas funções existentes e propagar suas exceções.
+- Aceitar chaves adicionais sem utilizá-las nos cálculos, permitindo receber o retorno completo do consumo.
+- Retornar um novo dicionário com oito valores em `Decimal`, sem modificar os três dicionários recebidos.
+- Integrar a chamada ao bloco principal, preservando a apresentação e a soma com infraestrutura.
+- Acrescentar `TestCalcularCustoIaCenario`, com 12 métodos: cenário didático e tipos de retorno, zeros de consumo, preços gratuitos, tokens fracionários, cotações permitidas, estrutura dos dicionários, erros dos campos, preservação das entradas e chaves adicionais.
+
+**Contribuição para o projeto:** a suíte passou de 77 para 89 métodos, distribuídos em nove classes, e a execução completa passou. A saída do cenário antes e depois da integração foi comparada e permaneceu idêntica. O custo de IA continua em US$ 0,44 ou R$ 2,20 por mês e US$ 5,28 ou R$ 26,40 por ano. O total com infraestrutura permanece em US$ 13,44 ou R$ 67,20 mensais e US$ 161,28 ou R$ 806,40 anuais, nas hipóteses didáticas registradas.
+
+**Marco deste registro:** documentação atualizada em 2026-10-31, até a função de custos de IA do cenário, seus testes e integração, sem novas dependências, consulta automática de câmbio ou chamadas reais à API.
+

@@ -140,6 +140,51 @@ def calcular_consumo_cenario(hipoteses_consumo):
     }
 
 
+def calcular_custo_ia_cenario(consumo_cenario, precos_ia, cotacao):
+    """Retorna os custos de IA em Decimal, sem alterar os três dicionários."""
+    if type(consumo_cenario) is not dict:
+        raise TypeError("O consumo do cenário deve ser um dicionário (dict).")
+    if type(precos_ia) is not dict:
+        raise TypeError("Os preços de IA devem ser um dicionário (dict).")
+    if type(cotacao) is not dict:
+        raise TypeError("A cotação deve ser um dicionário (dict).")
+
+    for chave in ("tokens_entrada_total", "tokens_saida_total"):
+        if chave not in consumo_cenario:
+            raise ValueError(f"Consumo do cenário: chave obrigatória ausente: {chave}.")
+    for chave in ("entrada_por_milhao_usd", "saida_por_milhao_usd"):
+        if chave not in precos_ia:
+            raise ValueError(f"Preços de IA: chave obrigatória ausente: {chave}.")
+    if "brl_por_usd" not in cotacao:
+        raise ValueError("Cotação: chave obrigatória ausente: brl_por_usd.")
+
+    custo_entrada_usd = calcular_custo_tokens(
+        consumo_cenario["tokens_entrada_total"], precos_ia["entrada_por_milhao_usd"]
+    )
+    custo_saida_usd = calcular_custo_tokens(
+        consumo_cenario["tokens_saida_total"], precos_ia["saida_por_milhao_usd"]
+    )
+    custo_ia_mensal_usd = custo_entrada_usd + custo_saida_usd
+
+    custo_entrada_br = calcular_real(custo_entrada_usd, cotacao["brl_por_usd"])
+    custo_saida_br = calcular_real(custo_saida_usd, cotacao["brl_por_usd"])
+    custo_ia_mensal_br = calcular_real(custo_ia_mensal_usd, cotacao["brl_por_usd"])
+
+    custo_ia_anual_usd = calcular_custo_anual(custo_ia_mensal_usd)
+    custo_ia_anual_br = calcular_custo_anual(custo_ia_mensal_br)
+
+    return {
+        "custo_entrada_usd": custo_entrada_usd,
+        "custo_saida_usd": custo_saida_usd,
+        "custo_ia_mensal_usd": custo_ia_mensal_usd,
+        "custo_entrada_br": custo_entrada_br,
+        "custo_saida_br": custo_saida_br,
+        "custo_ia_mensal_br": custo_ia_mensal_br,
+        "custo_ia_anual_usd": custo_ia_anual_usd,
+        "custo_ia_anual_br": custo_ia_anual_br,
+    }
+
+
 if __name__ == "__main__":
     # Cenário didático: hipóteses de consumo, não dados reais do LiteArt.
     hipoteses_consumo = {
@@ -184,21 +229,16 @@ if __name__ == "__main__":
         "saida_por_milhao_usd": Decimal("0.50"),
     }
 
-    # Custos mensais estimados de IA, em dólares.
-    # A conversão para Decimal acontece dentro de calcular_custo_tokens.
-    custo_entrada_usd = calcular_custo_tokens(tokens_entrada_total, precos_ia["entrada_por_milhao_usd"])
-    custo_saida_usd = calcular_custo_tokens(tokens_saida_total, precos_ia["saida_por_milhao_usd"])
-    custo_ia_mensal_usd = custo_entrada_usd + custo_saida_usd
-
-    # Custo mensal estimado de IA, em reais (BRL), usando uma taxa de câmbio hipotética.
-    custo_entrada_br = calcular_real(custo_entrada_usd, cotacao["brl_por_usd"])
-    custo_saida_br = calcular_real(custo_saida_usd, cotacao["brl_por_usd"])
-    custo_ia_mensal_br = calcular_real(custo_ia_mensal_usd, cotacao["brl_por_usd"])
-
-    # Custos anuais estimados de IA, em dólares e reais (BRL).
-    custo_ia_anual_usd = calcular_custo_anual(custo_ia_mensal_usd)
-    custo_ia_anual_br = calcular_custo_anual(custo_ia_mensal_br)
-
+    # Custos de IA calculados a partir do consumo, dos preços e da cotação.
+    custos_ia_cenario = calcular_custo_ia_cenario(consumo_cenario, precos_ia, cotacao)
+    custo_entrada_usd = custos_ia_cenario["custo_entrada_usd"]
+    custo_saida_usd = custos_ia_cenario["custo_saida_usd"]
+    custo_ia_mensal_usd = custos_ia_cenario["custo_ia_mensal_usd"]
+    custo_entrada_br = custos_ia_cenario["custo_entrada_br"]
+    custo_saida_br = custos_ia_cenario["custo_saida_br"]
+    custo_ia_mensal_br = custos_ia_cenario["custo_ia_mensal_br"]
+    custo_ia_anual_usd = custos_ia_cenario["custo_ia_anual_usd"]
+    custo_ia_anual_br = custos_ia_cenario["custo_ia_anual_br"]
 
     # Mensalidades fixas de infraestrutura, independentes do consumo de IA.
     custo_backend_mensal_usd = calcular_custo_servico(
