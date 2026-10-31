@@ -234,3 +234,31 @@ Foram acrescentados oito métodos de teste para o serviço, levando a suíte a 6
 
 **Marco deste registro:** documentação atualizada em 2026-10-28, até a integração de infraestrutura e IA, sem novas dependências ou chamadas reais à API.
 
+## 13. Pesquisa de hospedagem e Firebase como alternativa
+
+**Etapa:** pesquisa de infraestrutura e avaliação de alternativas, antes de alterar o cenário da calculadora.
+
+**Objetivo dos pedidos:** comparar opções gratuitas e pagas em fontes oficiais e compreender se o Firebase pode atender ao LiteArt, aproveitando o aprendizado da faculdade sem substituir antecipadamente a arquitetura planejada.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Pesquisar três opções de hospedagem para backend e PostgreSQL, priorizando baixo custo e incluindo pelo menos uma combinação gratuita. Explicar preços, limites e condições aos poucos e registrar a comparação no planejamento antes de alterar o código. Verificar o Firebase, apresentado na disciplina de programação de dispositivos móveis, especialmente para login com Google e possível centralização de backend e banco. Explicar sua hospedagem, os produtos envolvidos e os custos e limitações. Registrar o Firebase como alternativa, mantendo NestJS e PostgreSQL como referência. Atualizar README e registro de prompts para salvar esse marco em um commit.
+
+**Participação e aprendizado:** o autor trouxe a experiência com Firebase na faculdade e pediu uma avaliação antes de decidir sobre a arquitetura. A orientação distinguiu autenticação, execução de backend, hospedagem de frontend e armazenamento de dados, além de mensalidade fixa, consumo, franquia e teste gratuito temporário.
+
+**Decisões registradas:**
+
+- Comparar Render + Neon, Railway e Koyeb + Neon, registrando fontes e data da consulta de 2026-10-28 no planejamento.
+- Distinguir uma combinação gratuita dentro das franquias de créditos limitados e ofertas temporárias; considerar suspensão por inatividade e condições de cadastro.
+- Registrar a avaliação do Firebase com consulta de 2026-10-30, incluindo Spark e Blaze e a separação dos serviços e suas cobranças.
+- Considerar Firebase Authentication para login com Google no Flutter sem exigir a troca do NestJS ou do PostgreSQL.
+- Distinguir Firestore, orientado a documentos, de SQL Connect com PostgreSQL via Cloud SQL; registrar que a gratuidade de teste deste último é temporária.
+- Distinguir Hosting tradicional de App Hosting e dos serviços que executam código de backend, como Functions e Cloud Run.
+- Manter Flutter, Node.js/NestJS e PostgreSQL como arquitetura de referência; Firebase permanece uma alternativa em estudo.
+- Manter os preços didáticos no cenário principal e nos testes. A pesquisa não implementa seleção de provedores, migração ou contratação.
+- Preparar hipóteses de operações, armazenamento, processamento e tráfego antes de simular ofertas cobradas por consumo.
+
+**Contribuição para o projeto:** o planejamento passou a registrar três combinações de hospedagem e uma alternativa Firebase com fontes, datas, custos e limitações. O README resume a pesquisa e aponta para os detalhes no planejamento. Nenhum provedor foi escolhido pelo autor para substituir as entradas didáticas, e código e testes permaneceram inalterados neste marco.
+
+**Marco deste registro:** documentação atualizada em 2026-10-31, consolidando a pesquisa de hospedagem e o Firebase como alternativa, com NestJS e PostgreSQL preservados como referência.
+

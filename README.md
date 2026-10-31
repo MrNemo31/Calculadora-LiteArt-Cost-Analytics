@@ -102,7 +102,26 @@ A conversão usa R$ 5,00 por dólar, uma cotação didática. O cenário soma ap
 
 A projeção anual mantém serviços, consumo, preços e câmbio constantes. Com zero usuários, o consumo variável de IA fica zero, mas os serviços contratados permanecem em US$ 13,00 ou R$ 65,00 mensais.
 
-A pesquisa oficial dos planos de infraestrutura ainda está pendente. Esses valores não demonstram a capacidade de atendimento do LiteArt. Se o banco estiver incluído na hospedagem, seu custo não deve ser contado duas vezes. O total contempla apenas as categorias e condições deste cenário; as exclusões da primeira versão estão no planejamento.
+A pesquisa inicial de hospedagem já está registrada no planejamento, mas ainda não substituiu os preços didáticos do cenário. Esses valores não demonstram a capacidade de atendimento do LiteArt. Se o banco estiver incluído na hospedagem, seu custo não deve ser contado duas vezes. O total contempla apenas as categorias e condições deste cenário; as exclusões da primeira versão estão no planejamento.
+
+
+### Pesquisa de hospedagem e alternativas de arquitetura
+
+A pesquisa inicial de 2026-10-28 comparou três combinações para hospedar o backend e o PostgreSQL:
+
+| Combinação pesquisada | Ponto de atenção registrado |
+|---|---|
+| Render + Neon | Opções gratuitas com franquias e suspensão por inatividade, além de alternativas pagas |
+| Railway | Créditos gratuitos limitados e plano pago com consumo incluído; o mínimo cobrado não é uma mensalidade fixa de todos os serviços |
+| Koyeb + Neon | Recursos gratuitos e pagos, com atenção ao plano selecionado e à possível cobrança inicial no cadastro |
+
+A avaliação de 2026-10-30 acrescentou o **Firebase como alternativa em estudo**. Foram distinguidos Authentication para login com Google, Hosting para arquivos web, Functions/Cloud Run para execução de backend, Firestore como banco de documentos e SQL Connect com PostgreSQL via Cloud SQL.
+
+**A arquitetura de referência do LiteArt continua sendo Flutter, backend Node.js/NestJS e PostgreSQL.** Usar Firebase Authentication pode preservar essa arquitetura; adotar Firestore e Functions exigiria rever parte do desenho. Nenhuma migração ou contratação foi realizada.
+
+Preços, unidades de cobrança, franquias, condições de cadastro, testes temporários e fontes oficiais estão na seção 6 do [planejamento](PLANEJAMENTO.md). As consultas são registros datados e devem ser revalidadas antes de contratar. Gratuidade de infraestrutura não inclui automaticamente o consumo das APIs de IA.
+
+Os preços pesquisados ainda não foram aplicados ao cenário principal, que permanece didático. Também não há comparação automatizada entre provedores. Ofertas por consumo precisarão de hipóteses adicionais antes de serem representadas pela calculadora.
 
 
 ### Como executar a versão atual
@@ -171,7 +190,7 @@ Exceções ainda não são tratadas em uma interface: fora dos testes, uma chama
 
 ### Próximos incrementos
 
-Pesquisar planos de backend e PostgreSQL em fontes oficiais, registrando preços, datas, limites e condições. Revisar casos adicionais de limite nas funções de respostas e feedbacks e definir o próximo incremento da calculadora. O tratamento das mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
+Revisar as alternativas pesquisadas e escolher com o autor a próxima configuração de estudo, revalidando preços e condições antes de alterar o cenário. Revisar casos adicionais de limite nas funções de respostas e feedbacks e definir o próximo incremento da calculadora. O tratamento das mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
 
 Os custos de infraestrutura já são calculados com valores didáticos. Leitura de CSV, comparação automatizada de cenários, gráficos e dashboard ainda serão implementados.
 

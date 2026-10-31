@@ -16,6 +16,8 @@ Quanto custa manter o LiteArt durante um mês, considerando infraestrutura fixa 
 
 A calculadora apenas simulará o custo da API; não precisará fazer chamadas reais para produzir as estimativas.
 
+Referência de arquitetura do LiteArt: Flutter, backend Node.js/NestJS e PostgreSQL. Firebase é uma alternativa em estudo, registrada na seção 6, sem substituir essa referência.
+
 ## 3. Tipos de informação
 
 - **Preço pesquisado:** tarifa de um fornecedor, acompanhada de fonte, data e condições.
@@ -45,9 +47,9 @@ A preferência por feedback nos erros é uma hipótese de produto baseada em pes
 |---|---|---|---|
 | Nome do cenário | Texto | Configuração | Identifica a simulação |
 | Preço mensal do plano de backend | USD/mês ou BRL/mês por unidade | Preço pesquisado | Hospedagem do backend |
-| Quantidade de unidades de backend | Quantidade | Hipótese de capacidade | Unidades contratadas; inicialmente uma |
+| Quantidade de unidades de backend | Quantidade | Hipótese de capacidade | Unidades contratadas; duas no cenário didático atual |
 | Preço mensal do plano de banco | USD/mês ou BRL/mês por unidade | Preço pesquisado | Serviço PostgreSQL |
-| Quantidade de unidades de banco | Quantidade | Hipótese de capacidade | Unidades contratadas; inicialmente uma |
+| Quantidade de unidades de banco | Quantidade | Hipótese de capacidade | Unidades contratadas; uma no cenário didático atual |
 | Provedor da API | Texto | Configuração | OpenAI na primeira versão; identifica quem fornece a API e define as tarifas |
 | Modelo de IA | Identificador | Configuração | Modelo específico da OpenAI na primeira versão, usado para pesquisar as tarifas |
 | Preço de tokens de entrada | USD por 1 milhão de tokens | Preço pesquisado | Tarifa de entrada sem desconto de cache |
@@ -73,7 +75,7 @@ Para cada tarifa, registrar:
 - Recursos incluídos, limites, franquias e condições promocionais.
 - Se o preço exige pagamento ou compromisso anual.
 
-Os primeiros preços de IA foram pesquisados e estão registrados abaixo. Os preços de infraestrutura ainda estão pendentes. Quando o banco estiver incluído no plano de hospedagem, registrar essa condição e não somar uma segunda cobrança pelo mesmo recurso.
+Os preços de IA e a pesquisa inicial de infraestrutura estão registrados abaixo, com suas respectivas datas. A configuração de infraestrutura a adotar ainda depende de escolha do autor. Quando o banco estiver incluído no plano de hospedagem, registrar essa condição e não somar uma segunda cobrança pelo mesmo recurso.
 
 ### Pesquisa inicial de modelos — 2026-10-23
 
@@ -91,7 +93,123 @@ Terra foi sugerido inicialmente pelo autor. Após a comparação de tarifas, o a
 
 Em modelos com raciocínio, tokens internos também são cobrados como saída, mesmo sem aparecer no feedback. A hipótese de saída deverá representar o total faturável, sem somar esses tokens duas vezes. Fonte: [documentação de modelos de raciocínio](https://developers.openai.com/api/docs/guides/reasoning), consultada em 2026-10-23.
 
-Há hipóteses didáticas adotadas de tokens por feedback na seção 7, ainda sem medição. A cotação e os preços de infraestrutura permanecem pendentes; portanto, ainda não há uma estimativa monetária completa da aplicação.
+Há hipóteses didáticas adotadas de tokens por feedback na seção 7, ainda sem medição. A calculadora já utiliza cotação didática de R$ 5,00 por dólar e preços inventados de infraestrutura. A pesquisa de ofertas reais abaixo ainda não substitui esses valores no código; não há medição de despesas reais.
+
+### Pesquisa de hospedagem e PostgreSQL — 2026-10-28
+
+**Data da consulta:** 2026-10-28. Fontes oficiais indicadas em cada item. Valores em USD, sem conversão de câmbio, impostos, custos de pagamento, domínio próprio ou IA. Nenhum serviço foi contratado ou implantado nesta pesquisa.
+
+São três combinações para hospedar o backend Node.js/NestJS e o PostgreSQL. Backend e banco podem pertencer a provedores diferentes; nesse caso, é preciso configurar a conexão segura e considerar latência e transferência de dados entre eles. Os limites publicados não comprovam capacidade para atender ao LiteArt.
+
+#### Resumo das alternativas
+
+| Opção | Backend | PostgreSQL | Caminho gratuito | Alternativa paga |
+|---|---|---|---|---|
+| 1. Render + Neon | Render Free | Neon Free | US$ 0/mês de infraestrutura dentro das franquias, com suspensão por inatividade | Render `0.5c-512mb` a US$ 7/mês + Neon Free dentro da franquia; banco Launch por consumo se necessário |
+| 2. Railway | Serviço da aplicação | Serviço PostgreSQL no mesmo projeto | Trial de US$ 5 por até 30 dias; depois Free com US$ 1 de crédito mensal | Hobby: mínimo de US$ 5/mês, incluindo US$ 5 de consumo; excedente aumenta a fatura |
+| 3. Koyeb + Neon | Instância Free da Koyeb | Neon Free | Recursos gratuitos documentados, mas o cadastro pode gerar cobrança inicial de Pro; não assumir custo inicial zero | Exemplo `eco-micro`: US$ 2,68/mês de referência de compute + Neon Free, condicionado ao Starter e à disponibilidade; cobrança por segundo e possíveis adicionais |
+
+As linhas não representam ofertas equivalentes de desempenho, disponibilidade ou operação do banco. “Gratuito” descreve apenas a infraestrutura nas condições indicadas; as chamadas à API de IA continuam sendo cobradas separadamente.
+
+#### 1. Render + Neon: referência gratuita para aprendizado
+
+**Backend Render Free:** US$ 0/mês, 512 MB de RAM. O serviço suspende após 15 minutos sem tráfego; a retomada pode levar aproximadamente um minuto. Há 750 horas gratuitas compartilhadas por workspace por mês. O disco local é temporário e não deve armazenar o banco. A Render destina os serviços Free a testes e projetos pessoais, não à produção. Fontes: [limites gratuitos](https://render.com/docs/free) e [preços](https://render.com/pricing).
+
+**Franquias do workspace Hobby da Render:** US$ 0/mês de assinatura, com compute cobrado separadamente quando pago; 5 GB de tráfego de saída e 500 minutos de build mensais. A tabela informa US$ 0,15/GB adicional e US$ 5 por mil minutos adicionais. Sem método de pagamento, a documentação descreve suspensão dos serviços ou dos novos builds ao esgotar as respectivas franquias. Fontes: [preços e franquias](https://render.com/pricing) e [regras de esgotamento](https://render.com/docs/free).
+
+**PostgreSQL Neon Free:** US$ 0/mês, sem prazo de teste e sem cartão exigido. A página atual lista 100 CU-horas mensais por projeto, 1 GB de armazenamento por projeto e tamanhos de até 2 CU. CU-hora mede capacidade computacional multiplicada pelo tempo ativo; não equivale a uma quantidade de usuários. Fonte: [preços Neon](https://neon.com/pricing).
+
+O banco suspende o compute após cinco minutos de inatividade. O plano inclui 5 GB de transferência pública por projeto. Selecionar uma região próxima ao backend; a combinação não utiliza a rede privada de um único fornecedor. Fonte: [planos e limites Neon](https://neon.com/docs/introduction/plans).
+
+**Caminho pago:** o backend Render `0.5c-512mb` (antigo Starter), com 0,5 CPU e 512 MB de RAM, custa US$ 7/mês de referência, com cobrança proporcional ao tempo. Mantendo o Neon Free e respeitando as franquias, a base de infraestrutura é US$ 7/mês. Isso não inclui eventual crescimento ou excedentes. Fonte: [preços Render](https://render.com/pricing).
+
+Para o banco, Neon Launch cobra US$ 0,106/CU-hora e US$ 0,35/GB-mês de armazenamento, além dos itens aplicáveis. A página exibe US$ 15 como gasto típico ilustrativo, não como mensalidade fixa garantida. Fonte: [preços Neon](https://neon.com/pricing).
+
+**Por que usar Neon nesta combinação:** o PostgreSQL gratuito da própria Render expira em 30 dias, tem 1 GB e não possui backups. Após a expiração, há 14 dias para atualizar antes da exclusão. Não tratar essa oferta temporária como banco gratuito para uma projeção anual. Fonte: [Postgres gratuito Render](https://render.com/docs/free).
+
+#### 2. Railway: aplicação e PostgreSQL com orçamento por consumo
+
+**Gratuidade:** o trial oferece US$ 5 de crédito por até 30 dias, terminando antes se o crédito acabar. Depois, o Free oferece US$ 1 de crédito por mês, sem acumular. Contas com trial limitado podem ter restrições de rede de saída, relevantes para futuras chamadas à IA. Fonte: [trial e transição para Free](https://docs.railway.com/pricing/free-trial).
+
+O Free tem limite de até 0,5 GB de RAM, 1 vCPU e 0,5 GB de volume por serviço. Esses tetos não são recursos gratuitos ilimitados: o consumo desconta o crédito disponível. Fonte: [limites dos planos](https://docs.railway.com/pricing/plans).
+
+**Hobby pago:** mínimo de US$ 5/mês com US$ 5 de consumo incluído para o workspace, não US$ 5 para cada serviço. Considerando apenas esses recursos e sem descontos ou adicionais, a fatura é o maior valor entre US$ 5 e o consumo: US$ 3 de uso resulta em US$ 5; US$ 8 de uso resulta em US$ 8. Não somar assinatura e consumo integral novamente. Fonte: [entenda a fatura](https://docs.railway.com/pricing/understanding-your-bill).
+
+Tarifas de containers: RAM a US$ 10/GB-mês, CPU a US$ 20/vCPU-mês, volumes a US$ 0,15/GB-mês e saída de rede a US$ 0,05/GB. O cálculo considera uso e tempo; essas unidades não são mensalidades de um pacote de backend ou banco. O Hobby publica limite padrão de volume de 5 GB por serviço. Fonte: [tarifas e recursos](https://docs.railway.com/pricing/plans).
+
+O PostgreSQL é um serviço adicional no projeto e seu consumo entra na mesma conta. O template inicial é de nó único; alta disponibilidade, backups e recuperação devem ser avaliados separadamente. Não presumir que recursos operacionais adicionais estão incluídos no piso de US$ 5. Fonte: [PostgreSQL Railway](https://docs.railway.com/databases/postgresql).
+
+**Aplicação na calculadora:** exige hipóteses de memória, CPU, armazenamento e tempo para estimar a fatura. Registrar o piso de US$ 5 como mínimo, não como preço fixo completo de backend e banco.
+
+#### 3. Koyeb + Neon: recursos gratuitos com condição de cadastro
+
+**Backend Free:** uma instância por organização, com 512 MB de RAM, 0,1 vCPU e 2 GB de SSD temporário, em Frankfurt ou Washington, D.C. Suspende após uma hora sem tráfego e não aceita volumes persistentes. É uma oferta para testes e projetos pessoais, não produção. Fonte: [instâncias Koyeb](https://www.koyeb.com/docs/reference/instances).
+
+**Cuidado com custo inicial:** a FAQ oficial informa exigência de cartão, pré-autorização de US$ 29 e cobrança proporcional do plano selecionado; o cadastro usa Pro como seleção inicial. A documentação permite migrar para Starter, sem custo-base, mas isso não torna o cadastro isento de cobrança retroativamente. Não apresentar esta combinação como opção garantidamente sem desembolso inicial. Fontes: [FAQ de cobrança](https://www.koyeb.com/docs/faqs/pricing) e [planos da organização](https://www.koyeb.com/docs/reference/organizations).
+
+**Caminho pago de compute:** `eco-micro` oferece 0,25 vCPU e 512 MB de RAM, a US$ 0,000001/segundo, com US$ 2,68/mês como referência publicada. É cobrança proporcional ao tempo; assinatura eventualmente selecionada, rede e adicionais devem ser conferidos antes de calcular um total. Eco está disponível em Washington, D.C., Frankfurt e Singapura. Fonte: [tabela de instâncias](https://www.koyeb.com/docs/reference/instances).
+
+O banco desta combinação é o Neon Free, nas condições da opção 1. A Koyeb também anuncia PostgreSQL gratuito próprio, mas limitado a cinco horas ativas mensais e 1 GB; não usaremos esse limite como referência de banco contínuo. Fonte: [banco e condições gratuitas Koyeb](https://www.koyeb.com/docs/faqs/pricing).
+
+#### Encaminhamento para o projeto
+
+- **Sugestão para a próxima simulação gratuita:** Render Free + Neon Free, com uma unidade de cada e custo de infraestrutura zero somente dentro das franquias. É uma recomendação de cenário de estudo, sem seleção de provedor pelo autor ou alteração do código.
+- **Referência paga simples:** Render `0.5c-512mb` + Neon Free, com US$ 7/mês de base, enquanto o banco couber no Free. A capacidade ainda deverá ser validada.
+- **Comparações por consumo:** Railway e Neon Launch não cabem diretamente na fórmula de mensalidade fixa. A Koyeb publica preços mensais de referência, mas cobra compute por segundo. Não substituir essas tarifas por mensalidades garantidas.
+- Manter os testes com preços inventados: eles validam a aritmética independentemente de mudanças comerciais. Os valores didáticos de backend a US$ 5 e banco a US$ 3 não são tarifas desta pesquisa.
+- Registrar região, franquias de rede/build e condições da conta ao escolher a configuração. Não há compromisso anual considerado nos exemplos; os totais são bases mensais ou tarifas de consumo, conforme indicado.
+- Revalidar preços e elegibilidade antes de contratar. Nenhuma das alternativas comprova que determinada quantidade de usuários será atendida.
+
+
+### Firebase como alternativa — 2026-10-30
+
+**Decisão atual:** manter Flutter no aplicativo, Node.js/NestJS no backend e PostgreSQL como referência de banco do LiteArt. O Firebase está registrado para comparação futura; não foi adotado como substituto dessa arquitetura. A calculadora de custos continua em Python.
+
+**Contexto:** o autor está aprendendo Firebase na faculdade, especialmente login com Google, e solicitou avaliar a centralização de serviços. A pesquisa foi consultada em 2026-10-30; os valores abaixo são tarifas e franquias publicadas, não custos observados nem uma cotação total do LiteArt.
+
+#### Formas de adoção e impacto
+
+| Alternativa | Papel do Firebase | Efeito sobre a referência atual |
+|---|---|---|
+| Apenas Authentication | Login com Google no Flutter; NestJS verifica o token e aplica permissões | Preserva NestJS e PostgreSQL, inclusive com hospedagem externa |
+| Authentication + Firestore + Functions | Identidade, banco de documentos e funções de backend | Exige revisar modelagem dos dados e organização do backend; não equivale à arquitetura atual |
+| Authentication + Cloud Run + PostgreSQL | Identidade e execução da API NestJS no ecossistema Google | Preserva o desenho relacional; escolher a hospedagem PostgreSQL e estimar seus custos separadamente |
+| Authentication + SQL Connect | PostgreSQL via Cloud SQL, consultas e operações com GraphQL e SDKs para clientes | Alternativa relacional a estudar; pode modificar parte das responsabilidades hoje previstas no NestJS |
+
+O login Google possui suporte oficial para Flutter. Um token do Firebase pode ser enviado ao NestJS por HTTPS e validado com o Admin SDK; autenticação não substitui as regras de autorização da aplicação. Fontes: [login no Flutter](https://firebase.google.com/docs/auth/flutter/federated-auth) e [validação de tokens](https://firebase.google.com/docs/auth/admin/verify-id-tokens).
+
+Firestore organiza documentos e coleções; migrar do PostgreSQL exige rever relacionamentos e consultas. SQL Connect, anteriormente Data Connect, utiliza PostgreSQL gerenciado pelo Cloud SQL e oferece integração com Flutter e Firebase Authentication. Fontes: [modelo Firestore](https://firebase.google.com/docs/firestore/data-model), [SQL Connect](https://firebase.google.com/docs/sql-connect) e [evolução do produto](https://firebase.blog/posts/2026/04/whats-new-sql-connect).
+
+#### Custos, franquias e condições
+
+Valores em USD, sem conversão, tributos ou custos da API de IA.
+
+| Serviço/plano | Preço ou franquia pesquisada | Limitação para a simulação | Fonte oficial |
+|---|---|---|---|
+| Spark | Sem custo, sem método de pagamento para começar | Somente serviços e franquias disponíveis no plano; não inclui publicação de Functions nem Cloud Run | [Planos](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans) |
+| Blaze | Pagamento por consumo, com franquias gratuitas e conta de faturamento vinculada | Não é uma mensalidade fixa nem promessa de fatura zero | [Planos](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans) |
+| Authentication | Login social padrão disponível sem custo no Spark | Telefone e upgrade para Identity Platform têm regras próprias; não generalizar gratuidade a todos os recursos | [Preços](https://firebase.google.com/pricing) |
+| Firestore Standard | 1 GiB armazenado, 50.000 leituras, 20.000 gravações e 20.000 exclusões de documentos por dia; saída de dados de 10 GiB/mês na franquia | Cobranças excedentes dependem das operações, localização e recursos; backups e recuperação não estão nessa franquia | [Limites](https://firebase.google.com/docs/firestore/quotas) |
+| Hosting tradicional | 10 GB de armazenamento sem custo; no Blaze, armazenamento adicional a US$ 0,026/GB e transferência adicional a US$ 0,15/GB | Hospeda arquivos web; a API exige Functions ou Cloud Run. Confirmar franquia de transferência antes de simular: tabela geral indica 360 MB/dia, enquanto a documentação específica indica 10 GB/mês | [Preços](https://firebase.google.com/pricing), [franquias Hosting](https://firebase.google.com/docs/hosting/usage-quotas-pricing) |
+| Functions / Cloud Run | Execução por consumo com franquias; total depende de requisições, tempo, memória, CPU, região e serviços auxiliares | Exige faturamento habilitado; ainda não foi definida uma configuração para orçar o LiteArt | [Publicar Functions](https://firebase.google.com/docs/functions/get-started), [Cloud Run](https://firebase.google.com/docs/hosting/cloud-run), [preços Cloud Run](https://cloud.google.com/run/pricing) |
+| SQL Connect — serviço | No Blaze, 250.000 operações/mês sem custo; excedente a US$ 0,90/milhão; saída de rede gratuita até 10 GiB/mês | Há cobrança separada do Cloud SQL; não confundir operação com linha lida | [Preços SQL Connect](https://firebase.google.com/docs/sql-connect/pricing) |
+| PostgreSQL do Cloud SQL via SQL Connect | Referência anunciada a partir de US$ 9,37/mês, variando por região e configuração | É um piso de referência, não orçamento completo ou capacidade validada para o LiteArt | [Preços SQL Connect](https://firebase.google.com/docs/sql-connect/pricing) |
+
+**Teste temporário do PostgreSQL:** SQL Connect oferece trial de 90 dias no Spark. Sem upgrade, a instância é arquivada; após outros 90 dias, pode ser excluída. No Blaze, há trial de três meses para instância elegível na configuração padrão; alterações de configuração podem encerrar o benefício. Não projetar o teste gratuito como gratuidade anual. Fonte: [condições do trial](https://firebase.google.com/docs/sql-connect/pricing).
+
+**Hosting e App Hosting são distintos:** Hosting tradicional distribui arquivos web e integra Functions/Cloud Run para conteúdo dinâmico. App Hosting é voltado a aplicações web dinâmicas, com suporte pré-configurado para Next.js e Angular, exige Blaze e agrega cobranças de serviços Google Cloud. Não duplicar o custo de execução do mesmo serviço ao comparar componentes. Fontes: [Hosting](https://firebase.google.com/docs/hosting), [App Hosting](https://firebase.google.com/docs/app-hosting) e [custos App Hosting](https://firebase.google.com/docs/app-hosting/costs).
+
+#### Premissas e limitações para o LiteArt Cost Analytics
+
+- Um projeto Firebase reúne serviços no ecossistema Google, mas cada componente mantém sua unidade de cobrança. Centralização não significa um preço único.
+- A quantidade de respostas dos estudantes não determina diretamente as operações do banco: uma tela pode ler vários documentos e uma resposta pode gerar várias gravações.
+- Uma simulação futura precisará declarar leituras e gravações por ação, armazenamento, transferência, requisições e duração/configuração do backend. Respeitar as janelas diárias ou mensais das franquias.
+- Os limites técnicos e gratuitos não demonstram capacidade para atender ao número de usuários do cenário.
+- Reutilizar Firebase Authentication não exige migrar banco ou hospedagem. Não iniciar migração, contratação ou implementação sem uma decisão posterior do autor.
+- A API de IA continua como categoria separada. Chamadas e credenciais de serviços devem ser controladas no backend.
+- Estudar custos por consumo antes de adaptar a calculadora: a função de mensalidade fixa não representa diretamente Firestore, Functions, Cloud Run ou SQL Connect.
+- Nesta atualização, apenas o planejamento foi alterado. Nenhum valor do cenário, função ou teste foi modificado.
+
 
 ## 7. Fórmulas
 
@@ -221,8 +339,11 @@ Testes e documentação acompanharão os primeiros cálculos. A etapa final cons
 
 ## 10. Próximas definições
 
-1. Preparar o ambiente Python e iniciar a calculadora com as hipóteses didáticas adotadas: 500 tokens de entrada e 300 de saída faturável por feedback.
-2. Definir o esforço de raciocínio e o método de medição antes de futuros testes reais com o Luna; isso não bloqueia os exercícios da calculadora com hipóteses.
-3. Pesquisar planos de backend e PostgreSQL, registrando fontes e condições.
-4. Definir a precisão dos cálculos e a apresentação dos valores.
-5. Implementar e conferir um cálculo de cada vez: volume de respostas e feedbacks, consumo de tokens, custo de IA e conversão cambial. O primeiro resultado de referência será 2.200 feedbacks mensais.
+A calculadora em Python já calcula IA, infraestrutura didática, conversão e totais mensais e anuais. A suíte contém 67 métodos de teste. A pesquisa de 2026-10-28 foi registrada sem alterar o código.
+
+1. Revisar com o autor as três combinações de hospedagem pesquisadas e a alternativa Firebase, mantendo NestJS e PostgreSQL como referência. Escolher a próxima configuração de estudo, preservando o cenário didático dos testes.
+2. Confirmar região, franquias, condições de cadastro e preços oficiais da configuração selecionada antes de atualizar as entradas do cenário.
+3. Definir as hipóteses adicionais necessárias para ofertas por consumo; não tratá-las como mensalidades fixas.
+4. Manter precisão com Decimal nos cálculos monetários e duas casas decimais na apresentação, como já implementado, e revisar casos adicionais de limite.
+5. Definir o esforço de raciocínio e o método de medição antes de futuros testes reais de tokens; essa medição não bloqueia a calculadora com hipóteses.
+6. Preparar posteriormente os dados de preços para CSV e comparação de cenários com Pandas.
