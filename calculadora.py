@@ -99,45 +99,64 @@ def calcular_custo_servico(preco_mensal_por_unidade, quantidade):
 
 if __name__ == "__main__":
     # Cenário didático: hipóteses de consumo, não dados reais do LiteArt.
-    usuarios_ativos = 100
-    respostas_por_usuario = 40
-    taxa_acerto = 60 / 100
-    proporcao_acertos_com_feedback = 25 / 100
-    tokens_entrada = 500
-    tokens_saida = 300
+    hipoteses_consumo = {
+        "usuarios_ativos": 100,
+        "respostas_por_usuario": 40,
+        "taxa_acerto": 60 / 100,
+        "proporcao_acertos_com_feedback": 25 / 100,
+        "tokens_entrada": 500,
+        "tokens_saida": 300,
+    }
 
     # Cotação didática em reais por dólar, não uma cotação pesquisada.
-    taxa_cambio = Decimal("5.00")
+    cotacao = {
+        "brl_por_usd": Decimal("5.00"),
+    }
 
     # Infraestrutura didática em USD: preços inventados, não planos pesquisados.
-    preco_backend_mensal_usd = Decimal("5.00")
+    precos_infraestrutura = {
+        "backend_mensal_por_unidade_usd": Decimal("5.00"),
+        "banco_mensal_por_unidade_usd": Decimal("3.00"),
+    }
+
+    # Hipóteses de capacidade: quantidades contratadas, não preços.
     quantidade_backend = 2
-    preco_banco_mensal_usd = Decimal("3.00")
     quantidade_banco = 1
 
     # Cada erro gera feedback; apenas parte dos acertos recebe feedback.
-    respostas_mensais = calcular_respostas_mensais(usuarios_ativos, respostas_por_usuario)
-    acertos_mensais, erros_mensais, feedbacks_nos_acertos, feedbacks_mensais = calcular_feedbacks_mensais(
-        respostas_mensais, taxa_acerto, proporcao_acertos_com_feedback
+    respostas_mensais = calcular_respostas_mensais(
+        hipoteses_consumo["usuarios_ativos"],
+        hipoteses_consumo["respostas_por_usuario"],
     )
-    tokens_entrada_total, tokens_saida_total = calcular_tokens_mensais(tokens_entrada, tokens_saida, feedbacks_mensais)
+    acertos_mensais, erros_mensais, feedbacks_nos_acertos, feedbacks_mensais = calcular_feedbacks_mensais(
+        respostas_mensais,
+        hipoteses_consumo["taxa_acerto"],
+        hipoteses_consumo["proporcao_acertos_com_feedback"],
+    )
+    tokens_entrada_total, tokens_saida_total = calcular_tokens_mensais(
+        hipoteses_consumo["tokens_entrada"],
+        hipoteses_consumo["tokens_saida"],
+        feedbacks_mensais,
+    )
 
     # Preços pesquisados: GPT-6 Luna, Standard, entrada sem cache.
     # Fonte: https://developers.openai.com/api/docs/models/gpt-6-luna
     # Consulta: 2026-10-23. Sem adicionais regionais, ferramentas ou cache.
-    preco_entrada_por_milhao_usd = Decimal("0.10")
-    preco_saida_por_milhao_usd = Decimal("0.50")
+    precos_ia = {
+        "entrada_por_milhao_usd": Decimal("0.10"),
+        "saida_por_milhao_usd": Decimal("0.50"),
+    }
 
     # Custos mensais estimados de IA, em dólares.
     # A conversão para Decimal acontece dentro de calcular_custo_tokens.
-    custo_entrada_usd = calcular_custo_tokens(tokens_entrada_total, preco_entrada_por_milhao_usd)
-    custo_saida_usd = calcular_custo_tokens(tokens_saida_total, preco_saida_por_milhao_usd)
+    custo_entrada_usd = calcular_custo_tokens(tokens_entrada_total, precos_ia["entrada_por_milhao_usd"])
+    custo_saida_usd = calcular_custo_tokens(tokens_saida_total, precos_ia["saida_por_milhao_usd"])
     custo_ia_mensal_usd = custo_entrada_usd + custo_saida_usd
 
     # Custo mensal estimado de IA, em reais (BRL), usando uma taxa de câmbio hipotética.
-    custo_entrada_br = calcular_real(custo_entrada_usd, taxa_cambio)
-    custo_saida_br = calcular_real(custo_saida_usd, taxa_cambio)
-    custo_ia_mensal_br = calcular_real(custo_ia_mensal_usd, taxa_cambio)
+    custo_entrada_br = calcular_real(custo_entrada_usd, cotacao["brl_por_usd"])
+    custo_saida_br = calcular_real(custo_saida_usd, cotacao["brl_por_usd"])
+    custo_ia_mensal_br = calcular_real(custo_ia_mensal_usd, cotacao["brl_por_usd"])
 
     # Custos anuais estimados de IA, em dólares e reais (BRL).
     custo_ia_anual_usd = calcular_custo_anual(custo_ia_mensal_usd)
@@ -145,13 +164,17 @@ if __name__ == "__main__":
 
 
     # Mensalidades fixas de infraestrutura, independentes do consumo de IA.
-    custo_backend_mensal_usd = calcular_custo_servico(preco_backend_mensal_usd, quantidade_backend)
-    custo_banco_mensal_usd = calcular_custo_servico(preco_banco_mensal_usd, quantidade_banco)
+    custo_backend_mensal_usd = calcular_custo_servico(
+        precos_infraestrutura["backend_mensal_por_unidade_usd"], quantidade_backend
+    )
+    custo_banco_mensal_usd = calcular_custo_servico(
+        precos_infraestrutura["banco_mensal_por_unidade_usd"], quantidade_banco
+    )
     custo_infra_mensal_usd = custo_backend_mensal_usd + custo_banco_mensal_usd
 
-    custo_backend_mensal_br = calcular_real(custo_backend_mensal_usd, taxa_cambio)
-    custo_banco_mensal_br = calcular_real(custo_banco_mensal_usd, taxa_cambio)
-    custo_infra_mensal_br = calcular_real(custo_infra_mensal_usd, taxa_cambio)
+    custo_backend_mensal_br = calcular_real(custo_backend_mensal_usd, cotacao["brl_por_usd"])
+    custo_banco_mensal_br = calcular_real(custo_banco_mensal_usd, cotacao["brl_por_usd"])
+    custo_infra_mensal_br = calcular_real(custo_infra_mensal_usd, cotacao["brl_por_usd"])
 
     # Somar apenas custos na mesma moeda, sem arredondar etapas intermediárias.
     custo_total_mensal_usd = custo_infra_mensal_usd + custo_ia_mensal_usd

@@ -262,3 +262,29 @@ Pesquisar três opções de hospedagem para backend e PostgreSQL, priorizando ba
 
 **Marco deste registro:** documentação atualizada em 2026-10-31, consolidando a pesquisa de hospedagem e o Firebase como alternativa, com NestJS e PostgreSQL preservados como referência.
 
+## 14. Organização das entradas em dicionários
+
+**Etapa:** organização dos dados da calculadora básica para preparar futuros cenários.
+
+**Objetivo dos pedidos:** separar hipóteses de consumo, preços e cotação, aprendendo dicionários e acesso por chaves sem alterar as fórmulas ou os resultados.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar um dicionário com as hipóteses de consumo e adaptar as chamadas das funções, explicando cada parte e como testar se os resultados continuam iguais. Esclarecer se a cotação do dólar poderá ser consultada automaticamente no futuro. Organizar depois os preços de IA, os preços de infraestrutura e a cotação em dicionários separados das hipóteses, explicando a leitura das chaves e a conferência dos cálculos. Atualizar README e registro de prompts antes de fazer um novo commit.
+
+**Participação e aprendizado:** o autor executou o cenário e os testes após cada incremento e confirmou os resultados. As explicações abordaram pares de chave e valor, uso de chaves entre colchetes, preservação de Decimal e a diferença entre testar uma função com entradas próprias e executar o cenário principal.
+
+**Decisões registradas:**
+
+- Criar `hipoteses_consumo` com seis entradas: usuários ativos, respostas por usuário, taxa de acerto, parcela dos acertos com feedback e tokens de entrada e saída por feedback.
+- Criar `precos_ia` com as tarifas em USD por milhão de tokens; preservar os comentários de fonte, data e condições.
+- Criar `precos_infraestrutura` com os preços didáticos mensais por unidade de backend e banco.
+- Criar `cotacao` com a chave `brl_por_usd`, mantendo a taxa manual didática de `Decimal("5.00")`.
+- Manter as quantidades contratadas como variáveis separadas, pois representam hipóteses de capacidade.
+- Adaptar as chamadas para buscar os valores por chave, mantendo os contratos e as validações das funções.
+- Manter os resultados separados das entradas e preservar todos os valores do cenário.
+- Considerar futuramente consulta de câmbio por API, registrando fonte e data e mantendo a opção manual. Essa consulta não foi implementada e não prevê o câmbio dos meses futuros.
+
+**Contribuição para o projeto:** quatro dicionários passaram a organizar as entradas no bloco principal. A conferência da última refatoração comparou a saída completa antes e depois e confirmou sua preservação; os 67 métodos de teste passaram. O total permaneceu em US$ 13,44 ou R$ 67,20 por mês e US$ 161,28 ou R$ 806,40 por ano. A organização prepara comparações futuras, mas ainda não implementa uma função de cenário completo nem importação de dados.
+
+**Marco deste registro:** documentação atualizada em 2026-10-31, até a organização de hipóteses, preços e cotação em dicionários, sem novas dependências ou consulta automática de câmbio.

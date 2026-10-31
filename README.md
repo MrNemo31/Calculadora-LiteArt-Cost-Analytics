@@ -14,10 +14,11 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 
 ## Situação atual
 
-**Etapa 2 — Calculadora básica em desenvolvimento.** O arquivo `calculadora.py` já organiza os cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna como referência inicial. Os valores do cenário são definidos diretamente no código; ainda não há entrada interativa.
+**Etapa 2 — Calculadora básica em desenvolvimento.** O arquivo `calculadora.py` já organiza os cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna como referência inicial. As hipóteses de consumo, preços e cotação são definidos em dicionários no bloco principal; as quantidades de unidades contratadas permanecem em variáveis separadas. Ainda não há entrada interativa.
 
 ### Funcionalidades implementadas
 
+- Organização das hipóteses de consumo, preços e cotação em dicionários separados.
 - Volume mensal de respostas, acertos, erros e feedbacks.
 - Consumo mensal estimado de tokens de entrada e saída.
 - Custos mensais de entrada e saída de IA em dólares, com `Decimal`.
@@ -28,6 +29,26 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 - Apresentação dos resultados com os símbolos US$ e R$.
 - Validação de tipos, valores negativos, taxas fora do intervalo, infinito e NaN nos argumentos das funções.
 - Testes automatizados reproduzíveis das sete funções de cálculo, usando `unittest`.
+
+### Organização das entradas em dicionários
+
+Dentro do bloco principal, as entradas estão agrupadas por finalidade:
+
+| Dicionário | Conteúdo | Natureza dos dados |
+|---|---|---|
+| `hipoteses_consumo` | Usuários, respostas por usuário, taxa de acerto, parcela dos acertos com feedback e tokens por feedback | Hipóteses didáticas de consumo |
+| `precos_ia` | Tarifas de entrada e saída em USD por milhão de tokens | Preços pesquisados, com fonte e data nos comentários e no planejamento |
+| `precos_infraestrutura` | Preços mensais por unidade de backend e banco em USD | Valores inventados para aprendizado |
+| `cotacao` | `brl_por_usd`, com `Decimal("5.00")` | Configuração cambial didática e manual |
+
+Os preços e a cotação mantêm o tipo `Decimal`. As quantidades `quantidade_backend` e `quantidade_banco` continuam como variáveis separadas: são hipóteses de capacidade, não preços.
+
+As chamadas buscam os valores pelas chaves, como `hipoteses_consumo["usuarios_ativos"]` e `cotacao["brl_por_usd"]`. As funções recebem os valores individuais, validam seus argumentos e retornam resultados. Os resultados calculados permanecem em variáveis próprias; não são armazenados nos dicionários de entrada.
+
+Essa organização prepara a reutilização dos cálculos em diferentes cenários. Ainda não há função que receba um cenário completo, leitura de CSV ou consulta automática de câmbio.
+
+Na última refatoração, a saída completa foi comparada antes e depois e permaneceu idêntica. Os 67 métodos de teste também passaram. Os testes das funções usam entradas próprias; alterações nos dicionários do cenário devem ser conferidas executando também `calculadora.py`.
+
 
 ### Organização das funções
 
