@@ -3,6 +3,7 @@ import unittest
 from decimal import Decimal
 
 from calculadora import (
+    calcular_cenario,
     calcular_consumo_cenario,
     calcular_custo_ia_cenario,
     calcular_custo_infra_cenario,
@@ -763,6 +764,184 @@ class TestCalcularCustoInfraCenario(unittest.TestCase):
         capacidade["nome"] = "Cenário didático"
         cotacao["origem"] = "Manual"
         self.assertEqual(calcular_custo_infra_cenario(precos, capacidade, cotacao), esperado)
+
+
+class TestCalcularCenario(unittest.TestCase):
+    def criar_entradas(self):
+        # A lista segue a ordem dos cinco argumentos de calcular_cenario.
+        return [
+            {
+                "usuarios_ativos": 100, "respostas_por_usuario": 40,
+                "taxa_acerto": 0.6, "proporcao_acertos_com_feedback": 0.25,
+                "tokens_entrada": 500, "tokens_saida": 300,
+            },
+            {"quantidade_backend": 2, "quantidade_banco": 1},
+            {"entrada_por_milhao_usd": Decimal("0.10"), "saida_por_milhao_usd": Decimal("0.50")},
+            {"backend_mensal_por_unidade_usd": Decimal("5.00"),
+             "banco_mensal_por_unidade_usd": Decimal("3.00")},
+            {"brl_por_usd": Decimal("5.00")},
+        ]
+
+    def test_calcula_cenario_didatico_completo(self):
+        resultado = calcular_cenario(*self.criar_entradas())
+        esperado = {
+            "consumo": {
+                "respostas_mensais": 4000,
+                "acertos_mensais": 2400,
+                "erros_mensais": 1600,
+                "feedbacks_nos_acertos": 600,
+                "feedbacks_mensais": 2200,
+                "tokens_entrada_total": 1_100_000,
+                "tokens_saida_total": 660_000,
+            },
+            "custos_ia": {
+                "custo_entrada_usd": Decimal("0.11"),
+                "custo_saida_usd": Decimal("0.33"),
+                "custo_ia_mensal_usd": Decimal("0.44"),
+                "custo_entrada_br": Decimal("0.55"),
+                "custo_saida_br": Decimal("1.65"),
+                "custo_ia_mensal_br": Decimal("2.20"),
+                "custo_ia_anual_usd": Decimal("5.28"),
+                "custo_ia_anual_br": Decimal("26.40"),
+            },
+            "custos_infraestrutura": {
+                "custo_backend_mensal_usd": Decimal("10"),
+                "custo_banco_mensal_usd": Decimal("3"),
+                "custo_infra_mensal_usd": Decimal("13"),
+                "custo_backend_mensal_br": Decimal("50"),
+                "custo_banco_mensal_br": Decimal("15"),
+                "custo_infra_mensal_br": Decimal("65"),
+                "custo_infra_anual_usd": Decimal("156"),
+                "custo_infra_anual_br": Decimal("780"),
+            },
+            "totais": {
+                "custo_total_mensal_usd": Decimal("13.44"),
+                "custo_total_mensal_br": Decimal("67.20"),
+                "custo_total_anual_usd": Decimal("161.28"),
+                "custo_total_anual_br": Decimal("806.40"),
+            },
+        }
+        self.assertEqual(resultado, esperado)
+        for grupo in ("custos_ia", "custos_infraestrutura", "totais"):
+            for campo, valor in resultado[grupo].items():
+                with self.subTest(grupo=grupo, campo=campo):
+                    self.assertIsInstance(valor, Decimal)
+
+    def test_zero_usuarios_ou_respostas_mantem_infraestrutura(self):
+        for campo in ("usuarios_ativos", "respostas_por_usuario"):
+            entradas = self.criar_entradas()
+            entradas[0][campo] = 0
+            with self.subTest(campo=campo):
+                resultado = calcular_cenario(*entradas)
+                for valor in resultado["consumo"].values():
+                    self.assertEqual(valor, 0)
+                for valor in resultado["custos_ia"].values():
+                    self.assertEqual(valor, Decimal("0"))
+                self.assertEqual(resultado["totais"], {
+                    "custo_total_mensal_usd": Decimal("13"),
+                    "custo_total_mensal_br": Decimal("65"),
+                    "custo_total_anual_usd": Decimal("156"),
+                    "custo_total_anual_br": Decimal("780"),
+                })
+
+    def test_zero_unidades_mantem_apenas_custos_de_ia(self):
+        entradas = self.criar_entradas()
+        entradas[1]["quantidade_backend"] = 0
+        entradas[1]["quantidade_banco"] = 0
+        resultado = calcular_cenario(*entradas)
+        for valor in resultado["custos_infraestrutura"].values():
+            self.assertEqual(valor, Decimal("0"))
+        self.assertEqual(resultado["totais"]["custo_total_mensal_usd"], Decimal("0.44"))
+        self.assertEqual(resultado["totais"]["custo_total_anual_br"], Decimal("26.40"))
+
+    def test_precos_gratuitos_zeram_custos_sem_zerar_consumo(self):
+        entradas = self.criar_entradas()
+        for indice in (2, 3):
+            for chave in entradas[indice]:
+                entradas[indice][chave] = Decimal("0")
+        resultado = calcular_cenario(*entradas)
+        self.assertEqual(resultado["consumo"]["feedbacks_mensais"], 2200)
+        for grupo in ("custos_ia", "custos_infraestrutura", "totais"):
+            for valor in resultado[grupo].values():
+                self.assertEqual(valor, Decimal("0"))
+
+    def test_mudar_cotacao_preserva_consumo_e_totais_em_dolares(self):
+        entradas = self.criar_entradas()
+        entradas[4]["brl_por_usd"] = Decimal("6")
+        resultado = calcular_cenario(*entradas)
+        self.assertEqual(resultado["consumo"]["feedbacks_mensais"], 2200)
+        self.assertEqual(resultado["totais"], {
+            "custo_total_mensal_usd": Decimal("13.44"),
+            "custo_total_mensal_br": Decimal("80.64"),
+            "custo_total_anual_usd": Decimal("161.28"),
+            "custo_total_anual_br": Decimal("967.68"),
+        })
+
+    def test_propaga_tipo_invalido_em_cada_argumento(self):
+        for indice in range(5):
+            for valor in (None, [], "cenario", 100, True):
+                entradas = self.criar_entradas()
+                entradas[indice] = valor
+                with self.subTest(argumento=indice, valor=valor):
+                    with self.assertRaises(TypeError):
+                        calcular_cenario(*entradas)
+
+    def test_propaga_ausencia_de_cada_chave_obrigatoria(self):
+        for indice, dicionario in enumerate(self.criar_entradas()):
+            for chave in dicionario:
+                entradas = self.criar_entradas()
+                del entradas[indice][chave]
+                with self.subTest(argumento=indice, chave=chave):
+                    with self.assertRaises(ValueError) as erro:
+                        calcular_cenario(*entradas)
+                    self.assertIn(chave, str(erro.exception))
+
+    def test_propaga_erros_numericos_de_cada_grupo(self):
+        casos = (
+            (0, "usuarios_ativos", 1.5, TypeError),
+            (0, "taxa_acerto", 1.1, ValueError),
+            (0, "tokens_entrada", float("nan"), ValueError),
+            (1, "quantidade_backend", -1, ValueError),
+            (1, "quantidade_banco", True, TypeError),
+            (2, "entrada_por_milhao_usd", 0.1, TypeError),
+            (2, "saida_por_milhao_usd", Decimal("-1"), ValueError),
+            (3, "backend_mensal_por_unidade_usd", Decimal("Infinity"), ValueError),
+            (3, "banco_mensal_por_unidade_usd", "3", TypeError),
+            (4, "brl_por_usd", 0, ValueError),
+            (4, "brl_por_usd", float("inf"), ValueError),
+        )
+        for indice, chave, valor, tipo_erro in casos:
+            entradas = self.criar_entradas()
+            entradas[indice][chave] = valor
+            with self.subTest(argumento=indice, chave=chave, valor=valor):
+                with self.assertRaises(tipo_erro):
+                    calcular_cenario(*entradas)
+
+    def test_nao_altera_as_cinco_entradas(self):
+        entradas = self.criar_entradas()
+        copias = []
+        for entrada in entradas:
+            copias.append(entrada.copy())
+        resultado = calcular_cenario(*entradas)
+        self.assertEqual(entradas, copias)
+        for grupo in resultado.values():
+            for entrada in entradas:
+                self.assertIsNot(grupo, entrada)
+
+    def test_resultados_de_execucoes_sao_independentes(self):
+        entradas = self.criar_entradas()
+        primeiro = calcular_cenario(*entradas)
+        primeiro["consumo"]["respostas_mensais"] = -1
+        segundo = calcular_cenario(*entradas)
+        self.assertEqual(segundo["consumo"]["respostas_mensais"], 4000)
+        self.assertEqual(entradas[0]["usuarios_ativos"], 100)
+
+    def test_chaves_adicionais_nao_alteram_resultado(self):
+        entradas = self.criar_entradas()
+        esperado = calcular_cenario(*entradas)
+        for entrada in entradas:
+            entrada["observacao"] = "Cenário didático"
+        self.assertEqual(calcular_cenario(*entradas), esperado)
 
 
 if __name__ == "__main__":

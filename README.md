@@ -1,8 +1,11 @@
 # LiteArt Cost Analytics
 
-Projeto pessoal de Análise de Dados para simular os custos operacionais de uma aplicação de software, utilizando o LiteArt como estudo de caso.
+Projeto pessoal de Análise de Dados para simular os custos operacionais de uma aplicação de
+software, utilizando o LiteArt como estudo de caso.
 
-O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparação para vestibulares, com questões, simulados, acompanhamento de desempenho e feedbacks pedagógicos personalizados por Inteligência Artificial.
+O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparação para vestibulares,
+com questões, simulados, acompanhamento de desempenho e feedbacks pedagógicos personalizados por
+Inteligência Artificial.
 
 ## Objetivos
 
@@ -14,7 +17,11 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 
 ## Situação atual
 
-**Etapa 2 — Calculadora básica em desenvolvimento.** O arquivo `calculadora.py` já organiza os cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna como referência inicial. As entradas são definidas em cinco dicionários no bloco principal: hipóteses de consumo e capacidade, preços de IA e infraestrutura e cotação. Ainda não há entrada interativa.
+**Etapa 2 — Calculadora básica em desenvolvimento.** O arquivo `calculadora.py` já organiza os
+cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna
+como referência inicial. As entradas são definidas em cinco dicionários no bloco principal:
+hipóteses de consumo e capacidade, preços de IA e infraestrutura e cotação. Ainda não há entrada
+interativa.
 
 ### Funcionalidades implementadas
 
@@ -22,93 +29,157 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
 - Consumo mensal estimado de tokens de entrada e saída.
-- Custos mensais de entrada e saída de IA em dólares, com `Decimal`.
-- Coordenação dos custos de IA por cenário, com conversão e projeção anual retornadas em um dicionário.
+- Custos mensais de entrada e saída de IA em dólares, com `Decimal` .
+- Coordenação dos custos de IA por cenário, com conversão e projeção anual retornadas em um
+  dicionário.
 - Mensalidades de backend e banco, calculadas por preço por unidade e quantidade contratada.
-- Coordenação dos custos de infraestrutura por cenário, com conversão e projeção anual em um novo dicionário.
+- Coordenação dos custos de infraestrutura por cenário, com conversão e projeção anual em um novo
+  dicionário.
+- Cenário completo com consumo, custos por categoria e totais organizados em um dicionário.
 - Soma de infraestrutura e IA, com totais mensais e anuais em dólares e reais.
 - Conversão dos custos para reais com cotação didática informada no código.
 - Projeção anual em dólares e reais, mantendo consumo, preços e câmbio constantes.
 - Apresentação dos resultados com os símbolos US$ e R$.
-- Validação de tipos, valores negativos, taxas fora do intervalo, infinito e NaN nos argumentos das funções.
-- Testes automatizados reproduzíveis das sete funções de cálculo e das três funções coordenadoras de cenário, usando `unittest`.
+- Validação de tipos, valores negativos, taxas fora do intervalo, infinito e NaN nos argumentos das
+  funções.
+- Testes automatizados reproduzíveis das sete funções de cálculo e das três coordenadoras de partes
+  do cenário e da função de cenário completo, usando `unittest` .
 
 ### Organização das entradas em dicionários
 
 Dentro do bloco principal, as entradas estão agrupadas por finalidade:
 
 | Dicionário | Conteúdo | Natureza dos dados |
-|---|---|---|
+| --- | --- | --- |
 | `hipoteses_consumo` | Usuários, respostas por usuário, taxa de acerto, parcela dos acertos com feedback e tokens por feedback | Hipóteses didáticas de consumo |
 | `hipoteses_capacidade` | Quantidades de unidades de backend e banco | Hipóteses didáticas de capacidade |
 | `precos_ia` | Tarifas de entrada e saída em USD por milhão de tokens | Preços pesquisados, com fonte e data nos comentários e no planejamento |
 | `precos_infraestrutura` | Preços mensais por unidade de backend e banco em USD | Valores inventados para aprendizado |
 | `cotacao` | `brl_por_usd`, com `Decimal("5.00")` | Configuração cambial didática e manual |
 
-Os preços e a cotação mantêm o tipo `Decimal`. As quantidades `quantidade_backend` e `quantidade_banco` são chaves de `hipoteses_capacidade`, separadas dos preços e das hipóteses de consumo.
+Os preços e a cotação mantêm o tipo `Decimal` . As quantidades `quantidade_backend` e
+`quantidade_banco` são chaves de `hipoteses_capacidade` , separadas dos preços e das hipóteses de
+consumo.
 
-As funções de cálculo recebem valores individuais. A função coordenadora `calcular_consumo_cenario` recebe o dicionário inteiro de hipóteses, busca os valores pelas chaves e retorna um novo dicionário de resultados. A coordenadora de custos de IA recebe consumo, preços e cotação em dicionários; a coordenadora de infraestrutura recebe preços, capacidade e cotação. Os resultados não são gravados nos dicionários de entrada.
+As funções de cálculo recebem valores individuais. A função coordenadora `calcular_consumo_cenario`
+recebe o dicionário inteiro de hipóteses, busca os valores pelas chaves e retorna um novo dicionário
+de resultados. A coordenadora de custos de IA recebe consumo, preços e cotação em dicionários; a
+coordenadora de infraestrutura recebe preços, capacidade e cotação. Os resultados não são gravados
+nos dicionários de entrada.
 
-Essa organização prepara a reutilização dos cálculos em diferentes cenários. Ainda não há função que receba um cenário completo, leitura de CSV ou consulta automática de câmbio.
+Essa organização prepara a reutilização dos cálculos em diferentes cenários. O cenário completo já
+pode ser calculado por uma função. Leitura de CSV e consulta automática de câmbio ainda não foram
+implementadas.
 
-Na última refatoração, a saída completa foi comparada antes e depois e permaneceu idêntica. Os 100 métodos de teste também passaram. Os testes das funções usam entradas próprias; alterações nos dicionários do cenário devem ser conferidas executando também `calculadora.py`.
-
+Na última refatoração, a saída completa foi comparada antes e depois e permaneceu idêntica. Os 111
+métodos de teste também passaram. Os testes das funções usam entradas próprias; alterações nos
+dicionários do cenário devem ser conferidas executando também `calculadora.py` .
 
 ### Cálculo do consumo de um cenário
 
-A função `calcular_consumo_cenario(hipoteses_consumo)` recebe o dicionário inteiro e coordena as funções de respostas, feedbacks e tokens. Ela não calcula custos nem imprime resultados.
+A função `calcular_consumo_cenario(hipoteses_consumo)` recebe o dicionário inteiro e coordena as
+funções de respostas, feedbacks e tokens. Ela não calcula custos nem imprime resultados.
 
-Antes dos cálculos, exige um `dict` e confere as seis chaves obrigatórias: `usuarios_ativos`, `respostas_por_usuario`, `taxa_acerto`, `proporcao_acertos_com_feedback`, `tokens_entrada` e `tokens_saida`.
+Antes dos cálculos, exige um `dict` e confere as seis chaves obrigatórias: `usuarios_ativos` ,
+`respostas_por_usuario` , `taxa_acerto` , `proporcao_acertos_com_feedback` , `tokens_entrada` e
+`tokens_saida` .
 
-- Argumento que não seja `dict`: `TypeError`.
+- Argumento que não seja `dict` : `TypeError` .
 - Chave obrigatória ausente: `ValueError` com o nome do campo.
 - Valor inválido: a exceção da função de cálculo é propagada.
 - Chaves adicionais: permitidas, sem participar do consumo.
 - Entrada: preservada, sem acrescentar resultados nem alterar seus valores.
 
-O retorno é um novo dicionário com `respostas_mensais`, `acertos_mensais`, `erros_mensais`, `feedbacks_nos_acertos`, `feedbacks_mensais`, `tokens_entrada_total` e `tokens_saida_total`.
+O retorno é um novo dicionário com `respostas_mensais` , `acertos_mensais` , `erros_mensais` ,
+`feedbacks_nos_acertos` , `feedbacks_mensais` , `tokens_entrada_total` e `tokens_saida_total` .
 
-No bloco principal, `consumo_cenario` recebe esse retorno. Seu retorno alimenta a coordenadora de custos de IA, e os valores de consumo são usados nos `print()` existentes. O cenário permanece com 4.000 respostas, 2.200 feedbacks e 1.100.000/660.000 tokens de entrada/saída. Ainda não há uma função que reúna consumo, preços, infraestrutura e câmbio em um cenário completo.
-
+No bloco principal, `consumo_cenario` recebe esse retorno. Seu retorno alimenta a coordenadora de
+custos de IA, e os valores de consumo são usados nos `print()` existentes. O cenário permanece com
+4.000 respostas, 2.200 feedbacks e 1.100.000/660.000 tokens de entrada/saída. A função
+calcular_cenario reúne consumo, preços, infraestrutura e câmbio.
 
 ### Cálculo dos custos de IA de um cenário
 
-A função `calcular_custo_ia_cenario(consumo_cenario, precos_ia, cotacao)` coordena os custos de tokens, a conversão para reais e a projeção anual. Reutiliza `calcular_custo_tokens`, `calcular_real` e `calcular_custo_anual`, sem imprimir resultados ou alterar as entradas.
+A função `calcular_custo_ia_cenario(consumo_cenario, precos_ia, cotacao)` coordena os custos de
+tokens, a conversão para reais e a projeção anual. Reutiliza `calcular_custo_tokens` ,
+`calcular_real` e `calcular_custo_anual` , sem imprimir resultados ou alterar as entradas.
 
 | Argumento | Chaves obrigatórias |
-|---|---|
+| --- | --- |
 | `consumo_cenario` | `tokens_entrada_total`, `tokens_saida_total` |
 | `precos_ia` | `entrada_por_milhao_usd`, `saida_por_milhao_usd` |
 | `cotacao` | `brl_por_usd` |
 
-Os três argumentos devem ser `dict`; outros tipos geram `TypeError`. Uma chave ausente gera `ValueError` com o campo identificado. As funções existentes validam os números e suas exceções são propagadas. Chaves adicionais são aceitas, permitindo usar diretamente o retorno completo de `calcular_consumo_cenario`.
+Os três argumentos devem ser `dict` ; outros tipos geram `TypeError` . Uma chave ausente gera
+`ValueError` com o campo identificado. As funções existentes validam os números e suas exceções são
+propagadas. Chaves adicionais são aceitas, permitindo usar diretamente o retorno completo de
+`calcular_consumo_cenario` .
 
-O retorno é um novo dicionário com oito resultados em `Decimal`: custos de entrada, saída e total mensal em USD e BRL, além dos totais anuais nas duas moedas. No cenário principal, `custos_ia_cenario` recebe esse dicionário; seus valores alimentam os `print()` e a soma com infraestrutura.
+O retorno é um novo dicionário com oito resultados em `Decimal` : custos de entrada, saída e total
+mensal em USD e BRL, além dos totais anuais nas duas moedas. No cenário principal,
+`custos_ia_cenario` recebe esse dicionário; seus valores alimentam os `print()` e a soma com
+infraestrutura.
 
-O cenário preserva US$ 0,44 / R$ 2,20 mensais de IA e US$ 5,28 / R$ 26,40 anuais. A função não calcula infraestrutura nem consulta câmbio; utiliza os dados recebidos e mantém a projeção de 12 meses constantes.
-
+O cenário preserva US$ 0,44 / R$ 2,20 mensais de IA e US$ 5,28 / R$ 26,40 anuais. A função não
+calcula infraestrutura nem consulta câmbio; utiliza os dados recebidos e mantém a projeção de 12
+meses constantes.
 
 ### Cálculo dos custos de infraestrutura de um cenário
 
-A função `calcular_custo_infra_cenario(precos_infraestrutura, hipoteses_capacidade, cotacao)` coordena mensalidades de backend e banco, conversão para reais e projeção anual. Reutiliza `calcular_custo_servico`, `calcular_real` e `calcular_custo_anual`, sem imprimir resultados ou modificar as entradas.
+A função `calcular_custo_infra_cenario(precos_infraestrutura, hipoteses_capacidade, cotacao)`
+coordena mensalidades de backend e banco, conversão para reais e projeção anual. Reutiliza
+`calcular_custo_servico` , `calcular_real` e `calcular_custo_anual` , sem imprimir resultados ou
+modificar as entradas.
 
 | Argumento | Chaves obrigatórias |
-|---|---|
+| --- | --- |
 | `precos_infraestrutura` | `backend_mensal_por_unidade_usd`, `banco_mensal_por_unidade_usd` |
 | `hipoteses_capacidade` | `quantidade_backend`, `quantidade_banco` |
 | `cotacao` | `brl_por_usd` |
 
-Os três argumentos devem ser `dict`; outros tipos geram `TypeError`. Uma chave obrigatória ausente gera `ValueError` com o campo identificado. As validações numéricas das funções existentes são preservadas: preços em `Decimal` finitos e não negativos, quantidades `int` não negativas e cotação finita e positiva. Chaves adicionais são permitidas sem participar dos cálculos.
+Os três argumentos devem ser `dict` ; outros tipos geram `TypeError` . Uma chave obrigatória ausente
+gera `ValueError` com o campo identificado. As validações numéricas das funções existentes são
+preservadas: preços em `Decimal` finitos e não negativos, quantidades `int` não negativas e cotação
+finita e positiva. Chaves adicionais são permitidas sem participar dos cálculos.
 
-O retorno é um novo dicionário com oito resultados em `Decimal`: backend, banco e total mensal em USD e BRL, mais os totais anuais de infraestrutura nas duas moedas. No bloco principal, `custos_infra_cenario` recebe esse retorno, que alimenta a soma com IA e os `print()`.
+O retorno é um novo dicionário com oito resultados em `Decimal` : backend, banco e total mensal em
+USD e BRL, mais os totais anuais de infraestrutura nas duas moedas. No bloco principal,
+`custos_infra_cenario` recebe esse retorno, que alimenta a soma com IA e os `print()` .
 
-A função utiliza os serviços contratados, independentemente da quantidade de estudantes. Com os valores didáticos, mantém US$ 13,00 / R$ 65,00 mensais e US$ 156,00 / R$ 780,00 anuais. A projeção pressupõe 12 meses com preços, quantidades e câmbio constantes; a capacidade de atendimento não foi validada.
+A função utiliza os serviços contratados, independentemente da quantidade de estudantes. Com os
+valores didáticos, mantém US$ 13,00 / R$ 65,00 mensais e US$ 156,00 / R$ 780,00 anuais. A projeção
+pressupõe 12 meses com preços, quantidades e câmbio constantes; a capacidade de atendimento não foi
+validada.
 
+### Cálculo do cenário completo
+
+A função
+`calcular_cenario(hipoteses_consumo, hipoteses_capacidade, precos_ia, precos_infraestrutura, cotacao)`
+reúne as três coordenadoras e calcula os totais. As verificações de tipos, chaves e valores são
+feitas pelas funções chamadas, que propagam suas exceções.
+
+O retorno é um novo dicionário com quatro grupos:
+
+| Chave | Conteúdo |
+| --- | --- |
+| `consumo` | Respostas, acertos, erros, feedbacks e tokens |
+| `custos_ia` | Custos mensais e anuais de IA em USD e BRL |
+| `custos_infraestrutura` | Custos de backend, banco e infraestrutura em USD e BRL |
+| `totais` | Totais mensais e anuais de infraestrutura e IA em USD e BRL |
+
+O acesso utiliza duas chaves, como `resultado_cenario["totais"]["custo_total_mensal_br"]` . A função
+não imprime resultados nem modifica os cinco dicionários recebidos. Cada execução produz seus
+próprios resultados; chaves adicionais nas entradas são permitidas pelas coordenadoras.
+
+No bloco principal, uma chamada a `calcular_cenario` substitui a sequência de cálculos. Os grupos
+são recuperados para manter os `print()` existentes. O total continua em US$ 13,44 / R$ 67,20 por
+mês e US$ 161,28 / R$ 806,40 por ano, com as hipóteses didáticas e 12 meses constantes.
 
 ### Organização das funções
 
 | Função | Responsabilidade |
-|---|---|
+| --- | --- |
+| `calcular_cenario` | Reunir consumo, custos por categoria e totais do cenário |
 | `calcular_consumo_cenario` | Coordenar respostas, feedbacks e tokens a partir das hipóteses |
 | `calcular_custo_ia_cenario` | Coordenar custos mensais e anuais de IA em USD e BRL |
 | `calcular_custo_infra_cenario` | Coordenar custos mensais e anuais de infraestrutura em USD e BRL |
@@ -121,24 +192,33 @@ A função utiliza os serviços contratados, independentemente da quantidade de 
 | `calcular_custo_servico` | Calcular mensalidade por preço unitário e quantidade, na moeda informada |
 | `validar_numero_nao_negativo` | Centralizar a validação de tipo permitido, valor finito e ausência de negativos |
 
-As funções de cálculo retornam valores; os `print()` apresentam os resultados separadamente. A auxiliar de validação sinaliza erros com exceções; quando a entrada é válida, termina sem retorno explícito (`None`).
+As funções de cálculo retornam valores; os `print()` apresentam os resultados separadamente. A
+auxiliar de validação sinaliza erros com exceções; quando a entrada é válida, termina sem retorno
+explícito (`None`).
 
 ### Auxiliar de validação
 
-A função `validar_numero_nao_negativo(valor, nome, tipos_permitidos=(int, float))` centraliza as regras compartilhadas pelas sete funções de cálculo:
+A função `validar_numero_nao_negativo(valor, nome, tipos_permitidos=(int, float))` centraliza as
+regras compartilhadas pelas sete funções de cálculo:
 
-- `valor`: dado que será verificado.
-- `nome`: rótulo do campo usado nas mensagens de erro, sem participar do cálculo.
-- `tipos_permitidos`: parâmetro opcional que aceita `int` e `float` por padrão. Preços e custos informam `(Decimal,)`; a cotação informa `(int, float, Decimal)`.
+- `valor` : dado que será verificado.
+- `nome` : rótulo do campo usado nas mensagens de erro, sem participar do cálculo.
+- `tipos_permitidos` : parâmetro opcional que aceita `int` e `float` por padrão. Preços e custos
+  informam `(Decimal,)` ; a cotação informa `(int, float, Decimal)` .
 
-A auxiliar rejeita tipos não permitidos, infinito, NaN e negativos, sem converter o valor. Para conferir valores finitos, usa `math.isfinite` com `float` e `.is_finite()` com `Decimal`. As mensagens seguem um formato compartilhado e identificam o campo.
+A auxiliar rejeita tipos não permitidos, infinito, NaN e negativos, sem converter o valor. Para
+conferir valores finitos, usa `math.isfinite` com `float` e `.is_finite()` com `Decimal` . As
+mensagens seguem um formato compartilhado e identificam o campo.
 
-Regras específicas permanecem nas funções de cálculo: usuários e quantidades de unidades devem ser inteiros, taxas não podem ultrapassar 1 e a cotação deve ser maior que zero. A auxiliar já garante o limite inferior de zero para as taxas. As fórmulas, os tipos aceitos e os resultados do cenário didático foram preservados.
+Regras específicas permanecem nas funções de cálculo: usuários e quantidades de unidades devem ser
+inteiros, taxas não podem ultrapassar 1 e a cotação deve ser maior que zero. A auxiliar já garante o
+limite inferior de zero para as taxas. As fórmulas, os tipos aceitos e os resultados do cenário
+didático foram preservados.
 
 ### Cenário didático de referência
 
 | Entrada | Hipótese |
-|---|---:|
+| --- | ---: |
 | Usuários ativos por mês | 100 |
 | Respostas por usuário no mês | 40 |
 | Taxa de acerto | 60% |
@@ -147,10 +227,12 @@ Regras específicas permanecem nas funções de cálculo: usuários e quantidade
 | Tokens de saída faturáveis por feedback | 300 |
 | Cotação didática | R$ 5,00 por US$ 1,00 |
 
-As tarifas pesquisadas do Luna são US$ 0,10 por milhão de tokens de entrada sem cache e US$ 0,50 por milhão de saída, no processamento Standard e nas condições registradas no planejamento. Fontes e data de consulta (2026-10-23) estão no [PLANEJAMENTO.md](PLANEJAMENTO.md).
+As tarifas pesquisadas do Luna são US$ 0,10 por milhão de tokens de entrada sem cache e US$ 0,50 por
+milhão de saída, no processamento Standard e nas condições registradas no planejamento. Fontes e
+data de consulta (2026-10-23) estão no [PLANEJAMENTO.md](PLANEJAMENTO.md) .
 
 | Resultado do cenário | Valor |
-|---|---:|
+| --- | ---: |
 | Feedbacks mensais | 2.200 |
 | Tokens mensais de entrada | 1.100.000 |
 | Tokens mensais de saída | 660.000 |
@@ -159,62 +241,86 @@ As tarifas pesquisadas do Luna são US$ 0,10 por milhão de tokens de entrada se
 | Custo anual estimado de IA em USD | US$ 5,28 |
 | Custo anual estimado de IA em BRL | R$ 26,40 |
 
-Esses valores conferem a aritmética do cenário. Não são despesas reais nem medições do consumo de uma API. A calculadora não realiza chamadas à OpenAI.
+Esses valores conferem a aritmética do cenário. Não são despesas reais nem medições do consumo de
+uma API. A calculadora não realiza chamadas à OpenAI.
 
 ### Custos de infraestrutura e total do cenário
 
-Os preços de infraestrutura abaixo são inventados para aprendizado, não preços pesquisados. A função `calcular_custo_servico` multiplica o preço mensal por unidade pela quantidade contratada e retorna `Decimal` na moeda do preço, sem conversão automática.
+Os preços de infraestrutura abaixo são inventados para aprendizado, não preços pesquisados. A função
+`calcular_custo_servico` multiplica o preço mensal por unidade pela quantidade contratada e retorna
+`Decimal` na moeda do preço, sem conversão automática.
 
 | Serviço | Preço didático por unidade/mês | Quantidade | Mensal em USD | Mensal em BRL |
-|---|---:|---:|---:|---:|
+| --- | ---: | ---: | ---: | ---: |
 | Backend | US$ 5,00 | 2 | US$ 10,00 | R$ 50,00 |
 | Banco PostgreSQL | US$ 3,00 | 1 | US$ 3,00 | R$ 15,00 |
 | **Infraestrutura** | — | — | **US$ 13,00** | **R$ 65,00** |
 
-A conversão usa R$ 5,00 por dólar, uma cotação didática. O cenário soma apenas custos na mesma moeda, sem arredondar etapas intermediárias.
+A conversão usa R$ 5,00 por dólar, uma cotação didática. O cenário soma apenas custos na mesma
+moeda, sem arredondar etapas intermediárias.
 
 | Categoria | Mensal em USD | Mensal em BRL | Anual em USD | Anual em BRL |
-|---|---:|---:|---:|---:|
+| --- | ---: | ---: | ---: | ---: |
 | Infraestrutura | US$ 13,00 | R$ 65,00 | US$ 156,00 | R$ 780,00 |
 | IA | US$ 0,44 | R$ 2,20 | US$ 5,28 | R$ 26,40 |
 | **Total do cenário** | **US$ 13,44** | **R$ 67,20** | **US$ 161,28** | **R$ 806,40** |
 
-A projeção anual mantém serviços, consumo, preços e câmbio constantes. Com zero usuários, o consumo variável de IA fica zero, mas os serviços contratados permanecem em US$ 13,00 ou R$ 65,00 mensais.
+A projeção anual mantém serviços, consumo, preços e câmbio constantes. Com zero usuários, o consumo
+variável de IA fica zero, mas os serviços contratados permanecem em US$ 13,00 ou R$ 65,00 mensais.
 
-A pesquisa inicial de hospedagem já está registrada no planejamento, mas ainda não substituiu os preços didáticos do cenário. Esses valores não demonstram a capacidade de atendimento do LiteArt. Se o banco estiver incluído na hospedagem, seu custo não deve ser contado duas vezes. O total contempla apenas as categorias e condições deste cenário; as exclusões da primeira versão estão no planejamento.
-
+A pesquisa inicial de hospedagem já está registrada no planejamento, mas ainda não substituiu os
+preços didáticos do cenário. Esses valores não demonstram a capacidade de atendimento do LiteArt. Se
+o banco estiver incluído na hospedagem, seu custo não deve ser contado duas vezes. O total contempla
+apenas as categorias e condições deste cenário; as exclusões da primeira versão estão no
+planejamento.
 
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
 A pesquisa inicial de 2026-10-28 comparou três combinações para hospedar o backend e o PostgreSQL:
 
 | Combinação pesquisada | Ponto de atenção registrado |
-|---|---|
+| --- | --- |
 | Render + Neon | Opções gratuitas com franquias e suspensão por inatividade, além de alternativas pagas |
 | Railway | Créditos gratuitos limitados e plano pago com consumo incluído; o mínimo cobrado não é uma mensalidade fixa de todos os serviços |
 | Koyeb + Neon | Recursos gratuitos e pagos, com atenção ao plano selecionado e à possível cobrança inicial no cadastro |
 
-A avaliação de 2026-10-30 acrescentou o **Firebase como alternativa em estudo**. Foram distinguidos Authentication para login com Google, Hosting para arquivos web, Functions/Cloud Run para execução de backend, Firestore como banco de documentos e SQL Connect com PostgreSQL via Cloud SQL.
+A avaliação de 2026-10-30 acrescentou o **Firebase como alternativa em estudo**. Foram distinguidos
+Authentication para login com Google, Hosting para arquivos web, Functions/Cloud Run para execução
+de backend, Firestore como banco de documentos e SQL Connect com PostgreSQL via Cloud SQL.
 
-**A arquitetura de referência do LiteArt continua sendo Flutter, backend Node.js/NestJS e PostgreSQL.** Usar Firebase Authentication pode preservar essa arquitetura; adotar Firestore e Functions exigiria rever parte do desenho. Nenhuma migração ou contratação foi realizada.
+**A arquitetura de referência do LiteArt continua sendo Flutter, backend Node.js/NestJS e
+PostgreSQL.** Usar Firebase Authentication pode preservar essa arquitetura; adotar Firestore e
+Functions exigiria rever parte do desenho. Nenhuma migração ou contratação foi realizada.
 
-Preços, unidades de cobrança, franquias, condições de cadastro, testes temporários e fontes oficiais estão na seção 6 do [planejamento](PLANEJAMENTO.md). As consultas são registros datados e devem ser revalidadas antes de contratar. Gratuidade de infraestrutura não inclui automaticamente o consumo das APIs de IA.
+Preços, unidades de cobrança, franquias, condições de cadastro, testes temporários e fontes oficiais
+estão na seção 6 do [planejamento](PLANEJAMENTO.md) . As consultas são registros datados e devem ser
+revalidadas antes de contratar. Gratuidade de infraestrutura não inclui automaticamente o consumo
+das APIs de IA.
 
-Os preços pesquisados ainda não foram aplicados ao cenário principal, que permanece didático. Também não há comparação automatizada entre provedores. Ofertas por consumo precisarão de hipóteses adicionais antes de serem representadas pela calculadora.
-
+Os preços pesquisados ainda não foram aplicados ao cenário principal, que permanece didático. Também
+não há comparação automatizada entre provedores. Ofertas por consumo precisarão de hipóteses
+adicionais antes de serem representadas pela calculadora.
 
 ### Como executar a versão atual
 
-Abra `calculadora.py` e execute o arquivo com seu interpretador Python 3. No ambiente usado durante o desenvolvimento, a execução foi realizada pelo VS Code. Não há dependências externas nesta etapa: `decimal`, `math` e `unittest` fazem parte da biblioteca padrão.
+Abra `calculadora.py` e execute o arquivo com seu interpretador Python 3. No ambiente usado durante
+o desenvolvimento, a execução foi realizada pelo VS Code. Não há dependências externas nesta etapa:
+`decimal` , `math` e `unittest` fazem parte da biblioteca padrão.
 
-O cenário didático e os `print()` ficam dentro de `if __name__ == "__main__":`. Ao executar o arquivo diretamente, o cenário é calculado e apresentado. Ao importar suas funções, esse bloco não é executado, permitindo reutilizá-las nos testes sem imprimir os resultados do cenário.
+O cenário didático e os `print()` ficam dentro de `if __name__ == "__main__":` . Ao executar o
+arquivo diretamente, o cenário é calculado e apresentado. Ao importar suas funções, esse bloco não é
+executado, permitindo reutilizá-las nos testes sem imprimir os resultados do cenário.
 
 ### Validação das entradas
 
-As sete funções de cálculo usam a auxiliar compartilhada e verificações específicas antes de calcular. As coordenadoras de consumo, custos de IA e infraestrutura validam os respectivos dicionários e suas chaves e reutilizam as validações numéricas por meio das funções de cálculo. Tipos não permitidos geram `TypeError`; valores fora das regras geram `ValueError`, com mensagens que identificam o argumento inválido.
+As sete funções de cálculo usam a auxiliar compartilhada e verificações específicas antes de
+calcular. As coordenadoras de consumo, custos de IA e infraestrutura validam os respectivos
+dicionários e suas chaves e reutilizam as validações numéricas por meio das funções de cálculo.
+Tipos não permitidos geram `TypeError` ; valores fora das regras geram `ValueError` , com mensagens
+que identificam o argumento inválido.
 
 | Entrada | Tipos aceitos | Regras |
-|---|---|---|
+| --- | --- | --- |
 | Usuários ativos e quantidade de unidades de serviço | `int` | Maior ou igual a zero; valores fracionários e `100.0` são recusados |
 | Média de respostas por usuário e total de respostas mensais | `int` ou `float` | Finitos e maiores ou iguais a zero |
 | Taxa de acerto e parcela dos acertos com feedback | `int` ou `float` | Entre 0 e 1, inclusive; a auxiliar rejeita negativos e valores não finitos, e a função verifica o limite superior |
@@ -222,15 +328,24 @@ As sete funções de cálculo usam a auxiliar compartilhada e verificações esp
 | Preço por milhão de tokens, preço mensal por unidade e custos monetários | `Decimal` | Finitos e maiores ou iguais a zero |
 | Cotação em BRL por USD | `int`, `float` ou `Decimal` | Finita e maior que zero; convertida internamente para `Decimal` |
 
-Textos passados diretamente, `None` e valores booleanos (`True` e `False`) são recusados. As funções não convertem automaticamente textos numéricos. Construir explicitamente `Decimal("5.00")` continua sendo válido.
+Textos passados diretamente, `None` e valores booleanos (`True` e `False` ) são recusados. As
+funções não convertem automaticamente textos numéricos. Construir explicitamente `Decimal("5.00")`
+continua sendo válido.
 
-Zero é permitido para consumo, quantidades, preços e custos. A cotação é a exceção: precisa ser positiva. Valores especiais como infinito e NaN são recusados; para `float`, usamos `math.isfinite`, e para `Decimal`, `.is_finite()`.
+Zero é permitido para consumo, quantidades, preços e custos. A cotação é a exceção: precisa ser
+positiva. Valores especiais como infinito e NaN são recusados; para `float` , usamos `math.isfinite`
+, e para `Decimal` , `.is_finite()` .
 
-As validações são aplicadas aos argumentos das funções, mesmo quando elas são chamadas fora do cenário principal. Elas verificam as regras definidas para as entradas; não demonstram que as hipóteses representam o consumo real do LiteArt.
+As validações são aplicadas aos argumentos das funções, mesmo quando elas são chamadas fora do
+cenário principal. Elas verificam as regras definidas para as entradas; não demonstram que as
+hipóteses representam o consumo real do LiteArt.
 
 ### Testes automatizados
 
-O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest`, da biblioteca padrão do Python. São 100 métodos de teste, distribuídos em dez classes: sete para os cálculos e três para as funções coordenadoras de cenário. Parte dos métodos usa `subTest` para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
+O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest` , da biblioteca padrão
+do Python. São 111 métodos de teste, distribuídos em 11 classes: sete para os cálculos, três para as
+coordenadoras de partes do cenário e uma para o cenário completo. Parte dos métodos usa `subTest`
+para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
 
 A suíte verifica:
 
@@ -239,14 +354,23 @@ A suíte verifica:
 - Tipos inválidos, incluindo textos e booleanos, e valores especiais como infinito e NaN.
 - Nos cálculos de tokens e custos: negativos, zeros permitidos e estimativas fracionárias válidas.
 - Exigência de `Decimal` para preços e custos e manutenção desse tipo nos resultados monetários.
-- Cotação positiva nos três tipos permitidos (`int`, `float` e `Decimal`), com rejeição de zero, negativos e valores não finitos.
-- Valores especiais de `Decimal`, incluindo `NaN` e `sNaN`, nos campos monetários.
-- Oito métodos para serviços: exemplos de backend e banco, zero unidades, preço gratuito e rejeição de tipos e valores inválidos.
-- Dez métodos para consumo do cenário: resultados, zeros, estrutura do dicionário, propagação de exceções, preservação da entrada e chaves adicionais.
-- Doze métodos para custos de IA do cenário: oito resultados em Decimal, zeros, preços gratuitos, frações, cotação, estrutura, propagação de erros e preservação das entradas.
-- Onze métodos para custos de infraestrutura do cenário: oito resultados em Decimal, zero unidades, preços gratuitos, cotação, estrutura, erros dos campos, preservação e chaves adicionais.
+- Cotação positiva nos três tipos permitidos (`int`, `float` e `Decimal` ), com rejeição de zero,
+  negativos e valores não finitos.
+- Valores especiais de `Decimal` , incluindo `NaN` e `sNaN` , nos campos monetários.
+- Oito métodos para serviços: exemplos de backend e banco, zero unidades, preço gratuito e rejeição
+  de tipos e valores inválidos.
+- Dez métodos para consumo do cenário: resultados, zeros, estrutura do dicionário, propagação de
+  exceções, preservação da entrada e chaves adicionais.
+- Doze métodos para custos de IA do cenário: oito resultados em Decimal, zeros, preços gratuitos,
+  frações, cotação, estrutura, propagação de erros e preservação das entradas.
+- Onze métodos para custos de infraestrutura do cenário: oito resultados em Decimal, zero unidades,
+  preços gratuitos, cotação, estrutura, erros dos campos, preservação e chaves adicionais.
+- Onze métodos para o cenário completo: resultados dos quatro grupos, zeros, preços gratuitos,
+  câmbio, erros propagados, preservação das entradas e independência das execuções.
 
-A auxiliar de validação é exercitada pelas chamadas às funções de cálculo. A suíte cobre os casos descritos; não é uma verificação exaustiva de todas as entradas possíveis nem uma medição de consumo real da API.
+A auxiliar de validação é exercitada pelas chamadas às funções de cálculo. A suíte cobre os casos
+descritos; não é uma verificação exaustiva de todas as entradas possíveis nem uma medição de consumo
+real da API.
 
 No terminal, dentro da pasta do projeto, use seu interpretador Python 3:
 
@@ -272,26 +396,45 @@ Para executar apenas os testes de infraestrutura do cenário:
 python -m unittest -v test_calculadora.TestCalcularCustoInfraCenario
 ```
 
-Se `python` não estiver disponível no terminal, utilize o caminho do interpretador configurado no VS Code. Também é possível executar `test_calculadora.py` diretamente com esse interpretador.
+Para executar apenas os testes do cenário completo:
 
-A última execução retornou `Ran 100 tests` e `OK`. `assertEqual` confere resultados, `assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
+```powershell
+python -m unittest -v test_calculadora.TestCalcularCenario
+```
 
-Além da suíte, foi conferida a execução do cenário principal com 100 e zero usuários: os totais mensais foram, respectivamente, US$ 13,44 / R$ 67,20 e US$ 13,00 / R$ 65,00. Essa conferência adicional foi executada em memória durante o desenvolvimento e não está salva como teste automatizado no repositório.
+Se `python` não estiver disponível no terminal, utilize o caminho do interpretador configurado no VS
+Code. Também é possível executar `test_calculadora.py` diretamente com esse interpretador.
 
-Antes da criação dessa suíte, foram executados roteiros temporários de 110 e 232 casos durante a implementação e a refatoração das validações. Esses números são registros históricos e não representam a quantidade de testes salvos atualmente.
+A última execução retornou `Ran 111 tests` e `OK` . `assertEqual` confere resultados,
+`assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma
+exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
 
-Exceções ainda não são tratadas em uma interface: fora dos testes, uma chamada inválida sem tratamento pode interromper o script com a mensagem do erro.
+Além da suíte, foi conferida a execução do cenário principal com 100 e zero usuários: os totais
+mensais foram, respectivamente, US$ 13,44 / R$ 67,20 e US$ 13,00 / R$ 65,00. A conferência inicial
+foi feita em memória; agora a classe TestCalcularCenario também verifica automaticamente o cenário
+didático e zero usuários ou respostas com infraestrutura preservada.
+
+Antes da criação dessa suíte, foram executados roteiros temporários de 110 e 232 casos durante a
+implementação e a refatoração das validações. Esses números são registros históricos e não
+representam a quantidade de testes salvos atualmente.
+
+Exceções ainda não são tratadas em uma interface: fora dos testes, uma chamada inválida sem
+tratamento pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
-Revisar as alternativas pesquisadas e escolher com o autor a próxima configuração de estudo, revalidando preços e condições antes de alterar o cenário. Revisar casos adicionais de limite nas funções de respostas e feedbacks e definir o próximo incremento da calculadora. O tratamento das mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
+Revisar as alternativas pesquisadas e escolher com o autor a próxima configuração de estudo,
+revalidando preços e condições antes de alterar o cenário. Revisar casos adicionais de limite nas
+funções de respostas e feedbacks e definir o próximo incremento da calculadora. O tratamento das
+mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
 
-Os custos de infraestrutura já são calculados com valores didáticos. Leitura de CSV, comparação automatizada de cenários, gráficos e dashboard ainda serão implementados.
-
+Os custos de infraestrutura já são calculados com valores didáticos. Leitura de CSV, comparação
+automatizada de cenários, gráficos e dashboard ainda serão implementados.
 
 ## Primeira versão planejada
 
-A primeira entrega funcional será uma calculadora em Python puro, com um cenário por execução, considerando:
+A primeira entrega funcional será uma calculadora em Python puro, com um cenário por execução,
+considerando:
 
 - Mensalidades de backend e banco de dados.
 - GPT-6 Luna (`gpt-6-luna`) como modelo de referência da API da OpenAI.
@@ -299,12 +442,13 @@ A primeira entrega funcional será uma calculadora em Python puro, com um cenár
 - Feedback em cada resposta errada e feedback opcional nos acertos.
 - Custos mensais por categoria, total mensal em reais e projeção anual constante.
 
-Os resultados serão estimativas baseadas em preços pesquisados e hipóteses de consumo. Não representarão despesas efetivamente realizadas nem comprovarão a capacidade dos planos escolhidos.
+Os resultados serão estimativas baseadas em preços pesquisados e hipóteses de consumo. Não
+representarão despesas efetivamente realizadas nem comprovarão a capacidade dos planos escolhidos.
 
 ## Tecnologias previstas
 
 | Tecnologia | Aplicação |
-|---|---|
+| --- | --- |
 | Python | Lógica e cálculos |
 | Pandas | Organização dos dados e comparação de cenários |
 | CSV | Formato de arquivo para armazenamento inicial dos preços |
@@ -321,22 +465,50 @@ As tecnologias serão introduzidas gradualmente, conforme a necessidade de cada 
 3. Análise de dados: tabelas e comparação de cenários com Pandas.
 4. Visualização: gráficos com Plotly.
 5. Dashboard: interface com Streamlit.
-6. Validação final e publicação da aplicação: consolidação dos testes, documentação e disponibilização do dashboard.
+6. Validação final e publicação da aplicação: consolidação dos testes, documentação e
+   disponibilização do dashboard.
 
 Testes e documentação acompanharão as implementações desde os primeiros cálculos.
 
 ## Evoluções futuras
 
-Permitir selecionar e comparar os custos de modelos de diferentes provedores, incluindo Claude, Qwen e Gemini, além dos modelos da OpenAI. A inclusão de cada opção dependerá da pesquisa de preços oficiais, unidades e regras de cobrança da API escolhida.
+Permitir selecionar e comparar os custos de modelos de diferentes provedores, incluindo Claude, Qwen
+e Gemini, além dos modelos da OpenAI. A inclusão de cada opção dependerá da pesquisa de preços
+oficiais, unidades e regras de cobrança da API escolhida.
 
-A calculadora simulará os custos dessas APIs; não será necessário fazer chamadas reais para comparar os cenários. A primeira versão continuará limitada a um modelo da OpenAI.
+A calculadora simulará os custos dessas APIs; não será necessário fazer chamadas reais para comparar
+os cenários. A primeira versão continuará limitada a um modelo da OpenAI.
+
+## Formatação da documentação
+
+O projeto usa `.markdownlint.json` para manter uma linha em branco entre blocos, tabelas no estilo
+`compact` e texto com até 100 caracteres por linha. Tabelas e blocos de código ficam fora do limite
+de comprimento, preservando URLs, células e comandos legíveis. As regras de tabelas e linhas em
+branco permanecem ativas.
+
+Com a extensão Markdownlint instalada, `.vscode/settings.json` habilita as correções disponíveis ao
+salvar explicitamente um arquivo Markdown. Nem todo aviso tem correção automática; revise o painel
+Problemas e mantenha os parágrafos dentro do limite nas próximas edições.
+
+Para conferir os três documentos com a mesma versão usada nesta revisão:
+
+```powershell
+npx --yes --package markdownlint-cli2@0.23.2 markdownlint-cli2 README.md PLANEJAMENTO.md PROMPTS.md
+```
+
+Esse comando requer Node.js/npm e pode baixar a ferramenta para o cache. Ele é opcional para a
+documentação; a calculadora continua sem dependências externas de Python.
 
 ## Documentação
 
-Consulte o [planejamento do projeto](PLANEJAMENTO.md) para conhecer as entradas, regras de negócio, fórmulas e limitações da primeira versão.
+Consulte o [planejamento do projeto](PLANEJAMENTO.md) para conhecer as entradas, regras de negócio,
+fórmulas e limitações da primeira versão.
 
-O [registro de prompts](PROMPTS.md) documenta pedidos e decisões relevantes do desenvolvimento com apoio de IA.
+O [registro de prompts](PROMPTS.md) documenta pedidos e decisões relevantes do desenvolvimento com
+apoio de IA.
 
 ## Aprendizado e uso de IA
 
-O desenvolvimento conta com apoio de IA para orientação técnica, explicação de conceitos e revisão. A proposta é implementar pequenas funcionalidades, compreender os cálculos e validar os resultados ao longo do aprendizado.
+O desenvolvimento conta com apoio de IA para orientação técnica, explicação de conceitos e revisão.
+A proposta é implementar pequenas funcionalidades, compreender os cálculos e validar os resultados
+ao longo do aprendizado.

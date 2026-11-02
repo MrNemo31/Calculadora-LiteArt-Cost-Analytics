@@ -231,6 +231,36 @@ def calcular_custo_infra_cenario(precos_infraestrutura, hipoteses_capacidade, co
     }
 
 
+def calcular_cenario(
+    hipoteses_consumo, hipoteses_capacidade, precos_ia, precos_infraestrutura, cotacao
+):
+    """Calcula consumo, IA, infraestrutura e totais, sem alterar as entradas."""
+    consumo = calcular_consumo_cenario(hipoteses_consumo)
+    custos_ia = calcular_custo_ia_cenario(consumo, precos_ia, cotacao)
+    custos_infraestrutura = calcular_custo_infra_cenario(
+        precos_infraestrutura, hipoteses_capacidade, cotacao
+    )
+
+    custo_total_mensal_usd = (
+        custos_ia["custo_ia_mensal_usd"] + custos_infraestrutura["custo_infra_mensal_usd"]
+    )
+    custo_total_mensal_br = (
+        custos_ia["custo_ia_mensal_br"] + custos_infraestrutura["custo_infra_mensal_br"]
+    )
+
+    return {
+        "consumo": consumo,
+        "custos_ia": custos_ia,
+        "custos_infraestrutura": custos_infraestrutura,
+        "totais": {
+            "custo_total_mensal_usd": custo_total_mensal_usd,
+            "custo_total_mensal_br": custo_total_mensal_br,
+            "custo_total_anual_usd": calcular_custo_anual(custo_total_mensal_usd),
+            "custo_total_anual_br": calcular_custo_anual(custo_total_mensal_br),
+        },
+    }
+
+
 if __name__ == "__main__":
     # Cenário didático: hipóteses de consumo, não dados reais do LiteArt.
     hipoteses_consumo = {
@@ -259,16 +289,6 @@ if __name__ == "__main__":
         "quantidade_banco": 1,
     }
 
-    # Calcular consumo a partir das hipóteses, antes de aplicar os preços.
-    consumo_cenario = calcular_consumo_cenario(hipoteses_consumo)
-    respostas_mensais = consumo_cenario["respostas_mensais"]
-    acertos_mensais = consumo_cenario["acertos_mensais"]
-    erros_mensais = consumo_cenario["erros_mensais"]
-    feedbacks_nos_acertos = consumo_cenario["feedbacks_nos_acertos"]
-    feedbacks_mensais = consumo_cenario["feedbacks_mensais"]
-    tokens_entrada_total = consumo_cenario["tokens_entrada_total"]
-    tokens_saida_total = consumo_cenario["tokens_saida_total"]
-
     # Preços pesquisados: GPT-6 Luna, Standard, entrada sem cache.
     # Fonte: https://developers.openai.com/api/docs/models/gpt-6-luna
     # Consulta: 2026-10-23. Sem adicionais regionais, ferramentas ou cache.
@@ -277,8 +297,23 @@ if __name__ == "__main__":
         "saida_por_milhao_usd": Decimal("0.50"),
     }
 
-    # Custos de IA calculados a partir do consumo, dos preços e da cotação.
-    custos_ia_cenario = calcular_custo_ia_cenario(consumo_cenario, precos_ia, cotacao)
+    # Executar o cenário completo antes de apresentar os resultados.
+    resultado_cenario = calcular_cenario(
+        hipoteses_consumo, hipoteses_capacidade, precos_ia, precos_infraestrutura, cotacao
+    )
+    consumo_cenario = resultado_cenario["consumo"]
+    custos_ia_cenario = resultado_cenario["custos_ia"]
+    custos_infra_cenario = resultado_cenario["custos_infraestrutura"]
+    totais_cenario = resultado_cenario["totais"]
+
+    respostas_mensais = consumo_cenario["respostas_mensais"]
+    acertos_mensais = consumo_cenario["acertos_mensais"]
+    erros_mensais = consumo_cenario["erros_mensais"]
+    feedbacks_nos_acertos = consumo_cenario["feedbacks_nos_acertos"]
+    feedbacks_mensais = consumo_cenario["feedbacks_mensais"]
+    tokens_entrada_total = consumo_cenario["tokens_entrada_total"]
+    tokens_saida_total = consumo_cenario["tokens_saida_total"]
+
     custo_entrada_usd = custos_ia_cenario["custo_entrada_usd"]
     custo_saida_usd = custos_ia_cenario["custo_saida_usd"]
     custo_ia_mensal_usd = custos_ia_cenario["custo_ia_mensal_usd"]
@@ -288,10 +323,6 @@ if __name__ == "__main__":
     custo_ia_anual_usd = custos_ia_cenario["custo_ia_anual_usd"]
     custo_ia_anual_br = custos_ia_cenario["custo_ia_anual_br"]
 
-    # Custos fixos calculados a partir dos preços, das quantidades e da cotação.
-    custos_infra_cenario = calcular_custo_infra_cenario(
-        precos_infraestrutura, hipoteses_capacidade, cotacao
-    )
     custo_backend_mensal_usd = custos_infra_cenario["custo_backend_mensal_usd"]
     custo_banco_mensal_usd = custos_infra_cenario["custo_banco_mensal_usd"]
     custo_infra_mensal_usd = custos_infra_cenario["custo_infra_mensal_usd"]
@@ -301,13 +332,10 @@ if __name__ == "__main__":
     custo_infra_anual_usd = custos_infra_cenario["custo_infra_anual_usd"]
     custo_infra_anual_br = custos_infra_cenario["custo_infra_anual_br"]
 
-    # Somar apenas custos na mesma moeda, sem arredondar etapas intermediárias.
-    custo_total_mensal_usd = custo_infra_mensal_usd + custo_ia_mensal_usd
-    custo_total_mensal_br = custo_infra_mensal_br + custo_ia_mensal_br
-
-    # Projeção de 12 meses com serviços, consumo, preços e câmbio constantes.
-    custo_total_anual_usd = calcular_custo_anual(custo_total_mensal_usd)
-    custo_total_anual_br = calcular_custo_anual(custo_total_mensal_br)
+    custo_total_mensal_usd = totais_cenario["custo_total_mensal_usd"]
+    custo_total_mensal_br = totais_cenario["custo_total_mensal_br"]
+    custo_total_anual_usd = totais_cenario["custo_total_anual_usd"]
+    custo_total_anual_br = totais_cenario["custo_total_anual_br"]
 
     # Exibição dos resultados para conferência manual.
     print("Respostas no mês:", respostas_mensais)
