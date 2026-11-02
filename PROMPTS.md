@@ -342,3 +342,31 @@ Criar calcular_custo_ia_cenario e seus testes, integrar a função ao cenário p
 
 **Marco deste registro:** documentação atualizada em 2026-10-31, até a função de custos de IA do cenário, seus testes e integração, sem novas dependências, consulta automática de câmbio ou chamadas reais à API.
 
+## 17. Hipóteses de capacidade e custos de infraestrutura por cenário
+
+**Etapa:** reutilização dos cálculos de infraestrutura.
+
+**Objetivo dos pedidos:** reunir as quantidades contratadas em um dicionário e coordenar os custos de backend e banco, preservando os resultados e o padrão das funções de cenário anteriores.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar hipoteses_capacidade e calcular_custo_infra_cenario com seus testes, integrar ao cenário principal e explicar cada parte e como conferir que os resultados continuam iguais, aos poucos. Atualizar README e registro de prompts para documentar esse incremento antes de fazer um commit.
+
+**Participação e aprendizado:** o autor executou os testes e confirmou os resultados. As explicações distinguiram quantidade contratada de preço e consumo, revisaram validação de dicionários e chaves e demonstraram a reutilização das funções de serviço, conversão e projeção anual.
+
+**Decisões registradas:**
+
+- Criar `hipoteses_capacidade` com `quantidade_backend: 2` e `quantidade_banco: 1`, substituindo as variáveis individuais do cenário.
+- Criar `calcular_custo_infra_cenario(precos_infraestrutura, hipoteses_capacidade, cotacao)`.
+- Exigir três dicionários e as cinco chaves necessárias; usar `TypeError` para tipos incorretos e `ValueError` para chave obrigatória ausente.
+- Reutilizar as validações numéricas existentes, propagando suas exceções; manter quantidades inteiras não negativas, preços Decimal não negativos e cotação positiva.
+- Retornar um novo dicionário com oito resultados em Decimal, preservando as entradas e aceitando chaves adicionais.
+- Integrar o retorno ao cenário principal e mover a projeção anual da infraestrutura para a função coordenadora, evitando calculá-la novamente no bloco principal.
+- Acrescentar `TestCalcularCustoInfraCenario`, com 11 métodos de teste: resultados e tipos, zero unidades, preços gratuitos, cotação, estrutura dos dicionários, erros dos campos, preservação e chaves adicionais.
+
+**Contribuição para o projeto:** as entradas passaram a ser organizadas em cinco dicionários, e a infraestrutura passou a ter uma função coordenadora própria. A suíte passou de 89 para 100 métodos de teste, distribuídos em dez classes; a execução completa passou. A comparação da saída antes e depois confirmou a preservação dos resultados.
+
+A infraestrutura continua em US$ 13,00 ou R$ 65,00 por mês e US$ 156,00 ou R$ 780,00 por ano. O total com IA permanece em US$ 13,44 ou R$ 67,20 mensais e US$ 161,28 ou R$ 806,40 anuais, sob as hipóteses didáticas. A função de cenário completo ainda será implementada.
+
+**Marco deste registro:** documentação atualizada em 2026-11-02, até o dicionário de capacidade, a função de infraestrutura, seus testes e integração, sem novas dependências ou chamadas externas.
+

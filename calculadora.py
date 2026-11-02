@@ -185,6 +185,52 @@ def calcular_custo_ia_cenario(consumo_cenario, precos_ia, cotacao):
     }
 
 
+def calcular_custo_infra_cenario(precos_infraestrutura, hipoteses_capacidade, cotacao):
+    """Retorna os custos fixos em Decimal, sem alterar os três dicionários."""
+    if type(precos_infraestrutura) is not dict:
+        raise TypeError("Os preços de infraestrutura devem ser um dicionário (dict).")
+    if type(hipoteses_capacidade) is not dict:
+        raise TypeError("As hipóteses de capacidade devem ser um dicionário (dict).")
+    if type(cotacao) is not dict:
+        raise TypeError("A cotação deve ser um dicionário (dict).")
+
+    for chave in ("backend_mensal_por_unidade_usd", "banco_mensal_por_unidade_usd"):
+        if chave not in precos_infraestrutura:
+            raise ValueError(f"Preços de infraestrutura: chave obrigatória ausente: {chave}.")
+    for chave in ("quantidade_backend", "quantidade_banco"):
+        if chave not in hipoteses_capacidade:
+            raise ValueError(f"Hipóteses de capacidade: chave obrigatória ausente: {chave}.")
+    if "brl_por_usd" not in cotacao:
+        raise ValueError("Cotação: chave obrigatória ausente: brl_por_usd.")
+
+    custo_backend_mensal_usd = calcular_custo_servico(
+        precos_infraestrutura["backend_mensal_por_unidade_usd"],
+        hipoteses_capacidade["quantidade_backend"],
+    )
+    custo_banco_mensal_usd = calcular_custo_servico(
+        precos_infraestrutura["banco_mensal_por_unidade_usd"],
+        hipoteses_capacidade["quantidade_banco"],
+    )
+    custo_infra_mensal_usd = custo_backend_mensal_usd + custo_banco_mensal_usd
+
+    custo_backend_mensal_br = calcular_real(custo_backend_mensal_usd, cotacao["brl_por_usd"])
+    custo_banco_mensal_br = calcular_real(custo_banco_mensal_usd, cotacao["brl_por_usd"])
+    custo_infra_mensal_br = calcular_real(custo_infra_mensal_usd, cotacao["brl_por_usd"])
+    custo_infra_anual_usd = calcular_custo_anual(custo_infra_mensal_usd)
+    custo_infra_anual_br = calcular_custo_anual(custo_infra_mensal_br)
+
+    return {
+        "custo_backend_mensal_usd": custo_backend_mensal_usd,
+        "custo_banco_mensal_usd": custo_banco_mensal_usd,
+        "custo_infra_mensal_usd": custo_infra_mensal_usd,
+        "custo_backend_mensal_br": custo_backend_mensal_br,
+        "custo_banco_mensal_br": custo_banco_mensal_br,
+        "custo_infra_mensal_br": custo_infra_mensal_br,
+        "custo_infra_anual_usd": custo_infra_anual_usd,
+        "custo_infra_anual_br": custo_infra_anual_br,
+    }
+
+
 if __name__ == "__main__":
     # Cenário didático: hipóteses de consumo, não dados reais do LiteArt.
     hipoteses_consumo = {
@@ -208,8 +254,10 @@ if __name__ == "__main__":
     }
 
     # Hipóteses de capacidade: quantidades contratadas, não preços.
-    quantidade_backend = 2
-    quantidade_banco = 1
+    hipoteses_capacidade = {
+        "quantidade_backend": 2,
+        "quantidade_banco": 1,
+    }
 
     # Calcular consumo a partir das hipóteses, antes de aplicar os preços.
     consumo_cenario = calcular_consumo_cenario(hipoteses_consumo)
@@ -240,26 +288,24 @@ if __name__ == "__main__":
     custo_ia_anual_usd = custos_ia_cenario["custo_ia_anual_usd"]
     custo_ia_anual_br = custos_ia_cenario["custo_ia_anual_br"]
 
-    # Mensalidades fixas de infraestrutura, independentes do consumo de IA.
-    custo_backend_mensal_usd = calcular_custo_servico(
-        precos_infraestrutura["backend_mensal_por_unidade_usd"], quantidade_backend
+    # Custos fixos calculados a partir dos preços, das quantidades e da cotação.
+    custos_infra_cenario = calcular_custo_infra_cenario(
+        precos_infraestrutura, hipoteses_capacidade, cotacao
     )
-    custo_banco_mensal_usd = calcular_custo_servico(
-        precos_infraestrutura["banco_mensal_por_unidade_usd"], quantidade_banco
-    )
-    custo_infra_mensal_usd = custo_backend_mensal_usd + custo_banco_mensal_usd
-
-    custo_backend_mensal_br = calcular_real(custo_backend_mensal_usd, cotacao["brl_por_usd"])
-    custo_banco_mensal_br = calcular_real(custo_banco_mensal_usd, cotacao["brl_por_usd"])
-    custo_infra_mensal_br = calcular_real(custo_infra_mensal_usd, cotacao["brl_por_usd"])
+    custo_backend_mensal_usd = custos_infra_cenario["custo_backend_mensal_usd"]
+    custo_banco_mensal_usd = custos_infra_cenario["custo_banco_mensal_usd"]
+    custo_infra_mensal_usd = custos_infra_cenario["custo_infra_mensal_usd"]
+    custo_backend_mensal_br = custos_infra_cenario["custo_backend_mensal_br"]
+    custo_banco_mensal_br = custos_infra_cenario["custo_banco_mensal_br"]
+    custo_infra_mensal_br = custos_infra_cenario["custo_infra_mensal_br"]
+    custo_infra_anual_usd = custos_infra_cenario["custo_infra_anual_usd"]
+    custo_infra_anual_br = custos_infra_cenario["custo_infra_anual_br"]
 
     # Somar apenas custos na mesma moeda, sem arredondar etapas intermediárias.
     custo_total_mensal_usd = custo_infra_mensal_usd + custo_ia_mensal_usd
     custo_total_mensal_br = custo_infra_mensal_br + custo_ia_mensal_br
 
     # Projeção de 12 meses com serviços, consumo, preços e câmbio constantes.
-    custo_infra_anual_usd = calcular_custo_anual(custo_infra_mensal_usd)
-    custo_infra_anual_br = calcular_custo_anual(custo_infra_mensal_br)
     custo_total_anual_usd = calcular_custo_anual(custo_total_mensal_usd)
     custo_total_anual_br = calcular_custo_anual(custo_total_mensal_br)
 

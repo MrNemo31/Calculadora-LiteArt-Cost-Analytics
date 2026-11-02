@@ -5,6 +5,7 @@ from decimal import Decimal
 from calculadora import (
     calcular_consumo_cenario,
     calcular_custo_ia_cenario,
+    calcular_custo_infra_cenario,
     calcular_custo_anual,
     calcular_custo_servico,
     calcular_custo_tokens,
@@ -625,6 +626,143 @@ class TestCalcularCustoIaCenario(unittest.TestCase):
         precos["modelo"] = "Modelo de referência"
         cotacao["origem"] = "Didática"
         self.assertEqual(calcular_custo_ia_cenario(consumo, precos, cotacao), esperado)
+
+
+class TestCalcularCustoInfraCenario(unittest.TestCase):
+    def criar_entradas(self):
+        precos = {
+            "backend_mensal_por_unidade_usd": Decimal("5.00"),
+            "banco_mensal_por_unidade_usd": Decimal("3.00"),
+        }
+        capacidade = {"quantidade_backend": 2, "quantidade_banco": 1}
+        cotacao = {"brl_por_usd": Decimal("5.00")}
+        return precos, capacidade, cotacao
+
+    def test_calcula_custos_do_cenario_didatico(self):
+        precos, capacidade, cotacao = self.criar_entradas()
+        resultado = calcular_custo_infra_cenario(precos, capacidade, cotacao)
+        esperado = {
+            "custo_backend_mensal_usd": Decimal("10.00"),
+            "custo_banco_mensal_usd": Decimal("3.00"),
+            "custo_infra_mensal_usd": Decimal("13.00"),
+            "custo_backend_mensal_br": Decimal("50.00"),
+            "custo_banco_mensal_br": Decimal("15.00"),
+            "custo_infra_mensal_br": Decimal("65.00"),
+            "custo_infra_anual_usd": Decimal("156.00"),
+            "custo_infra_anual_br": Decimal("780.00"),
+        }
+        self.assertEqual(resultado, esperado)
+        for campo, valor in resultado.items():
+            with self.subTest(campo=campo):
+                self.assertIsInstance(valor, Decimal)
+
+    def test_zero_unidades_em_cada_servico_e_nos_dois(self):
+        for backend, banco, esperado in ((0, 1, "3"), (2, 0, "10"), (0, 0, "0")):
+            precos, capacidade, cotacao = self.criar_entradas()
+            capacidade["quantidade_backend"] = backend
+            capacidade["quantidade_banco"] = banco
+            with self.subTest(backend=backend, banco=banco):
+                resultado = calcular_custo_infra_cenario(precos, capacidade, cotacao)
+                self.assertEqual(resultado["custo_infra_mensal_usd"], Decimal(esperado))
+                if backend == 0 and banco == 0:
+                    for valor in resultado.values():
+                        self.assertEqual(valor, Decimal("0"))
+
+    def test_preco_gratuito_em_cada_servico_e_nos_dois(self):
+        for backend, banco, esperado in (("0", "3", "3"), ("5", "0", "10"), ("0", "0", "0")):
+            precos, capacidade, cotacao = self.criar_entradas()
+            precos["backend_mensal_por_unidade_usd"] = Decimal(backend)
+            precos["banco_mensal_por_unidade_usd"] = Decimal(banco)
+            with self.subTest(backend=backend, banco=banco):
+                resultado = calcular_custo_infra_cenario(precos, capacidade, cotacao)
+                self.assertEqual(resultado["custo_infra_mensal_usd"], Decimal(esperado))
+
+    def test_cotacao_aceita_tres_tipos_e_altera_apenas_os_valores_em_reais(self):
+        for taxa in (5, 5.0, Decimal("5.00"), Decimal("6.00")):
+            precos, capacidade, cotacao = self.criar_entradas()
+            cotacao["brl_por_usd"] = taxa
+            with self.subTest(taxa=taxa, tipo=type(taxa).__name__):
+                resultado = calcular_custo_infra_cenario(precos, capacidade, cotacao)
+                self.assertEqual(resultado["custo_infra_mensal_usd"], Decimal("13"))
+                self.assertEqual(resultado["custo_infra_mensal_br"],
+                                 Decimal("13") * Decimal(str(taxa)))
+
+    def test_exige_dicionarios_nos_tres_argumentos(self):
+        for valor in (None, [], "cenario", 100, True):
+            precos, capacidade, cotacao = self.criar_entradas()
+            with self.subTest(argumento="precos_infraestrutura", valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_custo_infra_cenario(valor, capacidade, cotacao)
+            with self.subTest(argumento="hipoteses_capacidade", valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_custo_infra_cenario(precos, valor, cotacao)
+            with self.subTest(argumento="cotacao", valor=valor):
+                with self.assertRaises(TypeError):
+                    calcular_custo_infra_cenario(precos, capacidade, valor)
+
+    def test_recusa_cada_chave_obrigatoria_ausente(self):
+        precos, capacidade, cotacao = self.criar_entradas()
+        for grupo, dicionario in (("precos", precos), ("capacidade", capacidade), ("cotacao", cotacao)):
+            for chave in dicionario.copy():
+                copia = dicionario.copy()
+                del dicionario[chave]
+                with self.subTest(grupo=grupo, chave=chave):
+                    with self.assertRaises(ValueError) as erro:
+                        calcular_custo_infra_cenario(precos, capacidade, cotacao)
+                    self.assertIn(chave, str(erro.exception))
+                dicionario[chave] = copia[chave]
+
+    def test_propaga_erros_de_precos(self):
+        precos, capacidade, cotacao = self.criar_entradas()
+        for chave in precos.copy():
+            for tipo_erro, valores in ((TypeError, ("5", 5, 5.0, True, False, None, [], 1j)),
+                                      (ValueError, (Decimal("-1"), Decimal("Infinity"), Decimal("-Infinity"), Decimal("NaN"), Decimal("sNaN")))):
+                for valor in valores:
+                    precos, capacidade, cotacao = self.criar_entradas()
+                    precos[chave] = valor
+                    with self.subTest(chave=chave, valor=valor, erro=tipo_erro.__name__):
+                        with self.assertRaises(tipo_erro):
+                            calcular_custo_infra_cenario(precos, capacidade, cotacao)
+
+    def test_propaga_erros_de_quantidades(self):
+        precos, capacidade, cotacao = self.criar_entradas()
+        for chave in capacidade.copy():
+            for tipo_erro, valores in ((TypeError, (1.5, 2.0, "2", True, False, None, Decimal("2"), [], 1j, float("inf"), float("-inf"), float("nan"))),
+                                      (ValueError, (-1, -2))):
+                for valor in valores:
+                    precos, capacidade, cotacao = self.criar_entradas()
+                    capacidade[chave] = valor
+                    with self.subTest(chave=chave, valor=valor, erro=tipo_erro.__name__):
+                        with self.assertRaises(tipo_erro):
+                            calcular_custo_infra_cenario(precos, capacidade, cotacao)
+
+    def test_propaga_erros_de_cotacao(self):
+        precos, capacidade, cotacao = self.criar_entradas()
+        for chave in cotacao.copy():
+            for tipo_erro, valores in ((TypeError, ("5", True, False, None, [], 1j)),
+                                      (ValueError, (0, 0.0, Decimal("0"), -1, -0.5, Decimal("-1"), float("inf"), float("-inf"), float("nan"), Decimal("Infinity"), Decimal("-Infinity"), Decimal("NaN"), Decimal("sNaN")))):
+                for valor in valores:
+                    precos, capacidade, cotacao = self.criar_entradas()
+                    cotacao[chave] = valor
+                    with self.subTest(chave=chave, valor=valor, erro=tipo_erro.__name__):
+                        with self.assertRaises(tipo_erro):
+                            calcular_custo_infra_cenario(precos, capacidade, cotacao)
+
+    def test_nao_altera_as_tres_entradas(self):
+        precos, capacidade, cotacao = self.criar_entradas()
+        antes = (precos.copy(), capacidade.copy(), cotacao.copy())
+        resultado = calcular_custo_infra_cenario(precos, capacidade, cotacao)
+        self.assertEqual((precos, capacidade, cotacao), antes)
+        for entrada in (precos, capacidade, cotacao):
+            self.assertIsNot(resultado, entrada)
+
+    def test_aceita_chaves_adicionais_sem_alterar_os_custos(self):
+        precos, capacidade, cotacao = self.criar_entradas()
+        esperado = calcular_custo_infra_cenario(precos, capacidade, cotacao)
+        precos["origem"] = "Didática"
+        capacidade["nome"] = "Cenário didático"
+        cotacao["origem"] = "Manual"
+        self.assertEqual(calcular_custo_infra_cenario(precos, capacidade, cotacao), esperado)
 
 
 if __name__ == "__main__":

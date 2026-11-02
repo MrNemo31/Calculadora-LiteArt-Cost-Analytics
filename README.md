@@ -14,23 +14,24 @@ O LiteArt é uma plataforma educacional em desenvolvimento, voltada à preparaç
 
 ## Situação atual
 
-**Etapa 2 — Calculadora básica em desenvolvimento.** O arquivo `calculadora.py` já organiza os cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna como referência inicial. As hipóteses de consumo, preços e cotação são definidos em dicionários no bloco principal; as quantidades de unidades contratadas permanecem em variáveis separadas. Ainda não há entrada interativa.
+**Etapa 2 — Calculadora básica em desenvolvimento.** O arquivo `calculadora.py` já organiza os cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna como referência inicial. As entradas são definidas em cinco dicionários no bloco principal: hipóteses de consumo e capacidade, preços de IA e infraestrutura e cotação. Ainda não há entrada interativa.
 
 ### Funcionalidades implementadas
 
-- Organização das hipóteses de consumo, preços e cotação em dicionários separados.
+- Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
 - Consumo mensal estimado de tokens de entrada e saída.
 - Custos mensais de entrada e saída de IA em dólares, com `Decimal`.
 - Coordenação dos custos de IA por cenário, com conversão e projeção anual retornadas em um dicionário.
 - Mensalidades de backend e banco, calculadas por preço por unidade e quantidade contratada.
+- Coordenação dos custos de infraestrutura por cenário, com conversão e projeção anual em um novo dicionário.
 - Soma de infraestrutura e IA, com totais mensais e anuais em dólares e reais.
 - Conversão dos custos para reais com cotação didática informada no código.
 - Projeção anual em dólares e reais, mantendo consumo, preços e câmbio constantes.
 - Apresentação dos resultados com os símbolos US$ e R$.
 - Validação de tipos, valores negativos, taxas fora do intervalo, infinito e NaN nos argumentos das funções.
-- Testes automatizados reproduzíveis das sete funções de cálculo e das duas funções coordenadoras de cenário, usando `unittest`.
+- Testes automatizados reproduzíveis das sete funções de cálculo e das três funções coordenadoras de cenário, usando `unittest`.
 
 ### Organização das entradas em dicionários
 
@@ -39,17 +40,18 @@ Dentro do bloco principal, as entradas estão agrupadas por finalidade:
 | Dicionário | Conteúdo | Natureza dos dados |
 |---|---|---|
 | `hipoteses_consumo` | Usuários, respostas por usuário, taxa de acerto, parcela dos acertos com feedback e tokens por feedback | Hipóteses didáticas de consumo |
+| `hipoteses_capacidade` | Quantidades de unidades de backend e banco | Hipóteses didáticas de capacidade |
 | `precos_ia` | Tarifas de entrada e saída em USD por milhão de tokens | Preços pesquisados, com fonte e data nos comentários e no planejamento |
 | `precos_infraestrutura` | Preços mensais por unidade de backend e banco em USD | Valores inventados para aprendizado |
 | `cotacao` | `brl_por_usd`, com `Decimal("5.00")` | Configuração cambial didática e manual |
 
-Os preços e a cotação mantêm o tipo `Decimal`. As quantidades `quantidade_backend` e `quantidade_banco` continuam como variáveis separadas: são hipóteses de capacidade, não preços.
+Os preços e a cotação mantêm o tipo `Decimal`. As quantidades `quantidade_backend` e `quantidade_banco` são chaves de `hipoteses_capacidade`, separadas dos preços e das hipóteses de consumo.
 
-As funções de cálculo recebem valores individuais. A função coordenadora `calcular_consumo_cenario` recebe o dicionário inteiro de hipóteses, busca os valores pelas chaves e retorna um novo dicionário de resultados. A coordenadora de custos de IA recebe consumo, preços e cotação em dicionários; os custos de infraestrutura continuam organizados no bloco principal. Os resultados não são gravados nos dicionários de entrada.
+As funções de cálculo recebem valores individuais. A função coordenadora `calcular_consumo_cenario` recebe o dicionário inteiro de hipóteses, busca os valores pelas chaves e retorna um novo dicionário de resultados. A coordenadora de custos de IA recebe consumo, preços e cotação em dicionários; a coordenadora de infraestrutura recebe preços, capacidade e cotação. Os resultados não são gravados nos dicionários de entrada.
 
 Essa organização prepara a reutilização dos cálculos em diferentes cenários. Ainda não há função que receba um cenário completo, leitura de CSV ou consulta automática de câmbio.
 
-Na última refatoração, a saída completa foi comparada antes e depois e permaneceu idêntica. Os 89 métodos de teste também passaram. Os testes das funções usam entradas próprias; alterações nos dicionários do cenário devem ser conferidas executando também `calculadora.py`.
+Na última refatoração, a saída completa foi comparada antes e depois e permaneceu idêntica. Os 100 métodos de teste também passaram. Os testes das funções usam entradas próprias; alterações nos dicionários do cenário devem ser conferidas executando também `calculadora.py`.
 
 
 ### Cálculo do consumo de um cenário
@@ -86,12 +88,30 @@ O retorno é um novo dicionário com oito resultados em `Decimal`: custos de ent
 O cenário preserva US$ 0,44 / R$ 2,20 mensais de IA e US$ 5,28 / R$ 26,40 anuais. A função não calcula infraestrutura nem consulta câmbio; utiliza os dados recebidos e mantém a projeção de 12 meses constantes.
 
 
+### Cálculo dos custos de infraestrutura de um cenário
+
+A função `calcular_custo_infra_cenario(precos_infraestrutura, hipoteses_capacidade, cotacao)` coordena mensalidades de backend e banco, conversão para reais e projeção anual. Reutiliza `calcular_custo_servico`, `calcular_real` e `calcular_custo_anual`, sem imprimir resultados ou modificar as entradas.
+
+| Argumento | Chaves obrigatórias |
+|---|---|
+| `precos_infraestrutura` | `backend_mensal_por_unidade_usd`, `banco_mensal_por_unidade_usd` |
+| `hipoteses_capacidade` | `quantidade_backend`, `quantidade_banco` |
+| `cotacao` | `brl_por_usd` |
+
+Os três argumentos devem ser `dict`; outros tipos geram `TypeError`. Uma chave obrigatória ausente gera `ValueError` com o campo identificado. As validações numéricas das funções existentes são preservadas: preços em `Decimal` finitos e não negativos, quantidades `int` não negativas e cotação finita e positiva. Chaves adicionais são permitidas sem participar dos cálculos.
+
+O retorno é um novo dicionário com oito resultados em `Decimal`: backend, banco e total mensal em USD e BRL, mais os totais anuais de infraestrutura nas duas moedas. No bloco principal, `custos_infra_cenario` recebe esse retorno, que alimenta a soma com IA e os `print()`.
+
+A função utiliza os serviços contratados, independentemente da quantidade de estudantes. Com os valores didáticos, mantém US$ 13,00 / R$ 65,00 mensais e US$ 156,00 / R$ 780,00 anuais. A projeção pressupõe 12 meses com preços, quantidades e câmbio constantes; a capacidade de atendimento não foi validada.
+
+
 ### Organização das funções
 
 | Função | Responsabilidade |
 |---|---|
 | `calcular_consumo_cenario` | Coordenar respostas, feedbacks e tokens a partir das hipóteses |
 | `calcular_custo_ia_cenario` | Coordenar custos mensais e anuais de IA em USD e BRL |
+| `calcular_custo_infra_cenario` | Coordenar custos mensais e anuais de infraestrutura em USD e BRL |
 | `calcular_respostas_mensais` | Estimar o volume de respostas |
 | `calcular_feedbacks_mensais` | Calcular acertos, erros e feedbacks |
 | `calcular_tokens_mensais` | Estimar os totais de tokens de entrada e saída |
@@ -191,7 +211,7 @@ O cenário didático e os `print()` ficam dentro de `if __name__ == "__main__":`
 
 ### Validação das entradas
 
-As sete funções de cálculo usam a auxiliar compartilhada e verificações específicas antes de calcular. As coordenadoras de consumo e custos de IA validam os respectivos dicionários e suas chaves e reutilizam as validações numéricas por meio das funções de cálculo. Tipos não permitidos geram `TypeError`; valores fora das regras geram `ValueError`, com mensagens que identificam o argumento inválido.
+As sete funções de cálculo usam a auxiliar compartilhada e verificações específicas antes de calcular. As coordenadoras de consumo, custos de IA e infraestrutura validam os respectivos dicionários e suas chaves e reutilizam as validações numéricas por meio das funções de cálculo. Tipos não permitidos geram `TypeError`; valores fora das regras geram `ValueError`, com mensagens que identificam o argumento inválido.
 
 | Entrada | Tipos aceitos | Regras |
 |---|---|---|
@@ -210,7 +230,7 @@ As validações são aplicadas aos argumentos das funções, mesmo quando elas s
 
 ### Testes automatizados
 
-O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest`, da biblioteca padrão do Python. São 89 métodos de teste, distribuídos em nove classes: sete para os cálculos e duas para as funções coordenadoras de cenário. Parte dos métodos usa `subTest` para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
+O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest`, da biblioteca padrão do Python. São 100 métodos de teste, distribuídos em dez classes: sete para os cálculos e três para as funções coordenadoras de cenário. Parte dos métodos usa `subTest` para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
 
 A suíte verifica:
 
@@ -224,6 +244,7 @@ A suíte verifica:
 - Oito métodos para serviços: exemplos de backend e banco, zero unidades, preço gratuito e rejeição de tipos e valores inválidos.
 - Dez métodos para consumo do cenário: resultados, zeros, estrutura do dicionário, propagação de exceções, preservação da entrada e chaves adicionais.
 - Doze métodos para custos de IA do cenário: oito resultados em Decimal, zeros, preços gratuitos, frações, cotação, estrutura, propagação de erros e preservação das entradas.
+- Onze métodos para custos de infraestrutura do cenário: oito resultados em Decimal, zero unidades, preços gratuitos, cotação, estrutura, erros dos campos, preservação e chaves adicionais.
 
 A auxiliar de validação é exercitada pelas chamadas às funções de cálculo. A suíte cobre os casos descritos; não é uma verificação exaustiva de todas as entradas possíveis nem uma medição de consumo real da API.
 
@@ -245,9 +266,15 @@ Para executar apenas os testes da função de custos de IA do cenário:
 python -m unittest -v test_calculadora.TestCalcularCustoIaCenario
 ```
 
+Para executar apenas os testes de infraestrutura do cenário:
+
+```powershell
+python -m unittest -v test_calculadora.TestCalcularCustoInfraCenario
+```
+
 Se `python` não estiver disponível no terminal, utilize o caminho do interpretador configurado no VS Code. Também é possível executar `test_calculadora.py` diretamente com esse interpretador.
 
-A última execução retornou `Ran 89 tests` e `OK`. `assertEqual` confere resultados, `assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
+A última execução retornou `Ran 100 tests` e `OK`. `assertEqual` confere resultados, `assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
 
 Além da suíte, foi conferida a execução do cenário principal com 100 e zero usuários: os totais mensais foram, respectivamente, US$ 13,44 / R$ 67,20 e US$ 13,00 / R$ 65,00. Essa conferência adicional foi executada em memória durante o desenvolvimento e não está salva como teste automatizado no repositório.
 
