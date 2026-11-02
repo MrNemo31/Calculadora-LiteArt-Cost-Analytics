@@ -21,10 +21,11 @@ Inteligência Artificial.
 cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna
 como referência inicial. As entradas são definidas em cinco dicionários no bloco principal:
 hipóteses de consumo e capacidade, preços de IA e infraestrutura e cotação. Ainda não há entrada
-interativa.
+interativa. O terminal já apresenta a comparação didática de 100 e 500 usuários.
 
 ### Funcionalidades implementadas
 
+- Comparação dos cenários didáticos de 100 e 500 usuários no terminal, com lista e laço for.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -274,6 +275,39 @@ o banco estiver incluído na hospedagem, seu custo não deve ser contado duas ve
 apenas as categorias e condições deste cenário; as exclusões da primeira versão estão no
 planejamento.
 
+### Comparação inicial de dois cenários didáticos
+
+Ao final da execução, o programa compara 100 e 500 usuários. A lista `cenarios_didaticos` reúne
+o nome e as hipóteses de consumo e capacidade de cada cenário. Os dicionários são copiados com
+`copy()`, permitindo alterar a quantidade de usuários sem modificar o outro cenário.
+
+O laço `for` chama `calcular_cenario` para cada item, apresenta o resumo no terminal e guarda
+nome, usuários e resultado em `comparacao_cenarios`. Os preços e a cotação são compartilhados.
+
+| Resultado | 100 usuários | 500 usuários |
+| --- | ---: | ---: |
+| Respostas mensais | 4.000 | 20.000 |
+| Feedbacks mensais | 2.200 | 11.000 |
+| Tokens mensais de entrada | 1.100.000 | 5.500.000 |
+| Tokens mensais de saída | 660.000 | 3.300.000 |
+| IA mensal | R$ 2,20 | R$ 11,00 |
+| Infraestrutura mensal | R$ 65,00 | R$ 65,00 |
+| Total mensal | R$ 67,20 | R$ 76,00 |
+| Total anual | R$ 806,40 | R$ 912,00 |
+
+Apenas os usuários mudam: respostas por usuário, taxas, tokens por feedback, preços, cotação e
+quantidades contratadas permanecem constantes. Assim, consumo e custo de IA crescem cinco vezes,
+enquanto a infraestrutura fica igual. Isso não comprova capacidade para atender 500 usuários.
+
+O detalhamento original continua sendo apresentado antes da comparação. Para conferir ambos,
+execute `calculadora.py` com seu interpretador Python 3. Os resultados são estimativas didáticas,
+com cotação de R$ 5,00 por dólar e projeção de 12 meses constantes, sem chamadas à API.
+
+A última conferência adicional verificou os dois cenários, a preservação das entradas e do
+detalhamento anterior e a multiplicação por cinco do consumo e da IA. Esse roteiro foi executado
+durante o desenvolvimento e não foi salvo na suíte. Os 111 métodos existentes passaram; a
+comparação no bloco principal ainda deve ser conferida executando também a calculadora.
+
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
 A pesquisa inicial de 2026-10-28 comparou três combinações para hospedar o backend e o PostgreSQL:
@@ -428,13 +462,14 @@ revalidando preços e condições antes de alterar o cenário. Revisar casos adi
 funções de respostas e feedbacks e definir o próximo incremento da calculadora. O tratamento das
 mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
 
-Os custos de infraestrutura já são calculados com valores didáticos. Leitura de CSV, comparação
-automatizada de cenários, gráficos e dashboard ainda serão implementados.
+Os custos de infraestrutura já são calculados com valores didáticos, e a comparação inicial
+no terminal está implementada. Leitura de CSV, ampliação da comparação, gráficos e dashboard
+ainda serão desenvolvidos.
 
 ## Primeira versão planejada
 
-A primeira entrega funcional será uma calculadora em Python puro, com um cenário por execução,
-considerando:
+A primeira entrega funcional será uma calculadora em Python puro, com comparação inicial de dois
+cenários didáticos, considerando:
 
 - Mensalidades de backend e banco de dados.
 - GPT-6 Luna (`gpt-6-luna`) como modelo de referência da API da OpenAI.

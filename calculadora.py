@@ -372,3 +372,48 @@ if __name__ == "__main__":
     print(f"Custo total mensal estimado (BRL): R$ {custo_total_mensal_br:.2f}")
     print(f"Custo total anual estimado (USD): US$ {custo_total_anual_usd:.2f}")
     print(f"Custo total anual estimado (BRL): R$ {custo_total_anual_br:.2f}")
+
+    # Cópias independentes: alterar o consumo de um cenário não altera o outro.
+    consumo_100_usuarios = hipoteses_consumo.copy()
+    consumo_500_usuarios = hipoteses_consumo.copy()
+    consumo_500_usuarios["usuarios_ativos"] = 500
+
+    cenarios_didaticos = [
+        {
+            "nome": "Cenário didático: 100 usuários",
+            "hipoteses_consumo": consumo_100_usuarios,
+            "hipoteses_capacidade": hipoteses_capacidade.copy(),
+        },
+        {
+            "nome": "Cenário didático: 500 usuários",
+            "hipoteses_consumo": consumo_500_usuarios,
+            "hipoteses_capacidade": hipoteses_capacidade.copy(),
+        },
+    ]
+
+    # Preços e cotação compartilhados; a capacidade é uma hipótese, não uma garantia.
+    comparacao_cenarios = []
+    print("\nComparação de cenários didáticos")
+    print("Mesmos preços, cotação e unidades contratadas; capacidade não validada.")
+    for cenario in cenarios_didaticos:
+        resultado_comparacao = calcular_cenario(
+            cenario["hipoteses_consumo"],
+            cenario["hipoteses_capacidade"],
+            precos_ia,
+            precos_infraestrutura,
+            cotacao,
+        )
+        comparacao_cenarios.append({
+            "nome": cenario["nome"],
+            "usuarios_ativos": cenario["hipoteses_consumo"]["usuarios_ativos"],
+            "resultado": resultado_comparacao,
+        })
+
+        print(f"\n{cenario['nome']}")
+        print("Usuários ativos:", cenario["hipoteses_consumo"]["usuarios_ativos"])
+        print("Feedbacks mensais:", resultado_comparacao["consumo"]["feedbacks_mensais"])
+        print(f"IA mensal: R$ {resultado_comparacao['custos_ia']['custo_ia_mensal_br']:.2f}")
+        print(f"Infraestrutura mensal: R$ {resultado_comparacao['custos_infraestrutura']['custo_infra_mensal_br']:.2f}")
+        print(f"Total mensal: R$ {resultado_comparacao['totais']['custo_total_mensal_br']:.2f}")
+        print(f"Total anual: R$ {resultado_comparacao['totais']['custo_total_anual_br']:.2f}")
+

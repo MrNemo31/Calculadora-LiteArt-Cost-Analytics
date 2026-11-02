@@ -663,3 +663,47 @@ formatação, sem mudanças adicionais no código Python neste marco documental.
 
 **Marco deste registro:** documentação atualizada em 2026-11-02, até o cenário completo, seus testes
 e a padronização de Markdown.
+
+## 19. Comparação dos cenários de 100 e 500 usuários
+
+**Etapa:** primeira comparação de cenários com Python puro.
+
+**Objetivo dos pedidos:** reutilizar o cenário completo em uma lista, compreender o laço de
+repetição e observar como consumo, custo variável e custo fixo se comportam.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar a lista com dois cenários didáticos de 100 e 500 usuários, calcular cada um com for e
+apresentar a comparação no terminal, explicando cada parte e como conferir os resultados aos
+poucos. Após executar e confirmar os testes, atualizar README e registro de prompts, preservando
+a formatação Markdown, para fazer um commit.
+
+**Participação e aprendizado:** o autor executou o programa e os testes e confirmou os resultados.
+As explicações abordaram cópia de dicionários, listas de cenários, repetição com for, armazenamento
+dos resultados com append e a diferença entre custos variáveis de IA e mensalidades fixas.
+
+**Decisões registradas:**
+
+- Criar cópias das hipóteses de consumo para 100 e 500 usuários; alterar apenas os usuários no
+  segundo cenário.
+- Criar `cenarios_didaticos` com nome, hipóteses de consumo e uma cópia da capacidade para cada
+  cenário, mantendo os preços e a cotação compartilhados.
+- Usar `for` para chamar `calcular_cenario` uma vez por item e apresentar o resumo no terminal.
+- Guardar nome, usuários e resultado em `comparacao_cenarios`, utilizando `append()`.
+- Preservar o detalhamento original e acrescentar a comparação ao final.
+- Declarar que a infraestrutura constante é uma hipótese, sem validar sua capacidade para
+  atender 500 usuários.
+- Manter Python puro, sem CSV, Pandas ou gráficos neste incremento.
+
+**Contribuição para o projeto:** a aplicação passou a apresentar uma comparação didática no
+terminal. Com 100 usuários, são 2.200 feedbacks, R$ 2,20 de IA e R$ 67,20 de total mensal. Com 500,
+são 11.000 feedbacks, R$ 11,00 de IA e R$ 76,00 mensais. A infraestrutura permanece em R$ 65,00 nos
+dois casos. Os totais anuais são R$ 806,40 e R$ 912,00, respectivamente, com condições constantes.
+
+Uma conferência adicional verificou resultados, consumo e IA multiplicados por cinco, entradas
+independentes e preservadas e manutenção do detalhamento anterior. Esse roteiro não foi salvo
+como teste na suíte. Os 111 métodos existentes passaram; não foram acrescentados métodos neste
+incremento. README e PROMPTS foram atualizados mantendo as regras locais de Markdown.
+
+**Marco deste registro:** documentação atualizada em 2026-11-02, até a comparação dos dois cenários
+didáticos no terminal.
