@@ -417,3 +417,23 @@ if __name__ == "__main__":
         print(f"Total mensal: R$ {resultado_comparacao['totais']['custo_total_mensal_br']:.2f}")
         print(f"Total anual: R$ {resultado_comparacao['totais']['custo_total_anual_br']:.2f}")
 
+    # Uma linha por cenário e um valor por campo, sem refazer os cálculos.
+    resumos_cenarios = []
+    for comparacao in comparacao_cenarios:
+        resultado = comparacao["resultado"]
+        resumo = {
+            "cenario": comparacao["nome"],
+            "usuarios_ativos": comparacao["usuarios_ativos"],
+            "feedbacks_mensais": resultado["consumo"]["feedbacks_mensais"],
+            "custo_ia_mensal_br": resultado["custos_ia"]["custo_ia_mensal_br"],
+            "custo_infra_mensal_br": resultado["custos_infraestrutura"]["custo_infra_mensal_br"],
+            "custo_total_mensal_br": resultado["totais"]["custo_total_mensal_br"],
+            "custo_total_anual_br": resultado["totais"]["custo_total_anual_br"],
+        }
+        resumos_cenarios.append(resumo)
+
+    # Inspeção da estrutura: Decimal permanece nos dados, sem símbolos ou arredondamento.
+    print("\nLista de resumos para a futura tabela (custos em BRL):")
+    for resumo in resumos_cenarios:
+        print(f"\n{resumo}")
+

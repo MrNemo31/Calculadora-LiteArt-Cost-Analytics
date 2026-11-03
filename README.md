@@ -26,6 +26,7 @@ interativa. O terminal já apresenta a comparação didática de 100 e 500 usuá
 ### Funcionalidades implementadas
 
 - Comparação dos cenários didáticos de 100 e 500 usuários no terminal, com lista e laço for.
+- Lista de resumos com sete campos por cenário e custos preservados como Decimal.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -308,6 +309,38 @@ detalhamento anterior e a multiplicação por cinco do consumo e da IA. Esse rot
 durante o desenvolvimento e não foi salvo na suíte. Os 111 métodos existentes passaram; a
 comparação no bloco principal ainda deve ser conferida executando também a calculadora.
 
+### Lista de resumos para a futura tabela
+
+A lista `resumos_cenarios` organiza os resultados em dois dicionários planos, um por cenário.
+Cada registro contém os mesmos sete campos:
+
+| Campo | Conteúdo |
+| --- | --- |
+| `cenario` | Nome da simulação |
+| `usuarios_ativos` | Quantidade de usuários |
+| `feedbacks_mensais` | Feedbacks estimados no mês |
+| `custo_ia_mensal_br` | Custo mensal de IA em BRL |
+| `custo_infra_mensal_br` | Custo mensal de infraestrutura em BRL |
+| `custo_total_mensal_br` | Total mensal em BRL |
+| `custo_total_anual_br` | Projeção anual em BRL |
+
+O laço percorre `comparacao_cenarios`, seleciona valores já calculados e acrescenta cada resumo
+com `append()`. Não refaz as fórmulas. Os custos permanecem como `Decimal`, sem símbolos
+monetários nos dados, conversão para texto ou arredondamento intermediário.
+
+O terminal apresenta a lista ao final para inspeção. Valores como `Decimal('67.200000')`
+representam R$ 67,20; os zeros adicionais não mudam o valor. Cada registro é um dicionário novo,
+e os resultados completos permanecem disponíveis na comparação original.
+
+Foram conferidos os dois registros, os sete campos, os valores conhecidos e os tipos monetários,
+além da independência entre registros e da preservação dos resultados anteriores. Essa
+conferência foi executada durante o desenvolvimento, sem novos métodos na suíte: os 111 testes
+existentes passaram. Os totais mensais continuam em R$ 67,20 e R$ 76,00 e os anuais em
+R$ 806,40 e R$ 912,00, para 100 e 500 usuários, respectivamente.
+
+A estrutura prepara uma futura tabela com Pandas. O programa ainda usa apenas Python puro;
+não há DataFrame, dependência de Pandas ou exportação de CSV neste incremento.
+
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
 A pesquisa inicial de 2026-10-28 comparou três combinações para hospedar o backend e o PostgreSQL:
@@ -457,14 +490,13 @@ tratamento pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
-Revisar as alternativas pesquisadas e escolher com o autor a próxima configuração de estudo,
-revalidando preços e condições antes de alterar o cenário. Revisar casos adicionais de limite nas
-funções de respostas e feedbacks e definir o próximo incremento da calculadora. O tratamento das
-mensagens de erro na apresentação poderá ser introduzido antes de receber entradas interativas.
+Verificar o ambiente Python, preparar as dependências e criar o primeiro DataFrame a partir de
+resumos_cenarios, preservando as fórmulas nas funções existentes e os tipos monetários nos dados.
+A lista já está pronta, mas o Pandas ainda não foi instalado para este incremento.
 
-Os custos de infraestrutura já são calculados com valores didáticos, e a comparação inicial
-no terminal está implementada. Leitura de CSV, ampliação da comparação, gráficos e dashboard
-ainda serão desenvolvidos.
+Revisar depois as alternativas pesquisadas com o autor antes de substituir preços didáticos.
+Leitura e exportação de CSV, ampliação das análises, gráficos e dashboard serão introduzidos
+gradualmente.
 
 ## Primeira versão planejada
 

@@ -707,3 +707,41 @@ incremento. README e PROMPTS foram atualizados mantendo as regras locais de Mark
 
 **Marco deste registro:** documentação atualizada em 2026-11-02, até a comparação dos dois cenários
 didáticos no terminal.
+
+## 20. Lista de resumos dos cenários
+
+**Etapa:** preparação dos resultados para análise tabular, ainda com Python puro.
+
+**Objetivo dos pedidos:** transformar os resultados aninhados em registros com os mesmos campos,
+preservando os valores e preparando a futura introdução do Pandas.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar a lista de resumos dos dois cenários com Python puro, explicando cada parte e como testar
+se os valores continuam corretos antes de usar Pandas. Após executar os testes, atualizar README
+e registro de prompts mantendo a formatação Markdown e sugerir uma mensagem de commit. Discutir
+também a proposta de usar este chat para planejamento e orientação e outro chat do Codex para
+as implementações, com prompts de escopo pequeno e revisão dos resultados pelo autor.
+
+**Participação e aprendizado:** o autor executou o programa e os testes e confirmou os resultados.
+As explicações abordaram lista vazia, seleção de campos, acesso a dicionários aninhados,
+armazenamento com append e criação de um registro independente por rodada do laço.
+
+**Decisões registradas:**
+
+- Criar `resumos_cenarios` e preenchê-la a partir de `comparacao_cenarios`, sem recalcular custos.
+- Usar sete campos por registro: nome, usuários, feedbacks, IA mensal, infraestrutura mensal,
+  total mensal e total anual em BRL.
+- Preservar custos em `Decimal`, sem símbolos monetários nos dados ou conversão para texto.
+- Criar um dicionário novo para cada cenário e preservar os resultados completos existentes.
+- Exibir a estrutura no terminal para inspeção, mantendo a apresentação anterior.
+- Adiar DataFrame, instalação do Pandas e CSV para incrementos posteriores.
+
+**Contribuição para o projeto:** a calculadora passou a produzir dois registros planos que podem
+ser usados como linhas de uma futura tabela. Uma conferência adicional verificou comprimento
+da lista, campos, valores, tipos e independência dos registros; esse roteiro não foi salvo na
+suíte. Os 111 métodos existentes passaram e os totais de 100 e 500 usuários foram preservados.
+README e PROMPTS registram o incremento, sem alterações adicionais em código nesta revisão.
+
+**Marco deste registro:** documentação atualizada em 2026-11-03, até a lista de resumos dos
+cenários com Python puro, antes da introdução do Pandas.
