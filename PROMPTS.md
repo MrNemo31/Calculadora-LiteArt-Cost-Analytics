@@ -1,16 +1,16 @@
 # Prompts relevantes — LiteArt Cost Analytics
 
-Este arquivo reúne uma seleção dos prompts enviados pelo autor durante o desenvolvimento do projeto
+Este arquivo reúne uma seleção dos prompts que orientaram o desenvolvimento do projeto
 com apoio de IA. O objetivo é documentar os pedidos que orientaram o escopo, o aprendizado e as
 principais decisões técnicas, sem reproduzir toda a conversa.
 
-Modelo registrado pelo autor para essas interações: **GPT-6.1 Sol, com esforço de raciocínio
+Modelo utilizado nessas interações: **GPT-6.1 Sol, com esforço de raciocínio
 médio**. Essa informação descreve a ferramenta de apoio ao desenvolvimento, não o modelo da API que
 será considerado pela calculadora.
 
 ## Como ler este registro
 
-- Os blocos de citação contêm palavras do autor, preservadas sem correções de escrita.
+- Os blocos de citação reproduzem os pedidos originais, preservados sem correções de escrita.
 - O registro 1 reúne trechos do pedido inicial. Os registros 2 a 5 contêm pedidos completos. Os
   registros a partir do 6 sintetizam pedidos relacionados, sem reproduzir literalmente cada
   mensagem.
@@ -149,22 +149,22 @@ chamadas à API para medir os tokens.
 
 **Etapa:** calculadora básica com Python puro.
 
-**Objetivo dos pedidos:** implementar pequenas partes, revisar o código escrito pelo autor e
+**Objetivo dos pedidos:** implementar pequenas partes, revisar o código em desenvolvimento e
 compreender cada fórmula antes de avançar.
 
 **Síntese dos pedidos relacionados — não é uma citação literal:**
 
 Criar `calculadora.py` e explicar as variáveis, operações e resultados. Revisar os cálculos de
-tokens mensais implementados pelo autor, corrigindo a base de respostas para feedbacks e deixando a
+tokens mensais já implementados, corrigindo a base de respostas para feedbacks e deixando a
 divisão por um milhão para o cálculo dos custos. Acrescentar as tarifas do Luna, explicar o uso de
 `Decimal` , conferir a conversão com cotação didática de R$ 5,00 por dólar e apresentar os símbolos
 monetários. Revisar a projeção anual em dólares e reais, mantendo preços, consumo e câmbio
 constantes.
 
-**Contribuição para o projeto:** o autor corrigiu os cálculos de tokens e acrescentou a conversão
-cambial e a projeção anual. A revisão com apoio de IA ajudou a conferir as fórmulas, adicionar os
-custos de IA e explicar os conceitos. O cenário resultou em US$ 0,44 ou R$ 2,20 por mês e US$ 5,28
-ou R$ 26,40 por ano, apenas para IA e sob as hipóteses registradas.
+**Contribuição para o projeto:** os cálculos de tokens foram corrigidos, e a conversão cambial e a
+projeção anual foram acrescentadas. A revisão com apoio de IA ajudou a conferir as fórmulas,
+adicionar os custos de IA e explicar os conceitos. O cenário resultou em US$ 0,44 ou R$ 2,20 por
+mês e US$ 5,28 ou R$ 26,40 por ano, apenas para IA e sob as hipóteses registradas.
 
 ## 8. Organização dos cálculos em funções
 
@@ -176,7 +176,7 @@ valores e organização das responsabilidades.
 **Síntese dos pedidos relacionados — não é uma citação literal:**
 
 Avaliar a criação de funções após o cálculo anual. Explicar uma primeira função de projeção anual e
-revisar as funções de conversão para reais e de tokens implementadas pelo autor. Acrescentar as
+revisar as funções de conversão para reais e de tokens já implementadas. Acrescentar as
 funções restantes para respostas, feedbacks e custo de tokens, explicando cada uma e preservando os
 resultados. Atualizar a documentação para registrar esse marco antes de iniciar a validação das
 entradas.
@@ -185,7 +185,7 @@ entradas.
 `calcular_respostas_mensais` , `calcular_feedbacks_mensais` , `calcular_tokens_mensais` ,
 `calcular_custo_tokens` , `calcular_real` e `calcular_custo_anual` . A cotação foi centralizada em
 uma variável e os resultados permaneceram separados dos `print()` . O nome inicial da função de
-tokens era `calcular_tokens_por_feedback` ; o autor passou a usar `calcular_tokens_mensais` para
+tokens era `calcular_tokens_por_feedback` ; passou a ser `calcular_tokens_mensais` para
 expressar melhor os totais devolvidos.
 
 O cenário didático e casos com consumo zero e feedback em 0% ou 100% dos acertos foram conferidos
@@ -213,11 +213,11 @@ negativos e valores não finitos. Aplicar o mesmo processo aos três argumentos 
 monetárias e revisar a consistência das regras anteriores. Atualizar a documentação para registrar
 esse marco antes de fazer um novo commit.
 
-**Participação e aprendizado:** o autor executou os exemplos de testes no VS Code após cada
-alteração e confirmou os resultados. A comparação com NaN na documentação do PostgreSQL ajudou a
-discutir a diferença entre um valor especial e uma operação que levanta uma exceção em Python. Os
-testes foram apresentados aos poucos para distinguir tipos inválidos, valores negativos, limites
-permitidos e valores não finitos.
+**Participação e aprendizado:** os exemplos de testes foram executados no VS Code após cada
+alteração, com confirmação dos resultados. A comparação com NaN na documentação do PostgreSQL
+ajudou a discutir a diferença entre um valor especial e uma operação que levanta uma exceção em
+Python. Os testes foram apresentados aos poucos para distinguir tipos inválidos, valores
+negativos, limites permitidos e valores não finitos.
 
 **Decisões registradas:**
 
@@ -258,8 +258,8 @@ função de respostas mensais, mantendo a exigência de usuários inteiros. Em s
 funções restantes, explicando as adaptações necessárias para tipos monetários e preservando as
 regras específicas. Registrar a refatoração na documentação antes de fazer um novo commit.
 
-**Participação e aprendizado:** o autor testou as primeiras aplicações da auxiliar e pediu
-esclarecimentos sobre parâmetros, retorno e mensagens de erro. A explicação distinguiu o papel de
+**Participação e aprendizado:** os testes das primeiras aplicações da auxiliar motivaram pedidos de
+esclarecimento sobre parâmetros, retorno e mensagens de erro. A explicação distinguiu o papel de
 uma função auxiliar da decisão de usar ou não `return` : funções auxiliares também podem processar e
 retornar valores; esta apenas valida e sinaliza erros.
 
@@ -306,8 +306,8 @@ tokens, custo de tokens, conversão para reais e custo anual. Explicar `for` , `
 monetários e como executar um teste, uma classe ou a suíte completa. Atualizar README e registro de
 prompts antes do próximo commit.
 
-**Participação e aprendizado:** o autor executou os testes no terminal após cada incremento e
-confirmou os resultados. Pediu esclarecimentos sobre a captura de `ValueError` , o percurso do laço
+**Participação e aprendizado:** os testes foram executados no terminal após cada incremento, com
+confirmação dos resultados. As dúvidas abordaram a captura de `ValueError` , o percurso do laço
 pelos subtestes e a conversão com cotações representadas como `int` , `float` e `Decimal` .
 
 **Decisões registradas:**
@@ -350,9 +350,9 @@ inventados para aprendizado, converter os custos para reais e apresentar infraes
 mensais e anuais. Explicar cada alteração e como conferir os resultados, incluindo o comportamento
 com zero usuários. Atualizar README e registro de prompts antes de fazer um novo commit.
 
-**Participação e aprendizado:** o autor executou os testes da nova função e o cenário integrado e
-confirmou os resultados. As explicações distinguiram preço por unidade, quantidade contratada, custo
-fixo de infraestrutura e custo variável de IA.
+**Participação e aprendizado:** os testes da nova função e o cenário integrado foram executados,
+com confirmação dos resultados. As explicações distinguiram preço por unidade, quantidade
+contratada, custo fixo de infraestrutura e custo variável de IA.
 
 **Decisões registradas:**
 
@@ -378,7 +378,7 @@ registradas.
 Foram acrescentados oito métodos de teste para o serviço, levando a suíte a 67 métodos em sete
 classes. A execução completa passou. Uma conferência adicional do cenário principal, realizada em
 memória e não salva como teste na suíte, confirmou os totais com 100 usuários e, com zero usuários,
-IA zero e infraestrutura de US$ 13,00 ou R$ 65,00 mensais. O autor também confirmou a execução no
+IA zero e infraestrutura de US$ 13,00 ou R$ 65,00 mensais. A execução também foi confirmada no
 terminal.
 
 **Marco deste registro:** documentação atualizada em 2026-10-28, até a integração de infraestrutura
@@ -403,8 +403,8 @@ centralização de backend e banco. Explicar sua hospedagem, os produtos envolvi
 limitações. Registrar o Firebase como alternativa, mantendo NestJS e PostgreSQL como referência.
 Atualizar README e registro de prompts para salvar esse marco em um commit.
 
-**Participação e aprendizado:** o autor trouxe a experiência com Firebase na faculdade e pediu uma
-avaliação antes de decidir sobre a arquitetura. A orientação distinguiu autenticação, execução de
+**Participação e aprendizado:** a experiência com Firebase na faculdade motivou uma avaliação antes
+da decisão sobre a arquitetura. A orientação distinguiu autenticação, execução de
 backend, hospedagem de frontend e armazenamento de dados, além de mensalidade fixa, consumo,
 franquia e teste gratuito temporário.
 
@@ -431,7 +431,7 @@ franquia e teste gratuito temporário.
 
 **Contribuição para o projeto:** o planejamento passou a registrar três combinações de hospedagem e
 uma alternativa Firebase com fontes, datas, custos e limitações. O README resume a pesquisa e aponta
-para os detalhes no planejamento. Nenhum provedor foi escolhido pelo autor para substituir as
+para os detalhes no planejamento. Nenhum provedor foi escolhido para substituir as
 entradas didáticas, e código e testes permaneceram inalterados neste marco.
 
 **Marco deste registro:** documentação atualizada em 2026-10-31, consolidando a pesquisa de
@@ -452,8 +452,8 @@ consultada automaticamente no futuro. Organizar depois os preços de IA, os pre�
 e a cotação em dicionários separados das hipóteses, explicando a leitura das chaves e a conferência
 dos cálculos. Atualizar README e registro de prompts antes de fazer um novo commit.
 
-**Participação e aprendizado:** o autor executou o cenário e os testes após cada incremento e
-confirmou os resultados. As explicações abordaram pares de chave e valor, uso de chaves entre
+**Participação e aprendizado:** o cenário e os testes foram executados após cada incremento, com
+confirmação dos resultados. As explicações abordaram pares de chave e valor, uso de chaves entre
 colchetes, preservação de Decimal e a diferença entre testar uma função com entradas próprias e
 executar o cenário principal.
 
@@ -496,8 +496,8 @@ consulta por chave e a passagem de um valor individual ou de um dicionário inte
 Criar calcular_consumo_cenario e seus testes, explicando cada parte e como executar aos poucos.
 Atualizar README e registro de prompts antes do próximo commit.
 
-**Participação e aprendizado:** o autor pediu esclarecimentos sobre dicionários e acesso aos dados
-antes da implementação. Depois, executou os testes e confirmou os resultados. As explicações
+**Participação e aprendizado:** as dúvidas sobre dicionários e acesso aos dados foram esclarecidas
+antes da implementação. Depois, os testes foram executados e os resultados confirmados. As explicações
 abordaram validação de chaves, reutilização de funções, propagação de exceções, retorno de um novo
 dicionário e preservação da entrada.
 
@@ -540,7 +540,7 @@ cada parte e como conferir que os resultados continuam iguais. Retomar a explica
 testes após a implementação, distinguindo validação dos dicionários, cálculo, retorno e execução no
 terminal. Atualizar README e registro de prompts antes do próximo commit.
 
-**Participação e aprendizado:** o autor executou os testes e confirmou os resultados. As explicações
+**Participação e aprendizado:** a execução dos testes confirmou os resultados. As explicações
 abordaram passagem de três dicionários, chaves obrigatórias, propagação das exceções, retorno de
 valores Decimal e uso de entradas independentes nos testes.
 
@@ -583,7 +583,7 @@ Criar hipoteses_capacidade e calcular_custo_infra_cenario com seus testes, integ
 principal e explicar cada parte e como conferir que os resultados continuam iguais, aos poucos.
 Atualizar README e registro de prompts para documentar esse incremento antes de fazer um commit.
 
-**Participação e aprendizado:** o autor executou os testes e confirmou os resultados. As explicações
+**Participação e aprendizado:** a execução dos testes confirmou os resultados. As explicações
 distinguiram quantidade contratada de preço e consumo, revisaram validação de dicionários e chaves e
 demonstraram a reutilização das funções de serviço, conversão e projeção anual.
 
@@ -631,8 +631,8 @@ resultados aos poucos. Após executar os testes, atualizar README e registro de 
 formatação dos arquivos Markdown e preparar uma forma de evitar a repetição dos avisos antes do
 próximo commit.
 
-**Participação e aprendizado:** o autor compartilhou os avisos do Markdownlint, executou os novos
-testes e confirmou os resultados. As explicações abordaram coordenação das funções existentes,
+**Participação e aprendizado:** os avisos do Markdownlint foram analisados, e a execução dos novos
+testes confirmou os resultados. As explicações abordaram coordenação das funções existentes,
 dicionários aninhados, acesso por duas chaves e desempacotamento de argumentos com asterisco nos
 testes.
 
@@ -678,7 +678,7 @@ apresentar a comparação no terminal, explicando cada parte e como conferir os 
 poucos. Após executar e confirmar os testes, atualizar README e registro de prompts, preservando
 a formatação Markdown, para fazer um commit.
 
-**Participação e aprendizado:** o autor executou o programa e os testes e confirmou os resultados.
+**Participação e aprendizado:** a execução do programa e dos testes confirmou os resultados.
 As explicações abordaram cópia de dicionários, listas de cenários, repetição com for, armazenamento
 dos resultados com append e a diferença entre custos variáveis de IA e mensalidades fixas.
 
@@ -721,9 +721,9 @@ Criar a lista de resumos dos dois cenários com Python puro, explicando cada par
 se os valores continuam corretos antes de usar Pandas. Após executar os testes, atualizar README
 e registro de prompts mantendo a formatação Markdown e sugerir uma mensagem de commit. Discutir
 também a proposta de usar este chat para planejamento e orientação e outro chat do Codex para
-as implementações, com prompts de escopo pequeno e revisão dos resultados pelo autor.
+as implementações, com prompts de escopo pequeno e revisão dos resultados a cada incremento.
 
-**Participação e aprendizado:** o autor executou o programa e os testes e confirmou os resultados.
+**Participação e aprendizado:** a execução do programa e dos testes confirmou os resultados.
 As explicações abordaram lista vazia, seleção de campos, acesso a dicionários aninhados,
 armazenamento com append e criação de um registro independente por rodada do laço.
 
@@ -794,3 +794,49 @@ repositório. As funções de cálculo, a importação silenciosa e as saídas a
 preservadas. CSV, gráficos e dashboard continuam planejados.
 
 **Marco deste registro:** documentação de 04/11/2026, até o primeiro DataFrame no terminal.
+
+## 22. Seleção e ordenação dos custos com Pandas
+
+**Data:** 05/11/2026.
+
+**Etapa:** comparação dos custos mensais com Pandas.
+
+**Objetivo dos pedidos:** selecionar três colunas e ordenar os cenários pelo custo mensal,
+preservando os valores financeiros e a tabela original, com explicações de cada operação.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar `comparacao_custos` com cenário, usuários e custo total mensal, nessa ordem. Usar
+`sort_values` com `ascending=False`, sem `inplace=True`, e apresentar a comparação no terminal.
+Conferir os valores como Decimal, a preservação integral de `tabela_cenarios`, a importação
+silenciosa e os 111 testes existentes. Atualizar somente README e PROMPTS, reformulando referências
+pessoais que deixavam a escrita artificial e mantendo a terceira pessoa, sem commit ou push.
+
+**Participação e aprendizado:** as explicações abordaram os colchetes de seleção, a lista de nomes
+das colunas, o parâmetro `by`, a ordem decrescente e o retorno de outro DataFrame pela ordenação.
+
+**Decisões registradas:**
+
+- Selecionar `cenario`, `usuarios_ativos` e `custo_total_mensal_br`, nessa ordem.
+- Ordenar por `custo_total_mensal_br` com `ascending=False`, atribuindo o retorno a
+  `comparacao_custos`.
+- Preservar os valores, tipos, colunas, índices e ordem das linhas de `tabela_cenarios`.
+- Manter os custos como objetos `Decimal`, sem conversão para float ou texto e sem arredondamento.
+- Acrescentar um título e `to_string(index=False)` ao final, mantendo as saídas existentes.
+
+**Contribuição para o projeto:** a comparação foi implementada com duas linhas e três colunas.
+O cenário de 500 usuários aparece primeiro, com custo mensal igual a `Decimal("76.00")`, seguido
+pelo de 100 usuários, com `Decimal("67.20")`. Os índices da comparação são `[1, 0]`; os da tabela
+original permanecem `[0, 1]`. Os resultados continuam sendo estimativas didáticas.
+
+As verificações pontuais confirmaram formato, colunas, ordem e custos exatos, com
+`isinstance(valor, Decimal)` nos dois valores financeiros. A comparação com uma cópia anterior,
+usando `assert_frame_equal` e conferências dos tipos individuais, confirmou a preservação integral
+de `tabela_cenarios`. As funções de cálculo, as saídas anteriores e a importação sem executar os
+cenários também foram preservadas.
+
+A calculadora e os 111 testes existentes foram executados com a `.venv-win` e passaram.
+As verificações específicas foram roteiros pontuais em memória; não foram acrescentados testes
+automatizados ao repositório. Documentação e dependências não foram alteradas na implementação.
+
+**Marco deste registro:** documentação de 05/11/2026, até a seleção e ordenação dos custos mensais.

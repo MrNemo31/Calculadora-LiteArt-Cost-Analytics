@@ -29,6 +29,7 @@ DataFrame, criado a partir da lista de resumos dos cenários.
 - Comparação dos cenários didáticos de 100 e 500 usuários no terminal, com lista e laço for.
 - Lista de resumos com sete campos por cenário e custos preservados como Decimal.
 - Primeiro DataFrame com Pandas: dois cenários, sete colunas e apresentação no terminal.
+- Seleção de três colunas e ordenação por custo mensal decrescente em `comparacao_custos`.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -371,6 +372,28 @@ cenários. Também confirmaram a importação sem executar o cenário e a manute
 saídas anteriores. Esses roteiros não foram adicionados a `test_calculadora.py`; os 111 métodos
 existentes passaram com o Python da `.venv-win`.
 
+### Seleção e ordenação dos custos mensais
+
+Dentro do bloco principal, `comparacao_custos` reúne três colunas de `tabela_cenarios`, nesta
+ordem: `cenario`, `usuarios_ativos` e `custo_total_mensal_br`. Os cenários são ordenados pelo
+custo mensal, do maior para o menor, em outro DataFrame. A tabela original mantém seus valores,
+tipos, colunas, índices e ordem das linhas.
+
+A comparação tem duas linhas e três colunas. O cenário de 500 usuários aparece primeiro, com
+custo mensal igual a `Decimal("76.00")`; o de 100 usuários vem depois, com `Decimal("67.20")`.
+Os índices originais acompanham as linhas: a comparação fica com `[1, 0]`, enquanto
+`tabela_cenarios` permanece com `[0, 1]`. O terminal apresenta um título explicativo e
+`comparacao_custos.to_string(index=False)`, preservando as saídas anteriores e ocultando os índices
+somente na impressão. Os custos continuam em `Decimal`, sem conversão ou arredondamento.
+
+As verificações pontuais conferiram o formato `(2, 3)`, a ordem das colunas e dos cenários e os
+custos exatos. Cada custo passou por `isinstance(valor, Decimal)`; `dtype object` sozinho não
+comprova esse tipo. A comparação com uma cópia anterior de `tabela_cenarios`, usando
+`assert_frame_equal` e conferências dos tipos individuais, confirmou sua preservação integral.
+Também foram preservadas as funções de cálculo, as saídas e a importação sem executar os cenários.
+Essas conferências foram executadas em memória, sem novos testes no repositório. A calculadora
+foi executada com a `.venv-win`, e os 111 testes existentes passaram.
+
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
 A pesquisa inicial de 2026-10-28 comparou três combinações para hospedar o backend e o PostgreSQL:
@@ -538,11 +561,11 @@ tratamento pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
-O primeiro DataFrame já está implementado e validado com Pandas na `.venv-win`. Os próximos
-incrementos poderão aprofundar a análise dos cenários, preservando as fórmulas nas funções
-existentes e os tipos monetários nos dados.
+O primeiro DataFrame e a seleção e ordenação dos custos mensais já estão implementados e
+validados com Pandas na `.venv-win`. Os próximos incrementos poderão aprofundar a análise dos
+cenários, preservando as fórmulas nas funções existentes e os tipos monetários nos dados.
 
-Revisar depois as alternativas pesquisadas com o autor antes de substituir preços didáticos.
+As alternativas pesquisadas ainda precisam ser revisadas antes da substituição dos preços didáticos.
 Leitura e exportação de CSV, ampliação das análises, gráficos e dashboard serão introduzidos
 gradualmente.
 
@@ -565,7 +588,7 @@ representarão despesas efetivamente realizadas nem comprovarão a capacidade do
 | Tecnologia | Aplicação |
 | --- | --- |
 | Python | Lógica e cálculos |
-| Pandas | Primeiro DataFrame dos cenários implementado; análises adicionais previstas |
+| Pandas | DataFrame dos cenários, seleção de colunas e ordenação de custos; análises adicionais previstas |
 | CSV | Formato de arquivo para armazenamento inicial dos preços |
 | Plotly | Gráficos interativos |
 | Streamlit | Interface do dashboard |

@@ -436,6 +436,13 @@ if __name__ == "__main__":
 
     tabela_cenarios = pd.DataFrame.from_records(resumos_cenarios, coerce_float=False)
 
+    comparacao_custos = tabela_cenarios[
+        ["cenario", "usuarios_ativos", "custo_total_mensal_br"]
+    ]
+    comparacao_custos = comparacao_custos.sort_values(
+        by="custo_total_mensal_br", ascending=False
+    )
+
     # Inspeção da estrutura: Decimal permanece nos dados, sem símbolos ou arredondamento.
     print("\nLista de resumos para a futura tabela (custos em BRL):")
     for resumo in resumos_cenarios:
@@ -443,4 +450,7 @@ if __name__ == "__main__":
 
     print("\nTabela de cenários (custos em BRL):")
     print(tabela_cenarios.to_string(index=False))
+
+    print("\nComparação de custos mensais em BRL (do maior para o menor):")
+    print(comparacao_custos.to_string(index=False))
 
