@@ -17,16 +17,18 @@ Inteligência Artificial.
 
 ## Situação atual
 
-**Etapa 2 — Calculadora básica em desenvolvimento.** O arquivo `calculadora.py` já organiza os
+**Etapa 3 — Início da análise de dados com Pandas.** O arquivo `calculadora.py` já organiza os
 cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna
 como referência inicial. As entradas são definidas em cinco dicionários no bloco principal:
 hipóteses de consumo e capacidade, preços de IA e infraestrutura e cotação. Ainda não há entrada
-interativa. O terminal já apresenta a comparação didática de 100 e 500 usuários.
+interativa. O terminal apresenta a comparação didática de 100 e 500 usuários e o primeiro
+DataFrame, criado a partir da lista de resumos dos cenários.
 
 ### Funcionalidades implementadas
 
 - Comparação dos cenários didáticos de 100 e 500 usuários no terminal, com lista e laço for.
 - Lista de resumos com sete campos por cenário e custos preservados como Decimal.
+- Primeiro DataFrame com Pandas: dois cenários, sete colunas e apresentação no terminal.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -309,7 +311,7 @@ detalhamento anterior e a multiplicação por cinco do consumo e da IA. Esse rot
 durante o desenvolvimento e não foi salvo na suíte. Os 111 métodos existentes passaram; a
 comparação no bloco principal ainda deve ser conferida executando também a calculadora.
 
-### Lista de resumos para a futura tabela
+### Lista de resumos e primeiro DataFrame
 
 A lista `resumos_cenarios` organiza os resultados em dois dicionários planos, um por cenário.
 Cada registro contém os mesmos sete campos:
@@ -328,7 +330,7 @@ O laço percorre `comparacao_cenarios`, seleciona valores já calculados e acres
 com `append()`. Não refaz as fórmulas. Os custos permanecem como `Decimal`, sem símbolos
 monetários nos dados, conversão para texto ou arredondamento intermediário.
 
-O terminal apresenta a lista ao final para inspeção. Valores como `Decimal('67.200000')`
+O terminal apresenta a lista antes da tabela para inspeção. Valores como `Decimal('67.200000')`
 representam R$ 67,20; os zeros adicionais não mudam o valor. Cada registro é um dicionário novo,
 e os resultados completos permanecem disponíveis na comparação original.
 
@@ -338,8 +340,36 @@ conferência foi executada durante o desenvolvimento, sem novos métodos na suí
 existentes passaram. Os totais mensais continuam em R$ 67,20 e R$ 76,00 e os anuais em
 R$ 806,40 e R$ 912,00, para 100 e 500 usuários, respectivamente.
 
-A estrutura prepara uma futura tabela com Pandas. O programa ainda usa apenas Python puro;
-não há DataFrame, dependência de Pandas ou exportação de CSV neste incremento.
+Dentro do bloco principal, após montar a lista, a tabela é criada com Pandas:
+
+```python
+tabela_cenarios = pd.DataFrame.from_records(resumos_cenarios, coerce_float=False)
+```
+
+Cada dicionário de `resumos_cenarios` vira uma linha de `tabela_cenarios`. São duas linhas, para
+100 e 500 usuários, e sete colunas, na ordem dos campos acima. A criação não refaz os cálculos.
+
+Os quatro campos financeiros mantêm objetos `Decimal`, sem conversão para `float` ou texto e
+sem arredondamento intermediário. `coerce_float=False` evita essa conversão na criação da tabela.
+Essas colunas apresentam `dtype object`, que permite armazenar objetos Python como `Decimal`;
+o dtype sozinho não comprova o tipo de cada valor. A conferência usou `isinstance(valor, Decimal)`
+individualmente nos oito valores financeiros dos dois cenários.
+
+Na inspeção realizada, `cenario` apresentou tipo `str`, `usuarios_ativos`, `int64`, e
+`feedbacks_mensais`, `float64`. Os feedbacks já eram `float` na lista de origem; essa informação
+não altera os tipos monetários.
+
+A apresentação acrescenta `print(tabela_cenarios.to_string(index=False))` ao final, mantendo
+as saídas anteriores. `index=False` oculta a numeração das linhas. A representação textual é
+usada somente na impressão; os valores financeiros da tabela continuam sendo objetos `Decimal`.
+Os cenários permanecem didáticos, sem despesas reais ou capacidade de atendimento comprovada.
+Ainda não há leitura ou exportação de CSV.
+
+As verificações pontuais confirmaram o formato `(2, 7)`, a ordem dos campos, a igualdade com a
+lista e sua preservação desde antes da criação da tabela, além dos resultados exatos dos dois
+cenários. Também confirmaram a importação sem executar o cenário e a manutenção das funções e
+saídas anteriores. Esses roteiros não foram adicionados a `test_calculadora.py`; os 111 métodos
+existentes passaram com o Python da `.venv-win`.
 
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
@@ -370,9 +400,27 @@ adicionais antes de serem representadas pela calculadora.
 
 ### Como executar a versão atual
 
-Abra `calculadora.py` e execute o arquivo com seu interpretador Python 3. No ambiente usado durante
-o desenvolvimento, a execução foi realizada pelo VS Code. Não há dependências externas nesta etapa:
-`decimal` , `math` e `unittest` fazem parte da biblioteca padrão.
+Pré-requisitos do ambiente validado: Python convencional 3.14.10 x64 para Windows e Pandas 3.1.0
+instalado no ambiente isolado `.venv-win`. `decimal`, `math` e `unittest` continuam fazendo parte
+da biblioteca padrão. Pandas é uma dependência externa, importada no início de `calculadora.py`;
+por isso, precisa estar disponível também para importar as funções nos testes.
+
+No PowerShell, com a `.venv-win` já preparada, use:
+
+```powershell
+Set-Location -LiteralPath 'D:\Natan\LiteArt Cost Analytics'
+& '.\.venv-win\Scripts\python.exe' -B -c "import pandas as pd; print(pd.__version__)"
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B calculadora.py
+```
+
+Os comandos conferem a versão do Pandas e executam a calculadora com o interpretador escolhido,
+sem precisar ativar o ambiente ou alterar o PATH. `-X utf8` mantém os acentos na saída capturada,
+e `-B` evita gerar bytecode. Se Pandas não estiver disponível, prepare essa dependência no ambiente
+antes de executar; os comandos acima não instalam nem atualizam pacotes.
+
+No VS Code, use **Python: Select Interpreter** e selecione
+`D:\Natan\LiteArt Cost Analytics\.venv-win\Scripts\python.exe`.
+A `.venv` anterior, baseada em MSYS2, permanece separada e preservada.
 
 O cenário didático e os `print()` ficam dentro de `if __name__ == "__main__":` . Ao executar o
 arquivo diretamente, o cenário é calculado e apresentado. Ao importar suas funções, esse bloco não é
@@ -439,38 +487,38 @@ A auxiliar de validação é exercitada pelas chamadas às funções de cálculo
 descritos; não é uma verificação exaustiva de todas as entradas possíveis nem uma medição de consumo
 real da API.
 
-No terminal, dentro da pasta do projeto, use seu interpretador Python 3:
+No terminal, dentro da pasta do projeto, use o Python da `.venv-win`, com Pandas disponível:
 
 ```powershell
-python -m unittest -v test_calculadora
+& '.\.venv-win\Scripts\python.exe' -B -m unittest -v test_calculadora
 ```
 
 Para executar somente uma classe, por exemplo a conversão cambial:
 
 ```powershell
-python -m unittest -v test_calculadora.TestCalcularReal
+& '.\.venv-win\Scripts\python.exe' -B -m unittest -v test_calculadora.TestCalcularReal
 ```
 
 Para executar apenas os testes da função de custos de IA do cenário:
 
 ```powershell
-python -m unittest -v test_calculadora.TestCalcularCustoIaCenario
+& '.\.venv-win\Scripts\python.exe' -B -m unittest -v test_calculadora.TestCalcularCustoIaCenario
 ```
 
 Para executar apenas os testes de infraestrutura do cenário:
 
 ```powershell
-python -m unittest -v test_calculadora.TestCalcularCustoInfraCenario
+& '.\.venv-win\Scripts\python.exe' -B -m unittest -v test_calculadora.TestCalcularCustoInfraCenario
 ```
 
 Para executar apenas os testes do cenário completo:
 
 ```powershell
-python -m unittest -v test_calculadora.TestCalcularCenario
+& '.\.venv-win\Scripts\python.exe' -B -m unittest -v test_calculadora.TestCalcularCenario
 ```
 
-Se `python` não estiver disponível no terminal, utilize o caminho do interpretador configurado no VS
-Code. Também é possível executar `test_calculadora.py` diretamente com esse interpretador.
+Os comandos usam diretamente o ambiente do projeto, independentemente de `python` no PATH.
+Também é possível executar `test_calculadora.py` diretamente com esse mesmo interpretador.
 
 A última execução retornou `Ran 111 tests` e `OK` . `assertEqual` confere resultados,
 `assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma
@@ -490,9 +538,9 @@ tratamento pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
-Verificar o ambiente Python, preparar as dependências e criar o primeiro DataFrame a partir de
-resumos_cenarios, preservando as fórmulas nas funções existentes e os tipos monetários nos dados.
-A lista já está pronta, mas o Pandas ainda não foi instalado para este incremento.
+O primeiro DataFrame já está implementado e validado com Pandas na `.venv-win`. Os próximos
+incrementos poderão aprofundar a análise dos cenários, preservando as fórmulas nas funções
+existentes e os tipos monetários nos dados.
 
 Revisar depois as alternativas pesquisadas com o autor antes de substituir preços didáticos.
 Leitura e exportação de CSV, ampliação das análises, gráficos e dashboard serão introduzidos
@@ -500,8 +548,8 @@ gradualmente.
 
 ## Primeira versão planejada
 
-A primeira entrega funcional será uma calculadora em Python puro, com comparação inicial de dois
-cenários didáticos, considerando:
+A base da primeira entrega funcional já reúne os cálculos e a comparação de dois cenários
+didáticos. A etapa de Pandas começou com a tabela de resumos. O escopo considera:
 
 - Mensalidades de backend e banco de dados.
 - GPT-6 Luna (`gpt-6-luna`) como modelo de referência da API da OpenAI.
@@ -512,18 +560,19 @@ cenários didáticos, considerando:
 Os resultados serão estimativas baseadas em preços pesquisados e hipóteses de consumo. Não
 representarão despesas efetivamente realizadas nem comprovarão a capacidade dos planos escolhidos.
 
-## Tecnologias previstas
+## Tecnologias utilizadas e previstas
 
 | Tecnologia | Aplicação |
 | --- | --- |
 | Python | Lógica e cálculos |
-| Pandas | Organização dos dados e comparação de cenários |
+| Pandas | Primeiro DataFrame dos cenários implementado; análises adicionais previstas |
 | CSV | Formato de arquivo para armazenamento inicial dos preços |
 | Plotly | Gráficos interativos |
 | Streamlit | Interface do dashboard |
 | Git e GitHub | Versionamento e hospedagem do repositório |
 
-As tecnologias serão introduzidas gradualmente, conforme a necessidade de cada etapa.
+Python e Pandas já são utilizados. CSV, Plotly e Streamlit serão introduzidos gradualmente,
+conforme a necessidade de cada etapa.
 
 ## Etapas de desenvolvimento
 
@@ -564,7 +613,7 @@ npx --yes --package markdownlint-cli2@0.23.2 markdownlint-cli2 README.md PLANEJA
 ```
 
 Esse comando requer Node.js/npm e pode baixar a ferramenta para o cache. Ele é opcional para a
-documentação; a calculadora continua sem dependências externas de Python.
+documentação; a execução da calculadora requer Pandas no ambiente Python selecionado.
 
 ## Documentação
 

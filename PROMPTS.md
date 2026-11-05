@@ -745,3 +745,52 @@ README e PROMPTS registram o incremento, sem alterações adicionais em código 
 
 **Marco deste registro:** documentação atualizada em 2026-11-03, até a lista de resumos dos
 cenários com Python puro, antes da introdução do Pandas.
+
+## 21. Primeiro DataFrame com Pandas e preservação de Decimal
+
+**Data:** 04/11/2026.
+
+**Etapa:** início da análise de dados com Pandas.
+
+**Objetivo dos pedidos:** criar uma tabela a partir dos resumos existentes, preservando os
+resultados e os tipos monetários, com uma alteração pequena e explicada.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Conferir o código, os testes e o Pandas disponível na `.venv-win`, sem instalar pacotes. Criar
+`tabela_cenarios` a partir de `resumos_cenarios`, manter os dois cenários, os sete campos e os
+valores financeiros em Decimal. Apresentar a tabela no terminal, preservar as saídas e conferir
+os dados, os resultados exatos e os testes existentes. Documentar o incremento sem alterar código,
+dependências ou planejamento nesta revisão documental e sem fazer commit ou push.
+
+**Participação e aprendizado:** os pedidos priorizaram a explicação de cada linha, a diferença
+entre os tipos das colunas e os objetos armazenados e a conferência explícita dos valores
+financeiros, sem tomar `dtype object` como prova de que são Decimal.
+
+**Decisões registradas:**
+
+- Importar `pandas as pd` e criar a tabela dentro do bloco principal com
+  `pd.DataFrame.from_records(resumos_cenarios, coerce_float=False)`.
+- Preservar duas linhas, para 100 e 500 usuários, e sete colunas na ordem da lista original.
+- Manter os quatro campos financeiros como objetos `Decimal`, sem conversão para float ou texto
+  e sem arredondar dados intermediários.
+- Acrescentar a impressão com `to_string(index=False)`, mantendo as saídas anteriores.
+- Preservar as funções de cálculo e a importação do módulo sem executar os cenários.
+- Usar o Python convencional da `.venv-win`, preservando o ambiente MSYS2 anterior.
+
+**Contribuição para o projeto:** a implementação foi concluída e validada. As verificações
+pontuais confirmaram formato `(2, 7)`, ordem dos campos, igualdade com `resumos_cenarios` e
+preservação da lista original. Os oito valores financeiros foram conferidos individualmente com
+`isinstance(valor, Decimal)` e comparados com os resultados esperados usando Decimal.
+
+Para 100 usuários, foram confirmados 2.200 feedbacks, R$ 2,20 de IA, R$ 65,00 de infraestrutura,
+R$ 67,20 de total mensal e R$ 806,40 anuais. Para 500, foram 11.000 feedbacks, R$ 11,00 de IA,
+R$ 65,00 de infraestrutura, R$ 76,00 mensais e R$ 912,00 anuais. São estimativas didáticas,
+com as hipóteses e exclusões existentes, sem representar despesas reais.
+
+Os 111 métodos de teste existentes passaram. As conferências específicas do DataFrame foram
+roteiros pontuais executados em memória; não foram adicionados novos testes automatizados ao
+repositório. As funções de cálculo, a importação silenciosa e as saídas anteriores foram
+preservadas. CSV, gráficos e dashboard continuam planejados.
+
+**Marco deste registro:** documentação de 04/11/2026, até o primeiro DataFrame no terminal.

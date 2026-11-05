@@ -1,6 +1,8 @@
 from decimal import Decimal
 from math import isfinite
 
+import pandas as pd
+
 #Funções auxuliares de validação
 def validar_numero_nao_negativo(valor, nome, tipos_permitidos=(int, float)):
     """Valida o tipo permitido, valor finito e não negativo; não converte o valor."""
@@ -432,8 +434,13 @@ if __name__ == "__main__":
         }
         resumos_cenarios.append(resumo)
 
+    tabela_cenarios = pd.DataFrame.from_records(resumos_cenarios, coerce_float=False)
+
     # Inspeção da estrutura: Decimal permanece nos dados, sem símbolos ou arredondamento.
     print("\nLista de resumos para a futura tabela (custos em BRL):")
     for resumo in resumos_cenarios:
         print(f"\n{resumo}")
+
+    print("\nTabela de cenários (custos em BRL):")
+    print(tabela_cenarios.to_string(index=False))
 
