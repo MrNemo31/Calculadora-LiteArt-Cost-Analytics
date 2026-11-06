@@ -32,6 +32,7 @@ DataFrame, criado a partir da lista de resumos dos cenários.
 - Seleção de três colunas e ordenação por custo mensal decrescente em `comparacao_custos`.
 - Filtro de cenários por orçamento mensal didático, preservando custos em `Decimal`.
 - Coluna calculada de saldo do orçamento, com sobra ou excesso por cenário em `Decimal`.
+- Resumo do menor e maior custo mensal e da diferença entre os extremos, preservando `Decimal`.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -468,6 +469,37 @@ As funções, a importação silenciosa e as saídas anteriores também foram pr
 A calculadora e os 111 testes existentes passaram na `.venv-win`; as verificações do saldo não
 foram adicionadas como novos testes automatizados ao repositório.
 
+### Resumo dos custos mensais
+
+O resumo utiliza a coluna `custo_total_mensal_br` de `comparacao_custos`, com os dois cenários
+completos, sem aplicar o filtro de orçamento. As agregações `.min()` e `.max()` retornam um
+único valor cada: `menor_custo_mensal_br` e `maior_custo_mensal_br`, respectivamente.
+`diferenca_custos_mensais_br` é calculada subtraindo o menor custo do maior.
+
+| Resultado | Valor em BRL |
+| --- | ---: |
+| Menor custo mensal, para 100 usuários | R$ 67,20 |
+| Maior custo mensal, para 500 usuários | R$ 76,00 |
+| Diferença entre os extremos | R$ 8,80 |
+
+Os três resultados permanecem como objetos `Decimal`, sem conversão para float ou arredondamento
+intermediário. O terminal acrescenta um resumo com rótulos, símbolo R$ e duas casas decimais
+somente na exibição, mantendo as saídas anteriores.
+
+Os extremos incluem todos os cenários avaliados; filtrar pelo orçamento antes da agregação
+excluiria o cenário de maior custo neste exemplo. A diferença depende das hipóteses atuais:
+a infraestrutura permanece em R$ 65,00 nos dois cenários, enquanto a IA passa de R$ 2,20 para
+R$ 11,00. Mudanças no consumo, nos preços, no câmbio ou na infraestrutura podem alterar esse
+resultado. Os valores são estimativas didáticas, não despesas reais ou custos medidos de uma API.
+
+As verificações pontuais confirmaram igualdade com `Decimal("67.20")`, `Decimal("76.00")` e
+`Decimal("8.80")`, além de `isinstance(valor, Decimal)` nos três resultados. Os quatro DataFrames
+anteriores foram comparados com cópias anteriores às agregações e permaneceram iguais, incluindo
+valores, tipos, colunas, índices e ordem das linhas. As funções de cálculo, a importação silenciosa
+e as saídas anteriores também foram preservadas. A calculadora e os 111 testes existentes passaram
+na `.venv-win`; as verificações específicas do resumo foram executadas em memória, sem novos
+testes automatizados persistentes no repositório.
+
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
 A pesquisa inicial de 2026-10-28 comparou três combinações para hospedar o backend e o PostgreSQL:
@@ -635,9 +667,10 @@ tratamento pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
-O primeiro DataFrame, a seleção e ordenação dos custos, o filtro por orçamento e a coluna de saldo
-já estão implementados e validados com Pandas na `.venv-win`. Os próximos incrementos poderão
-aprofundar a análise dos cenários, preservando as funções existentes e os tipos monetários.
+O primeiro DataFrame, a seleção e ordenação dos custos, o filtro por orçamento, a coluna de saldo
+e o resumo dos extremos mensais já estão implementados e validados com Pandas na `.venv-win`.
+Os próximos incrementos poderão aprofundar a análise dos cenários, preservando as funções
+existentes e os tipos monetários.
 
 As alternativas pesquisadas ainda precisam ser revisadas antes da substituição dos preços didáticos.
 Leitura e exportação de CSV, ampliação das análises, gráficos e dashboard serão introduzidos
@@ -662,7 +695,7 @@ representarão despesas efetivamente realizadas nem comprovarão a capacidade do
 | Tecnologia | Aplicação |
 | --- | --- |
 | Python | Lógica e cálculos |
-| Pandas | DataFrame dos cenários, seleção, ordenação, filtro e saldo do orçamento; análises adicionais previstas |
+| Pandas | DataFrame dos cenários, seleção, ordenação, filtro, saldo e agregações de custos; análises adicionais previstas |
 | CSV | Formato de arquivo para armazenamento inicial dos preços |
 | Plotly | Gráficos interativos |
 | Streamlit | Interface do dashboard |

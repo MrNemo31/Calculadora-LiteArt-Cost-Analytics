@@ -938,3 +938,47 @@ testes automatizados persistentes ao repositório. Os resultados continuam sendo
 didáticas, sem receitas, chamadas reais à API ou validação de capacidade dos serviços.
 
 **Marco deste registro:** documentação de 06/11/2026, até a coluna de saldo do orçamento.
+
+## 25. Resumo dos custos mensais com agregações
+
+**Data:** 06/11/2026.
+
+**Etapa:** agregações de uma coluna com Pandas.
+
+**Objetivo dos pedidos:** obter o menor e o maior custo mensal e a diferença entre eles,
+preservando Decimal, os DataFrames anteriores e as saídas existentes.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Usar a coluna de custo total mensal de `comparacao_custos`, incluindo os dois cenários sem filtro
+de orçamento. Calcular os extremos com `.min()` e `.max()` e subtrair o menor do maior.
+Apresentar o resumo em reais, com duas casas somente na exibição, explicar as agregações e
+conferir resultados, tipos, tabelas e testes existentes. Atualizar somente README e PROMPTS,
+executar o Markdownlint e sugerir uma mensagem de commit, sem fazer commit ou push.
+
+**Participação e aprendizado:** as explicações distinguiram a seleção de uma coluna do retorno
+de um único valor por agregação. Também abordaram a inclusão dos dois cenários completos e a
+dependência dos resultados em relação às hipóteses de consumo, preços, câmbio e infraestrutura.
+
+**Decisões registradas:**
+
+- Calcular `menor_custo_mensal_br` com `.min()` e `maior_custo_mensal_br` com `.max()`.
+- Calcular `diferenca_custos_mensais_br` subtraindo o menor custo do maior.
+- Usar os dois cenários de `comparacao_custos`, sem aplicar o filtro de orçamento.
+- Manter os três resultados como Decimal, sem conversões para float ou arredondamento intermediário.
+- Acrescentar rótulos claros e valores com R$ e duas casas decimais somente na exibição.
+- Preservar os quatro DataFrames anteriores, as funções de cálculo e a importação silenciosa.
+
+**Contribuição para o projeto:** o resumo foi implementado e validado. As verificações pontuais
+confirmaram menor custo igual a `Decimal("67.20")`, maior custo igual a `Decimal("76.00")` e
+diferença igual a `Decimal("8.80")`. Os três resultados passaram por `isinstance(valor, Decimal)`.
+Os quatro DataFrames foram comparados com cópias anteriores às operações, incluindo valores,
+tipos individuais, colunas, índices e ordem das linhas, e permaneceram iguais.
+As funções, as saídas anteriores e a importação sem executar cenários também foram preservadas.
+
+A calculadora e os 111 testes existentes foram executados com a `.venv-win` e passaram.
+As verificações específicas do resumo foram roteiros pontuais em memória; não foram adicionados
+testes automatizados persistentes ao repositório. A diferença reflete as hipóteses didáticas
+atuais, com infraestrutura constante e variação do custo de IA, sem representar despesas reais.
+
+**Marco deste registro:** documentação de 06/11/2026, até o resumo dos extremos dos custos mensais.

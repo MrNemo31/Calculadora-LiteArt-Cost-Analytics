@@ -453,24 +453,47 @@ if __name__ == "__main__":
         orcamento_mensal_br - analise_orcamento["custo_total_mensal_br"]
     )
 
-    # Inspeção da estrutura: Decimal permanece nos dados, sem símbolos ou arredondamento.
-    print("\nLista de resumos para a futura tabela (custos em BRL):")
+    menor_custo_mensal_br = comparacao_custos["custo_total_mensal_br"].min()
+    maior_custo_mensal_br = comparacao_custos["custo_total_mensal_br"].max()
+    diferenca_custos_mensais_br = maior_custo_mensal_br - menor_custo_mensal_br
+
+    # Formatação somente na exibição; os dados continuam com a precisão de Decimal.
+    formatadores_monetarios = {
+        coluna: "{:.2f}".format
+        for coluna in (
+            "custo_ia_mensal_br",
+            "custo_infra_mensal_br",
+            "custo_total_mensal_br",
+            "custo_total_anual_br",
+            "saldo_orcamento_br",
+        )
+    }
+    print("\nLista de resumos dos cenários (custos em BRL):")
     for resumo in resumos_cenarios:
-        print(f"\n{resumo}")
+        resumo_exibicao = {
+            campo: f"{valor:.2f}" if isinstance(valor, Decimal) else valor
+            for campo, valor in resumo.items()
+        }
+        print(f"\n{resumo_exibicao}")
 
     print("\nTabela de cenários (custos em BRL):")
-    print(tabela_cenarios.to_string(index=False))
+    print(tabela_cenarios.to_string(index=False, formatters=formatadores_monetarios))
 
     print("\nComparação de custos mensais em BRL (do maior para o menor):")
-    print(comparacao_custos.to_string(index=False))
+    print(comparacao_custos.to_string(index=False, formatters=formatadores_monetarios))
 
     print(f"\nCenários dentro do orçamento mensal didático de R$ {orcamento_mensal_br:.2f}:")
     if cenarios_no_orcamento.empty:
         print("Nenhum cenário avaliado cabe no orçamento mensal informado.")
     else:
-        print(cenarios_no_orcamento.to_string(index=False))
+        print(cenarios_no_orcamento.to_string(index=False, formatters=formatadores_monetarios))
 
     print(f"\nSaldo por cenário com orçamento mensal didático de R$ {orcamento_mensal_br:.2f}:")
     print("Saldo positivo indica sobra; saldo negativo indica excesso sobre o orçamento.")
-    print(analise_orcamento.to_string(index=False))
+    print(analise_orcamento.to_string(index=False, formatters=formatadores_monetarios))
+
+    print("\nResumo dos custos mensais dos dois cenários didáticos:")
+    print(f"Menor custo mensal: R$ {menor_custo_mensal_br:.2f}")
+    print(f"Maior custo mensal: R$ {maior_custo_mensal_br:.2f}")
+    print(f"Diferença entre os extremos: R$ {diferenca_custos_mensais_br:.2f}")
 
