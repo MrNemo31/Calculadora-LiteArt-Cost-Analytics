@@ -840,3 +840,101 @@ As verificações específicas foram roteiros pontuais em memória; não foram a
 automatizados ao repositório. Documentação e dependências não foram alteradas na implementação.
 
 **Marco deste registro:** documentação de 05/11/2026, até a seleção e ordenação dos custos mensais.
+
+## 23. Filtro de cenários por orçamento mensal
+
+**Data:** 06/11/2026.
+
+**Etapa:** seleção de cenários com máscara booleana no Pandas.
+
+**Objetivo dos pedidos:** filtrar os cenários por um limite mensal didático, preservando Decimal
+e os DataFrames de origem, com uma alteração pequena e explicada.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Definir o orçamento de R$ 70,00 após a ordenação dos custos. Comparar a coluna de custo mensal
+com o limite usando `<=`, selecionar as linhas aprovadas com `.loc` e apresentar o resultado ou
+uma mensagem quando nenhum cenário couber no orçamento. Conferir limites adicionais, tipos,
+preservação das tabelas e testes existentes. Documentar o comportamento implementado somente em
+README e PROMPTS, sem alterar código, testes ou dependências e sem commit ou push nesta revisão.
+
+**Participação e aprendizado:** as explicações abordaram o operador menor ou igual, a máscara
+de valores True e False, a seleção com `.loc` e a identificação de resultados vazios com `.empty`.
+
+**Decisões registradas:**
+
+- Definir `orcamento_mensal_br = Decimal("70.00")` como limite didático, sem entrada interativa.
+- Criar `dentro_do_orcamento` pela comparação entre custo mensal e orçamento com `<=`.
+- Guardar a seleção com `.loc` em `cenarios_no_orcamento`, mantendo as três colunas, a ordem
+  dos cenários aprovados e seus índices originais.
+- Preservar os custos como Decimal, sem conversão para float ou texto e sem arredondamento.
+- Apresentar orçamento, título e tabela sem índices; usar uma mensagem para o resultado vazio.
+- Preservar integralmente `tabela_cenarios`, `comparacao_custos` e as saídas existentes.
+
+**Contribuição para o projeto:** o filtro foi implementado no bloco principal. Com o limite de
+R$ 70,00, o resultado tem uma linha e três colunas: o cenário de 100 usuários, com custo mensal
+igual a `Decimal("67.20")` e índice `[0]`. Quando nenhum cenário é aprovado, a mensagem informa:
+"Nenhum cenário avaliado cabe no orçamento mensal informado."
+
+As verificações pontuais executadas em memória também confirmaram que `Decimal("67.20")` inclui
+somente 100 usuários, `Decimal("76.00")` inclui 500 e depois 100 usuários, e `Decimal("60.00")`
+produz resultado vazio com a mensagem esperada. O orçamento principal permaneceu em R$ 70,00.
+Os valores financeiros selecionados passaram por `isinstance(valor, Decimal)`. A comparação dos
+dois DataFrames de origem com cópias anteriores à filtragem confirmou valores, tipos, colunas,
+índices e ordem das linhas preservados. A importação silenciosa e as funções também foram mantidas.
+
+A calculadora e os 111 testes existentes foram executados com a `.venv-win` e passaram.
+As conferências específicas do filtro foram verificações pontuais, sem novos testes automatizados
+adicionados ao repositório. Os limites e resultados representam hipóteses didáticas, não despesas
+reais nem comprovação de capacidade dos serviços.
+
+**Marco deste registro:** documentação de 06/11/2026, até o filtro por orçamento mensal.
+
+## 24. Coluna calculada de saldo do orçamento
+
+**Data:** 06/11/2026.
+
+**Etapa:** cálculo de uma nova coluna com Pandas.
+
+**Objetivo dos pedidos:** analisar a sobra ou o excesso sobre o orçamento mensal em todos os
+cenários, preservando Decimal e os DataFrames anteriores, com uma alteração pequena e explicada.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar `analise_orcamento` como cópia de `comparacao_custos` e acrescentar `saldo_orcamento_br`
+pela subtração direta do custo mensal do orçamento, sem laço, apply ou conversões para float.
+Apresentar a tabela e explicar os sinais do saldo. Conferir resultados, tipos, preservação das
+tabelas e testes existentes. Atualizar somente README e PROMPTS com o comportamento implementado,
+sem alterar código, testes, planejamento ou dependências e sem commit ou push nesta revisão.
+
+**Participação e aprendizado:** as explicações abordaram a finalidade de `copy()`, a subtração
+elemento por elemento, a criação de uma coluna por atribuição e a validade de saldos negativos.
+
+**Decisões registradas:**
+
+- Reutilizar o orçamento didático de `Decimal("70.00")`.
+- Criar `analise_orcamento` com `comparacao_custos.copy()`, mantendo ambos os cenários e sua ordem.
+- Acrescentar o saldo como última coluna: orçamento mensal menos custo total mensal.
+- Preservar custos e saldos como objetos Decimal, sem arredondamento intermediário.
+- Acrescentar título, indicação de sobra ou excesso e tabela sem índices às saídas existentes.
+- Manter integralmente `tabela_cenarios`, `comparacao_custos` e `cenarios_no_orcamento`.
+
+**Contribuição para o projeto:** a implementação foi concluída com duas linhas e quatro colunas,
+na ordem de 500 e depois 100 usuários, com índices `[1, 0]`. Para 500 usuários, foram confirmados
+custo mensal de `Decimal("76.00")` e saldo de `Decimal("-6.00")`. Para 100, custo de
+`Decimal("67.20")` e saldo de `Decimal("2.80")`. O saldo compara custo e limite didático;
+não representa lucro, pois não considera receitas.
+
+As verificações pontuais conferiram os dois custos e os dois saldos com `isinstance` e Decimal.
+Uma subtração adicional em memória com limite de `Decimal("67.20")` confirmou saldo zero para
+100 usuários, sem alterar o orçamento principal de R$ 70,00 nem os resultados finais.
+Os três DataFrames anteriores foram comparados com cópias anteriores à análise, incluindo valores,
+tipos individuais, colunas, índices e ordem das linhas, e permaneceram iguais.
+As funções de cálculo, a importação silenciosa e as saídas anteriores foram preservadas.
+
+A calculadora e os 111 testes existentes foram executados com a `.venv-win` e passaram.
+As verificações específicas do saldo foram roteiros pontuais em memória; não foram acrescentados
+testes automatizados persistentes ao repositório. Os resultados continuam sendo estimativas
+didáticas, sem receitas, chamadas reais à API ou validação de capacidade dos serviços.
+
+**Marco deste registro:** documentação de 06/11/2026, até a coluna de saldo do orçamento.

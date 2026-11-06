@@ -443,6 +443,16 @@ if __name__ == "__main__":
         by="custo_total_mensal_br", ascending=False
     )
 
+    # Limite didático de orçamento mensal, não um orçamento real do LiteArt.
+    orcamento_mensal_br = Decimal("70.00")
+    dentro_do_orcamento = comparacao_custos["custo_total_mensal_br"] <= orcamento_mensal_br
+    cenarios_no_orcamento = comparacao_custos.loc[dentro_do_orcamento]
+
+    analise_orcamento = comparacao_custos.copy()
+    analise_orcamento["saldo_orcamento_br"] = (
+        orcamento_mensal_br - analise_orcamento["custo_total_mensal_br"]
+    )
+
     # Inspeção da estrutura: Decimal permanece nos dados, sem símbolos ou arredondamento.
     print("\nLista de resumos para a futura tabela (custos em BRL):")
     for resumo in resumos_cenarios:
@@ -453,4 +463,14 @@ if __name__ == "__main__":
 
     print("\nComparação de custos mensais em BRL (do maior para o menor):")
     print(comparacao_custos.to_string(index=False))
+
+    print(f"\nCenários dentro do orçamento mensal didático de R$ {orcamento_mensal_br:.2f}:")
+    if cenarios_no_orcamento.empty:
+        print("Nenhum cenário avaliado cabe no orçamento mensal informado.")
+    else:
+        print(cenarios_no_orcamento.to_string(index=False))
+
+    print(f"\nSaldo por cenário com orçamento mensal didático de R$ {orcamento_mensal_br:.2f}:")
+    print("Saldo positivo indica sobra; saldo negativo indica excesso sobre o orçamento.")
+    print(analise_orcamento.to_string(index=False))
 

@@ -30,6 +30,8 @@ DataFrame, criado a partir da lista de resumos dos cenários.
 - Lista de resumos com sete campos por cenário e custos preservados como Decimal.
 - Primeiro DataFrame com Pandas: dois cenários, sete colunas e apresentação no terminal.
 - Seleção de três colunas e ordenação por custo mensal decrescente em `comparacao_custos`.
+- Filtro de cenários por orçamento mensal didático, preservando custos em `Decimal`.
+- Coluna calculada de saldo do orçamento, com sobra ou excesso por cenário em `Decimal`.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -394,6 +396,78 @@ Também foram preservadas as funções de cálculo, as saídas e a importação 
 Essas conferências foram executadas em memória, sem novos testes no repositório. A calculadora
 foi executada com a `.venv-win`, e os 111 testes existentes passaram.
 
+### Filtro de cenários por orçamento mensal
+
+O limite didático `orcamento_mensal_br` é definido como `Decimal("70.00")` no bloco principal,
+após a seleção e ordenação dos custos. Não representa um orçamento real do LiteArt e não há
+entrada interativa para alterá-lo.
+
+A comparação de `custo_total_mensal_br` com o limite usa `<=`, incluindo custos menores ou iguais
+ao orçamento. Ela produz a máscara booleana `dentro_do_orcamento`, com um valor `True` ou `False`
+por cenário. A seleção com `.loc` mantém apenas as linhas aprovadas em `cenarios_no_orcamento`.
+As três colunas, a ordem da comparação e os índices originais são preservados, sem redefinição.
+
+Com R$ 70,00, somente o cenário de 100 usuários é apresentado, com custo mensal de R$ 67,20.
+O resultado tem uma linha, três colunas e índice `[0]`. O terminal mostra o orçamento e um título
+explicativo; a tabela é apresentada sem os índices, mantendo as saídas anteriores.
+Quando `.empty` identifica um resultado sem linhas, a mensagem é:
+"Nenhum cenário avaliado cabe no orçamento mensal informado."
+
+Os custos filtrados continuam como objetos `Decimal`, sem conversão para float ou texto e sem
+arredondamento intermediário. `tabela_cenarios` e `comparacao_custos` permanecem integralmente
+iguais, incluindo valores, tipos, colunas, índices e ordem das linhas.
+
+As verificações pontuais em memória confirmaram os seguintes limites, sem mudar os R$ 70,00
+definidos no arquivo:
+
+| Orçamento em BRL | Cenários incluídos, na ordem | Índices |
+| --- | --- | --- |
+| R$ 70,00 | 100 usuários, com R$ 67,20 mensais | `[0]` |
+| R$ 67,20 | Somente 100 usuários | `[0]` |
+| R$ 76,00 | 500 usuários e depois 100 usuários | `[1, 0]` |
+| R$ 60,00 | Nenhum; mensagem de resultado vazio confirmada | `[]` |
+
+Os valores financeiros selecionados foram conferidos com `isinstance(valor, Decimal)`.
+Os dois DataFrames de origem foram comparados com cópias anteriores à filtragem, incluindo
+conferências dos tipos individuais. A importação silenciosa, as funções de cálculo e as saídas
+anteriores foram preservadas. A calculadora e os 111 testes existentes passaram na `.venv-win`;
+essas verificações específicas do filtro não foram adicionadas como novos testes ao repositório.
+
+### Saldo do orçamento por cenário
+
+No bloco principal, `analise_orcamento` é criada com uma cópia de `comparacao_custos`, mantendo
+os dois cenários na ordem de 500 e depois 100 usuários. A coluna `saldo_orcamento_br` é
+acrescentada ao final, com a fórmula: orçamento mensal menos custo total mensal.
+A subtração é feita diretamente sobre a coluna de custos, elemento por elemento, sem laço
+ou `apply`. A análise tem duas linhas, quatro colunas e índices `[1, 0]`.
+
+O orçamento didático permanece em `Decimal("70.00")`. Saldo positivo indica sobra; negativo
+indica excesso sobre o orçamento; zero indica custo igual ao limite. Esse saldo não representa
+lucro, pois não considera receitas.
+
+| Usuários | Custo total mensal | Saldo do orçamento |
+| ---: | ---: | ---: |
+| 500 | R$ 76,00 | −R$ 6,00 |
+| 100 | R$ 67,20 | R$ 2,80 |
+
+Custos e saldos permanecem como objetos `Decimal`, sem conversão para float ou texto e sem
+arredondamento intermediário. A cópia permite acrescentar a coluna sem alterar
+`comparacao_custos`. Também são preservados `tabela_cenarios` e `cenarios_no_orcamento`, incluindo
+valores, tipos, colunas, índices e ordem das linhas.
+
+O terminal acrescenta a tabela sem índices, com um título que informa o orçamento e uma breve
+explicação dos sinais do saldo, mantendo as saídas anteriores. São estimativas didáticas, sem
+representar despesas reais ou comprovar a capacidade dos serviços.
+
+As verificações pontuais confirmaram os custos e saldos exatos e conferiram os quatro valores
+financeiros com `isinstance(valor, Decimal)`. Uma subtração adicional em memória, com orçamento
+de `Decimal("67.20")`, produziu saldo zero para 100 usuários, sem alterar o limite principal ou
+os resultados finais. Os três DataFrames anteriores foram comparados com cópias feitas antes da
+análise, incluindo conferências dos tipos individuais, e permaneceram integralmente iguais.
+As funções, a importação silenciosa e as saídas anteriores também foram preservadas.
+A calculadora e os 111 testes existentes passaram na `.venv-win`; as verificações do saldo não
+foram adicionadas como novos testes automatizados ao repositório.
+
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
 A pesquisa inicial de 2026-10-28 comparou três combinações para hospedar o backend e o PostgreSQL:
@@ -561,9 +635,9 @@ tratamento pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
-O primeiro DataFrame e a seleção e ordenação dos custos mensais já estão implementados e
-validados com Pandas na `.venv-win`. Os próximos incrementos poderão aprofundar a análise dos
-cenários, preservando as fórmulas nas funções existentes e os tipos monetários nos dados.
+O primeiro DataFrame, a seleção e ordenação dos custos, o filtro por orçamento e a coluna de saldo
+já estão implementados e validados com Pandas na `.venv-win`. Os próximos incrementos poderão
+aprofundar a análise dos cenários, preservando as funções existentes e os tipos monetários.
 
 As alternativas pesquisadas ainda precisam ser revisadas antes da substituição dos preços didáticos.
 Leitura e exportação de CSV, ampliação das análises, gráficos e dashboard serão introduzidos
@@ -588,7 +662,7 @@ representarão despesas efetivamente realizadas nem comprovarão a capacidade do
 | Tecnologia | Aplicação |
 | --- | --- |
 | Python | Lógica e cálculos |
-| Pandas | DataFrame dos cenários, seleção de colunas e ordenação de custos; análises adicionais previstas |
+| Pandas | DataFrame dos cenários, seleção, ordenação, filtro e saldo do orçamento; análises adicionais previstas |
 | CSV | Formato de arquivo para armazenamento inicial dos preços |
 | Plotly | Gráficos interativos |
 | Streamlit | Interface do dashboard |
