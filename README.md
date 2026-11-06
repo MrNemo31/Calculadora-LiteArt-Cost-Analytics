@@ -33,6 +33,7 @@ DataFrame, criado a partir da lista de resumos dos cenários.
 - Filtro de cenários por orçamento mensal didático, preservando custos em `Decimal`.
 - Coluna calculada de saldo do orçamento, com sobra ou excesso por cenário em `Decimal`.
 - Resumo do menor e maior custo mensal e da diferença entre os extremos, preservando `Decimal`.
+- Formatação monetária com duas casas decimais nas tabelas e resumos, somente na apresentação.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -331,12 +332,14 @@ Cada registro contém os mesmos sete campos:
 | `custo_total_anual_br` | Projeção anual em BRL |
 
 O laço percorre `comparacao_cenarios`, seleciona valores já calculados e acrescenta cada resumo
-com `append()`. Não refaz as fórmulas. Os custos permanecem como `Decimal`, sem símbolos
-monetários nos dados, conversão para texto ou arredondamento intermediário.
+com `append()`. Não refaz as fórmulas. Nos dados de cálculo, os custos permanecem como `Decimal`,
+sem símbolos monetários, conversão para texto ou arredondamento intermediário.
 
-O terminal apresenta a lista antes da tabela para inspeção. Valores como `Decimal('67.200000')`
-representam R$ 67,20; os zeros adicionais não mudam o valor. Cada registro é um dicionário novo,
-e os resultados completos permanecem disponíveis na comparação original.
+O terminal apresenta os resumos antes da tabela. Para cada registro, `resumo_exibicao` reúne os
+campos financeiros como textos com duas casas decimais, mantendo os demais campos como recebidos.
+A lista `resumos_cenarios` continua com os objetos `Decimal` originais: por exemplo,
+`Decimal('67.200000')` é apresentado como `67.20`, sem substituir o valor armazenado.
+Cada registro é um dicionário novo, e os resultados completos permanecem na comparação original.
 
 Foram conferidos os dois registros, os sete campos, os valores conhecidos e os tipos monetários,
 além da independência entre registros e da preservação dos resultados anteriores. Essa
@@ -353,8 +356,9 @@ tabela_cenarios = pd.DataFrame.from_records(resumos_cenarios, coerce_float=False
 Cada dicionário de `resumos_cenarios` vira uma linha de `tabela_cenarios`. São duas linhas, para
 100 e 500 usuários, e sete colunas, na ordem dos campos acima. A criação não refaz os cálculos.
 
-Os quatro campos financeiros mantêm objetos `Decimal`, sem conversão para `float` ou texto e
-sem arredondamento intermediário. `coerce_float=False` evita essa conversão na criação da tabela.
+Nos dados da tabela, os quatro campos financeiros mantêm objetos `Decimal`, sem conversão para
+`float` ou texto e sem arredondamento intermediário. `coerce_float=False` evita a conversão para
+float na criação da tabela. A apresentação produz textos formatados separadamente.
 Essas colunas apresentam `dtype object`, que permite armazenar objetos Python como `Decimal`;
 o dtype sozinho não comprova o tipo de cada valor. A conferência usou `isinstance(valor, Decimal)`
 individualmente nos oito valores financeiros dos dois cenários.
@@ -363,9 +367,9 @@ Na inspeção realizada, `cenario` apresentou tipo `str`, `usuarios_ativos`, `in
 `feedbacks_mensais`, `float64`. Os feedbacks já eram `float` na lista de origem; essa informação
 não altera os tipos monetários.
 
-A apresentação acrescenta `print(tabela_cenarios.to_string(index=False))` ao final, mantendo
-as saídas anteriores. `index=False` oculta a numeração das linhas. A representação textual é
-usada somente na impressão; os valores financeiros da tabela continuam sendo objetos `Decimal`.
+A apresentação usa `to_string()` com `index=False` e formatadores monetários por coluna.
+`index=False` oculta a numeração das linhas. A representação textual é usada somente na impressão;
+os valores financeiros da tabela continuam sendo objetos `Decimal`.
 Os cenários permanecem didáticos, sem despesas reais ou capacidade de atendimento comprovada.
 Ainda não há leitura ou exportação de CSV.
 
@@ -386,8 +390,8 @@ A comparação tem duas linhas e três colunas. O cenário de 500 usuários apar
 custo mensal igual a `Decimal("76.00")`; o de 100 usuários vem depois, com `Decimal("67.20")`.
 Os índices originais acompanham as linhas: a comparação fica com `[1, 0]`, enquanto
 `tabela_cenarios` permanece com `[0, 1]`. O terminal apresenta um título explicativo e
-`comparacao_custos.to_string(index=False)`, preservando as saídas anteriores e ocultando os índices
-somente na impressão. Os custos continuam em `Decimal`, sem conversão ou arredondamento.
+`to_string()` com índices ocultos e formatadores monetários, preservando as saídas anteriores.
+Nos dados de cálculo, os custos continuam em `Decimal`, sem conversão ou arredondamento.
 
 As verificações pontuais conferiram o formato `(2, 3)`, a ordem das colunas e dos cenários e os
 custos exatos. Cada custo passou por `isinstance(valor, Decimal)`; `dtype object` sozinho não
@@ -414,8 +418,8 @@ explicativo; a tabela é apresentada sem os índices, mantendo as saídas anteri
 Quando `.empty` identifica um resultado sem linhas, a mensagem é:
 "Nenhum cenário avaliado cabe no orçamento mensal informado."
 
-Os custos filtrados continuam como objetos `Decimal`, sem conversão para float ou texto e sem
-arredondamento intermediário. `tabela_cenarios` e `comparacao_custos` permanecem integralmente
+Nos dados filtrados, os custos continuam como objetos `Decimal`, sem conversão para float ou texto
+e sem arredondamento intermediário. `tabela_cenarios` e `comparacao_custos` permanecem integralmente
 iguais, incluindo valores, tipos, colunas, índices e ordem das linhas.
 
 As verificações pontuais em memória confirmaram os seguintes limites, sem mudar os R$ 70,00
@@ -451,8 +455,8 @@ lucro, pois não considera receitas.
 | 500 | R$ 76,00 | −R$ 6,00 |
 | 100 | R$ 67,20 | R$ 2,80 |
 
-Custos e saldos permanecem como objetos `Decimal`, sem conversão para float ou texto e sem
-arredondamento intermediário. A cópia permite acrescentar a coluna sem alterar
+Nos dados da análise, custos e saldos permanecem como objetos `Decimal`, sem conversão para float
+ou texto e sem arredondamento intermediário. A cópia permite acrescentar a coluna sem alterar
 `comparacao_custos`. Também são preservados `tabela_cenarios` e `cenarios_no_orcamento`, incluindo
 valores, tipos, colunas, índices e ordem das linhas.
 
@@ -499,6 +503,35 @@ valores, tipos, colunas, índices e ordem das linhas. As funções de cálculo, 
 e as saídas anteriores também foram preservadas. A calculadora e os 111 testes existentes passaram
 na `.venv-win`; as verificações específicas do resumo foram executadas em memória, sem novos
 testes automatizados persistentes no repositório.
+
+### Formatação monetária no terminal
+
+Os valores financeiros são apresentados com duas casas decimais no detalhamento, nos resumos e
+nas quatro tabelas. Nas mensagens individuais, `:.2f` formata o Decimal em uma representação
+textual com duas casas. O terminal usa ponto decimal, como `67.20`; a documentação apresenta
+os valores em notação brasileira, como R$ 67,20. Os títulos das tabelas identificam a moeda BRL.
+
+O dicionário `formatadores_monetarios` associa os nomes das colunas de custos e saldo ao
+formatador `"{:.2f}".format`. Ele é passado pelo argumento `formatters` de `DataFrame.to_string()`
+na tabela completa, na comparação, no filtro e na análise de saldo. `index=False` oculta os
+índices somente na impressão.
+
+Para os resumos em dicionários, `resumo_exibicao` contém textos formatados para os valores
+financeiros, enquanto `resumos_cenarios` mantém os objetos `Decimal` usados nos cálculos.
+Esses textos de apresentação não são atribuídos às colunas dos DataFrames.
+
+A formatação arredonda somente a representação exibida quando necessário: um valor como
+`Decimal("1.236")` é apresentado como `1.24`, mas continua armazenado com sua precisão original.
+Não há arredondamento ou substituição dos valores dentro dos DataFrames. Cálculos, agregações,
+ordenação e filtros continuam usando os objetos `Decimal` com sua precisão completa.
+As afirmações de preservação do tipo e ausência de conversão para texto referem-se a esses dados
+de cálculo; a impressão necessariamente gera uma representação textual separada.
+
+Uma conferência pontual em memória verificou a apresentação das quatro tabelas e dos resumos,
+a separação entre textos e dados, os tipos financeiros e a preservação dos DataFrames e da lista.
+Também confirmou a exibição de `1.236` como `1.24` sem alterar o Decimal e a manutenção de
+`Decimal('67.200000')` nos dados. Os 111 testes existentes passaram na `.venv-win`.
+Essa conferência específica de precisão e apresentação não foi adicionada como teste persistente.
 
 ### Pesquisa de hospedagem e alternativas de arquitetura
 

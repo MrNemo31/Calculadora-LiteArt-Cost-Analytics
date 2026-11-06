@@ -982,3 +982,47 @@ testes automatizados persistentes ao repositório. A diferença reflete as hipó
 atuais, com infraestrutura constante e variação do custo de IA, sem representar despesas reais.
 
 **Marco deste registro:** documentação de 06/11/2026, até o resumo dos extremos dos custos mensais.
+
+## 26. Formatação monetária e precisão interna
+
+**Data:** 06/11/2026.
+
+**Etapa:** legibilidade da apresentação financeira no terminal.
+
+**Objetivo dos pedidos:** apresentar valores monetários com duas casas decimais nas tabelas e
+nos resumos, mantendo a precisão de Decimal nos dados usados para cálculos, ordenação e filtros.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Melhorar a legibilidade financeira sem substituir ou arredondar os dados internos. Documentar
+o uso de `:.2f`, dos formatadores de `to_string()` e de `resumo_exibicao`, distinguindo textos
+de apresentação dos valores em `resumos_cenarios`. Conferir precisão, apresentação e testes
+existentes. Atualizar somente README e PROMPTS e verificar o Markdown, sem commit ou push.
+
+**Participação e aprendizado:** a distinção central é entre formatar uma representação exibida
+e alterar o valor armazenado. Duas casas no terminal não limitam a precisão dos cálculos.
+
+**Decisões registradas:**
+
+- Usar `:.2f` nas mensagens individuais e nos textos financeiros de `resumo_exibicao`.
+- Passar `formatadores_monetarios` ao argumento `formatters` de `DataFrame.to_string()` nas
+  quatro tabelas, mantendo os índices ocultos somente na impressão.
+- Manter `resumos_cenarios` e as colunas financeiras dos DataFrames com objetos Decimal.
+- Gerar textos para apresentação sem atribuí-los de volta aos dados de cálculo.
+- Esclarecer que a formatação pode arredondar a representação, preservando a precisão interna.
+
+**Contribuição para o projeto:** a implementação foi conferida em `calculadora.py`. As tabelas
+e os resumos apresentam os valores financeiros com duas casas decimais; os dados originais
+continuam em Decimal. `resumo_exibicao` contém textos nos campos monetários, e os demais campos
+mantêm seus valores. Cálculos, agregações, ordenação e filtros usam os dados originais.
+
+Uma conferência pontual executada em memória confirmou a apresentação das quatro tabelas e dos
+resumos e a preservação da lista e dos DataFrames, incluindo tipos, índices e precisão Decimal.
+O formatador apresentou `Decimal("1.236")` como `1.24` sem alterar o valor original; o custo
+`Decimal('67.200000')` também manteve sua precisão nos dados.
+
+Os 111 testes existentes foram executados com a `.venv-win` e passaram. A conferência específica
+de precisão e apresentação foi pontual; não foram adicionados novos testes automatizados ao
+repositório. A atualização documental preserva código, testes, planejamento e dependências.
+
+**Marco deste registro:** documentação de 06/11/2026, até a formatação monetária no terminal.
