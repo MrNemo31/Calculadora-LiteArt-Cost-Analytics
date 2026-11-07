@@ -265,6 +265,53 @@ def calcular_cenario(
     }
 
 
+def converter_hipotese_consumo(texto, coluna):
+    """Converte uma hipótese textual e valida as regras compartilhadas das entradas."""
+    if not texto:
+        raise ValueError("Campo obrigatório vazio.")
+    try:
+        valor = int(texto) if coluna == "usuarios_ativos" else float(texto)
+    except ValueError as erro:
+        formato = "um inteiro sem parte decimal" if coluna == "usuarios_ativos" else "um número"
+        raise ValueError(f"Informe {formato}.") from erro
+
+    validar_numero_nao_negativo(valor, coluna)
+    if coluna in ("taxa_acerto", "proporcao_acertos_com_feedback") and valor > 1:
+        raise ValueError("A taxa deve estar entre 0 e 1, inclusive.")
+    return valor
+
+
+def ler_cenario_terminal():
+    """Solicita um cenário, repetindo somente entradas inválidas."""
+    print("Use ponto decimal para frações. Taxas são proporções de 0 a 1: 0.60 significa 60%.")
+    while True:
+        nome = input("Nome do cenário: ").strip()
+        if nome:
+            break
+        print("O nome do cenário é obrigatório.")
+
+    perguntas = (
+        ("usuarios_ativos", "Usuários ativos (inteiro, usuários/mês): "),
+        ("respostas_por_usuario", "Respostas por usuário (respostas/usuário/mês): "),
+        ("taxa_acerto", "Taxa de acerto (proporção de 0 a 1): "),
+        ("proporcao_acertos_com_feedback", "Acertos com feedback (proporção de 0 a 1): "),
+        ("tokens_entrada", "Tokens de entrada (média de tokens/feedback): "),
+        ("tokens_saida", "Tokens de saída faturáveis (média de tokens/feedback): "),
+    )
+    hipoteses = {}
+    for coluna, pergunta in perguntas:
+        while True:
+            texto = input(pergunta).strip()
+            try:
+                valor = converter_hipotese_consumo(texto, coluna)
+            except ValueError as erro:
+                print(f"{coluna}: {erro}")
+            else:
+                hipoteses[coluna] = valor
+                break
+    return {"nome": nome, "hipoteses_consumo": hipoteses}
+
+
 def ler_cenarios_csv(caminho):
     """Lê hipóteses de consumo em UTF-8, sem executar os cenários."""
     colunas = (
@@ -305,16 +352,7 @@ def ler_cenarios_csv(caminho):
                 valores[coluna] = texto
                 continue
             try:
-                valor = int(texto) if coluna == "usuarios_ativos" else float(texto)
-            except ValueError as erro:
-                formato = "um inteiro sem parte decimal" if coluna == "usuarios_ativos" else "um número"
-                raise ValueError(
-                    f"Registro {numero}, coluna '{coluna}': informe {formato}."
-                ) from erro
-            try:
-                validar_numero_nao_negativo(valor, coluna)
-                if coluna in ("taxa_acerto", "proporcao_acertos_com_feedback") and valor > 1:
-                    raise ValueError("A taxa deve estar entre 0 e 1, inclusive.")
+                valor = converter_hipotese_consumo(texto, coluna)
             except ValueError as erro:
                 raise ValueError(f"Registro {numero}, coluna '{coluna}': {erro}") from erro
             valores[coluna] = valor
@@ -326,12 +364,26 @@ def ler_cenarios_csv(caminho):
 
 
 if __name__ == "__main__":
-    caminho_cenarios = Path(__file__).resolve().parent / "dados" / "cenarios_exemplo.csv"
     try:
-        # Validar o arquivo inteiro antes de calcular ou escrever resultados.
-        cenarios_didaticos = ler_cenarios_csv(caminho_cenarios)
-    except (OSError, ValueError) as erro:
-        raise SystemExit(f"Erro ao ler cenários de '{caminho_cenarios}': {erro}") from erro
+        while True:
+            print("\n1 — Importar cenários do CSV atual.")
+            print("2 — Informar um cenário pelo terminal.")
+            opcao = input("Escolha 1 ou 2: ").strip()
+            if opcao in ("1", "2"):
+                break
+            print("Opção inválida. Informe 1 para CSV ou 2 para preenchimento pelo terminal.")
+
+        if opcao == "1":
+            caminho_cenarios = Path(__file__).resolve().parent / "dados" / "cenarios_exemplo.csv"
+            try:
+                # Validar o arquivo inteiro antes de calcular ou escrever resultados.
+                cenarios_didaticos = ler_cenarios_csv(caminho_cenarios)
+            except (OSError, ValueError) as erro:
+                raise SystemExit(f"Erro ao ler cenários de '{caminho_cenarios}': {erro}") from erro
+        else:
+            cenarios_didaticos = [ler_cenario_terminal()]
+    except (KeyboardInterrupt, EOFError) as erro:
+        raise SystemExit("\nEntrada cancelada. Nenhum resultado foi gerado ou sobrescrito.") from erro
 
     # Cotação didática em reais por dólar, não uma cotação pesquisada.
     cotacao = {
@@ -405,7 +457,7 @@ if __name__ == "__main__":
     custo_total_anual_br = totais_cenario["custo_total_anual_br"]
 
     # Exibição dos resultados para conferência manual.
-    print(f"\nDetalhamento do primeiro cenário importado: {primeiro_cenario['nome']}")
+    print(f"\nDetalhamento do primeiro cenário: {primeiro_cenario['nome']}")
     print("Respostas no mês:", respostas_mensais)
     print("Acertos estimados:", acertos_mensais)
     print("Erros estimados:", erros_mensais)

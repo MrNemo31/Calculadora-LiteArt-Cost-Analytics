@@ -1182,3 +1182,57 @@ A execução real da calculadora confirmou os resultados do exemplo; a comparaç
 existentes foi uma verificação pontual, sem alteração de seus cálculos ou da função de leitura.
 
 **Marco deste registro:** documentação de 07/11/2026, até o fluxo principal integrado ao CSV.
+
+## 30. Escolha do modo e entrada manual de um cenário
+
+**Data:** 07/11/2026.
+
+**Etapa:** preenchimento pelo terminal com validação e reutilização do fluxo existente.
+
+**Objetivo dos pedidos:** escolher entre CSV e um cenário manual, corrigir entradas inválidas
+por campo e preservar precisão, configurações e resultados anteriores em caso de cancelamento.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar um menu com duas opções e `ler_cenario_terminal()`, solicitando nome e seis hipóteses com
+unidades. Validar os textos digitados, repetir somente o campo incorreto e permitir cancelamento
+sem exportação. Encaminhar os dois modos ao mesmo fluxo, sem exigir CSV no modo manual.
+Simular a digitação nos testes, adaptar o modo CSV e documentar apenas as convenções implementadas,
+sem alterar os demais arquivos nesta revisão e sem commit ou push.
+
+**Participação e aprendizado:** as explicações abordaram o retorno textual de `input()`, as
+conversões numéricas, a repetição para correção, a validação compartilhada e a simulação de entradas
+com `unittest.mock.patch`.
+
+**Decisões registradas:**
+
+- Oferecer opção 1 para o CSV atual e 2 para um cenário manual; repetir opções inválidas.
+- Retornar `nome` e `hipoteses_consumo` na leitura manual, removendo espaços externos.
+- Converter usuários diretamente para int e as demais hipóteses para float, sem truncar usuários.
+- Compartilhar `converter_hipotese_consumo` entre CSV e terminal, com tratamento próprio de erros
+  de conversão e posterior validação numérica, preservando os contratos de leitura e cálculo.
+- Exigir nome preenchido, números finitos e não negativos e taxas de 0 a 1; repetir só o campo inválido.
+- Usar ponto decimal, inclusive na saída financeira. Vírgula decimal, taxas de 0 a 100 e saída
+  monetária localizada no padrão brasileiro não foram implementadas.
+- Tratar Ctrl+C e fim da entrada antes dos cálculos, com mensagem e encerramento sem exportação.
+- Encaminhar o cenário manual como lista de um elemento ao mesmo fluxo, mantendo preços, cotação,
+  capacidade, orçamento, Decimal e apresentação com duas casas decimais.
+
+**Contribuição para o projeto:** o modo manual foi implementado sem leitura ou exigência do CSV.
+O cenário de 100 usuários confirmou 2.200 feedbacks, IA mensal de `Decimal("2.20")`, total mensal
+de `Decimal("67.20")` e anual de `Decimal("806.40")`. Com um cenário, os extremos mensais são
+iguais e a diferença é zero. Os testes confirmaram igualdade entre tabelas e exportações dos dois
+modos para as mesmas hipóteses.
+
+Foram acrescentados 14 métodos persistentes: sete de leitura manual e sete de integração.
+Eles simulam `input()` com `patch` e conferem estrutura, tipos, unidades, regras de entrada,
+repetição do campo, opções inválidas, modo manual sem CSV e cancelamento por EOF ou Ctrl+C.
+Também confirmam preservação de resultados anteriores e ausência de novas saídas no cancelamento.
+Os testes CSV foram adaptados para selecionar explicitamente a opção 1; as saídas de integração
+são temporárias. A importação do módulo continua sem perguntas, leitura ou exportação.
+
+A suíte completa passou com 158 métodos em 14 classes. Subtests não aumentam essa contagem.
+As conferências de entrada e integração descritas acima são testes persistentes; a comparação
+das funções de cálculo existentes foi uma verificação pontual de preservação do escopo.
+
+**Marco deste registro:** documentação de 07/11/2026, até o menu e a entrada manual de cenários.

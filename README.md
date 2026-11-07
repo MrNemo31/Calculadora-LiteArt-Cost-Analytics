@@ -19,10 +19,10 @@ Inteligência Artificial.
 
 **Etapa 3 — Início da análise de dados com Pandas.** O arquivo `calculadora.py` já organiza os
 cálculos de consumo, custos de IA e mensalidades de infraestrutura em funções, usando GPT-6 Luna
-como referência inicial. A execução lê as hipóteses de consumo de `dados/cenarios_exemplo.csv`;
-capacidade, preços de IA e infraestrutura e cotação continuam definidos separadamente no código.
-Ainda não há entrada interativa. O arquivo de exemplo contém 100 e 500 usuários, e todos os
-registros válidos alimentam os cálculos, as análises com Pandas e a exportação dos resultados.
+como referência inicial. Um menu permite importar hipóteses de `dados/cenarios_exemplo.csv` ou
+preencher um cenário pelo terminal. Capacidade, preços, cotação e orçamento continuam nas
+configurações atuais do código. Os dois modos alimentam os mesmos cálculos, análises e exportação.
+O arquivo de exemplo contém 100 e 500 usuários; o modo manual trabalha com um cenário por execução.
 
 ### Funcionalidades implementadas
 
@@ -37,6 +37,8 @@ registros válidos alimentam os cálculos, as análises com Pandas e a exportaç
 - Exportação dos dois cenários e sete colunas de `tabela_cenarios` para `resultados/cenarios.csv`.
 - Leitura validada de `dados/cenarios_exemplo.csv` integrada ao fluxo principal, sem cenários fixos
   de reserva em caso de falha.
+- Menu de escolha do modo e leitura manual com `ler_cenario_terminal()`, repetindo somente campos
+  inválidos e permitindo cancelamento sem exportação.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -59,12 +61,12 @@ registros válidos alimentam os cálculos, as análises com Pandas e a exportaç
 
 ### Organização das entradas em dicionários
 
-As entradas estão agrupadas por finalidade. As hipóteses de consumo vêm do CSV; o bloco principal
-associa a capacidade e mantém preços e cotação separados:
+As entradas estão agrupadas por finalidade. As hipóteses de consumo vêm do CSV ou do terminal;
+o bloco principal associa a capacidade e mantém preços e cotação separados:
 
 | Dicionário | Conteúdo | Natureza dos dados |
 | --- | --- | --- |
-| `hipoteses_consumo` | Usuários, respostas, taxas e tokens por feedback; lidos por cenário do CSV | Hipóteses de consumo; didáticas no arquivo de exemplo |
+| `hipoteses_consumo` | Usuários, respostas, taxas e tokens por feedback; lidos do CSV ou do terminal | Hipóteses de consumo; didáticas no arquivo de exemplo |
 | `hipoteses_capacidade` | Quantidades de unidades de backend e banco | Hipóteses didáticas de capacidade |
 | `precos_ia` | Tarifas de entrada e saída em USD por milhão de tokens | Preços pesquisados, com fonte e data nos comentários e no planejamento |
 | `precos_infraestrutura` | Preços mensais por unidade de backend e banco em USD | Valores inventados para aprendizado |
@@ -312,8 +314,8 @@ Apenas os usuários mudam: respostas por usuário, taxas, tokens por feedback, p
 quantidades contratadas permanecem constantes. Assim, consumo e custo de IA crescem cinco vezes,
 enquanto a infraestrutura fica igual. Isso não comprova capacidade para atender 500 usuários.
 
-O detalhamento individual identifica e utiliza o primeiro cenário na ordem do CSV, antes da
-comparação de todos os registros. Para conferir ambos, execute `calculadora.py` com a `.venv-win`.
+O detalhamento individual identifica e utiliza o primeiro cenário do CSV ou o único cenário
+manual, antes da comparação. Para conferir o exemplo, escolha o modo CSV na execução com a `.venv-win`.
 Os resultados do exemplo são estimativas didáticas,
 com cotação de R$ 5,00 por dólar e projeção de 12 meses constantes, sem chamadas à API.
 
@@ -589,9 +591,9 @@ preservando a ordem dos registros. Cada item contém `nome` e `hipoteses_consumo
 hipóteses esperadas por `calcular_consumo_cenario`. Os dicionários são independentes.
 A função não executa cenários, não imprime, não exporta e não altera o arquivo de origem.
 
-**A leitura já está integrada à execução principal.** Executar `calculadora.py` utiliza todos os
-cenários válidos de `dados/cenarios_exemplo.csv`. A função isolada ainda pode ser chamada para
-inspecionar somente as hipóteses, como no comando manual abaixo.
+**A leitura já está integrada à execução principal.** Escolher a opção 1 ao executar a calculadora
+utiliza todos os cenários válidos de `dados/cenarios_exemplo.csv`. A função isolada pode ser
+chamada para inspecionar somente as hipóteses, como no comando manual abaixo.
 
 O arquivo versionável `dados/cenarios_exemplo.csv` contém os cenários de 100 e 500 usuários,
 com nomes distintos, e exatamente estas sete colunas:
@@ -634,7 +636,7 @@ reutilizadas. Campos extras não podem ser descartados silenciosamente nem usado
 Arquivos malformados falham claramente, sem devolver resultados parciais.
 
 Erros de campo geram `ValueError` com registro de dados, coluna e explicação, como
-`Registro 2, coluna 'usuarios_ativos': informe um inteiro sem parte decimal.`
+`Registro 2, coluna 'usuarios_ativos': Informe um inteiro sem parte decimal.`
 A contagem começa em 1 e não corresponde necessariamente à linha física do arquivo, pois campos
 entre aspas podem conter quebras de linha. Erros estruturais identificam o problema do CSV ou os
 nomes das colunas; arquivo inexistente preserva `FileNotFoundError`.
@@ -650,25 +652,71 @@ O `print` pertence ao comando de conferência, não à função. Ele apresenta a
 não calcula os cenários nem regenera o CSV de resultados. Importar `calculadora` também não
 lê o exemplo ou gera arquivos.
 
-### Fluxo principal integrado ao CSV
+### Entrada de um cenário pelo terminal
 
-1. Localizar `dados/cenarios_exemplo.csv` pela pasta de `calculadora.py`, usando
-   `Path(__file__).resolve().parent`, independentemente da pasta atual do terminal.
-2. Ler e validar todos os registros com `ler_cenarios_csv` antes de calcular ou escrever resultados.
+O menu oferece `1` para importar o CSV atual e `2` para preencher um cenário pelo terminal.
+Uma opção diferente, inclusive vazia, recebe uma explicação e a pergunta é repetida.
+No modo manual, `ler_cenario_terminal()` retorna `nome` e `hipoteses_consumo`, na mesma estrutura
+de cada cenário importado. O CSV não é lido nem precisa existir nesse modo.
+
+São solicitados nome e seis hipóteses, nesta ordem:
+
+| Campo | Unidade, formato e regra | Exemplo manual |
+| --- | --- | --- |
+| Nome | Texto não vazio após remover espaços externos | `Cenário manual` |
+| Usuários ativos | Inteiro não negativo, usuários/mês; `100.0` e `100.5` são recusados | `100` |
+| Respostas por usuário | Respostas/usuário/mês, finitas e não negativas; médias fracionárias aceitas | `40` |
+| Taxa de acerto | Proporção entre 0 e 1, inclusive; `0.60` representa 60% | `0.60` |
+| Acertos com feedback | Proporção dos acertos entre 0 e 1, inclusive | `0.25` |
+| Tokens de entrada | Média de tokens/feedback, finita e não negativa; frações aceitas | `500` |
+| Tokens de saída faturáveis | Média de tokens/feedback, finita e não negativa; frações aceitas | `300` |
+
+`input()` retorna texto. Os espaços externos são removidos e a auxiliar compartilhada
+`converter_hipotese_consumo` converte usuários diretamente para `int` e as outras cinco hipóteses
+para `float`, compatível com as funções atuais. A conversão tem seu próprio tratamento de erro;
+depois, `validar_numero_nao_negativo` verifica valores finitos e não negativos, e as taxas recebem
+a verificação do limite superior de 1. A leitura CSV reutiliza essa mesma auxiliar.
+
+Nome ou campo vazio, texto não numérico, usuário fracionário, negativo, infinito, NaN ou taxa fora
+do intervalo provoca uma mensagem explicativa e nova pergunta somente para aquele campo.
+As respostas já aceitas são mantidas.
+
+A convenção atual exige ponto decimal, como `40.5`. Vírgula decimal, como `40,5`, e taxas como
+`60` ou `60%` para representar 60% não são aceitas. A saída monetária usa ponto e duas casas,
+como `R$ 67.20`; a notação brasileira usada nas explicações deste README não é a formatação do
+terminal. Aceitar vírgula, taxas de 0 a 100 ou localizar a saída monetária são melhorias futuras.
+
+Ctrl+C ou fim da entrada durante a escolha ou o preenchimento encerram com código diferente de
+zero e a mensagem "Entrada cancelada. Nenhum resultado foi gerado ou sobrescrito."
+Nenhum cálculo ou exportação é iniciado; resultados anteriores são preservados. A função isolada
+propaga `KeyboardInterrupt` e `EOFError`, tratados pelo bloco principal.
+
+### Fluxo principal compartilhado pelos dois modos
+
+1. Apresentar o menu e obter uma opção válida. No modo CSV, localizar `dados/cenarios_exemplo.csv`
+   pela pasta de `calculadora.py`, independentemente da pasta atual do terminal.
+2. Ler e validar todos os registros com `ler_cenarios_csv`, ou montar a lista de um elemento com
+   `ler_cenario_terminal()`, antes de calcular ou escrever resultados.
 3. Associar a cada cenário uma cópia independente da capacidade definida no código. Preços e
    cotação continuam separados das hipóteses de consumo e compartilhados pelos cenários.
-4. Calcular e apresentar o primeiro cenário, identificando seu nome, e depois processar todos os
-   cenários com `calcular_cenario`, preservando a ordem de entrada nos resumos e na tabela original.
+4. Calcular e apresentar o primeiro cenário, identificando seu nome, e depois processar a lista
+   com `calcular_cenario`, preservando a ordem de entrada nos resumos e na tabela original.
 5. Reutilizar a comparação por custo decrescente, o filtro por orçamento, os saldos e as agregações.
    A comparação possui sua própria ordenação; ela não reorganiza a tabela original.
 6. Exportar a tabela original para `resultados/cenarios.csv`, com valores completos. Os dados
    financeiros permanecem em Decimal, e duas casas decimais são usadas somente na apresentação.
 
-Se a leitura falhar por arquivo ausente ou inválido, o fluxo principal apresenta no terminal
+No modo CSV, se a leitura falhar por arquivo ausente ou inválido, o fluxo apresenta no terminal
 uma mensagem iniciada por "Erro ao ler cenários", incluindo caminho e explicação, e encerra com
 código de saída 1. Não há fallback para cenários fixos. Nenhum cálculo ou exportação é iniciado;
 a pasta de resultados não é criada e um CSV anterior, se existir, não é sobrescrito.
 As exceções de `ler_cenarios_csv` continuam disponíveis para quem chama a função diretamente.
+
+Preços de IA e infraestrutura, cotação de R$ 5,00 por dólar, capacidade de duas unidades de backend
+e uma de banco e orçamento didático de R$ 70,00 continuam definidos no código. O modo manual não
+solicita essas configurações. Os dados financeiros continuam em Decimal, com precisão completa
+na exportação e duas casas somente na exibição. Com um cenário, menor e maior custo são iguais,
+e a diferença entre eles é zero.
 
 Os testes de integração usaram arquivos e saídas temporários. Além do exemplo de 100 e 500
 usuários, um arquivo com somente 200 usuários produziu 4.400 feedbacks, R$ 4,40 de IA, R$ 69,40
@@ -720,9 +768,13 @@ Set-Location -LiteralPath 'D:\Natan\LiteArt Cost Analytics'
 
 Ao concluir, o terminal informa o arquivo salvo. Executar novamente substitui esse arquivo com
 os resultados atuais.
-O arquivo de entrada deve existir em `dados/cenarios_exemplo.csv`, junto ao projeto. Editar seus
-registros altera a simulação; o primeiro registro define o detalhamento individual. Com o arquivo
-de exemplo preservado, os resultados de 100 e 500 usuários apresentados neste README continuam válidos.
+No menu, escolher `1` para usar `dados/cenarios_exemplo.csv`, que precisa existir somente nesse
+modo. Editar seus registros altera a simulação; o primeiro define o detalhamento individual.
+Com o arquivo de exemplo preservado, os resultados de 100 e 500 usuários continuam válidos.
+
+Para um preenchimento manual curto, escolher `2` e responder, na ordem: `Cenário manual`, `100`,
+`40`, `0.60`, `0.25`, `500` e `300`. O resultado é 2.200 feedbacks, IA mensal de R$ 2,20, total
+mensal de R$ 67,20 e anual de R$ 806,40; no terminal, os valores usam ponto decimal.
 
 Os comandos conferem a versão do Pandas e executam a calculadora com o interpretador escolhido,
 sem precisar ativar o ambiente ou alterar o PATH. `-X utf8` mantém os acentos na saída capturada,
@@ -770,14 +822,15 @@ hipóteses representam o consumo real do LiteArt.
 ### Testes automatizados
 
 O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest` , da biblioteca padrão
-do Python. São 144 métodos de teste, distribuídos em 13 classes: sete para os cálculos, três para as
-coordenadoras de partes do cenário, uma para o cenário completo, uma para a leitura de CSV e uma
-para a integração do fluxo principal.
+do Python. São 158 métodos de teste, distribuídos em 14 classes: sete para os cálculos, três para as
+coordenadoras de partes do cenário, uma para o cenário completo, uma para a leitura de CSV, uma
+para a leitura pelo terminal e uma para a integração do fluxo principal.
 Parte dos métodos usa `subTest`
 para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
 
 A contagem foi reconferida no arquivo atual: os 111 métodos dos cálculos e coordenadoras,
-25 de `TestLerCenariosCsv` e oito de `TestIntegracaoCenariosCsv`. As primeiras verificações de
+25 de `TestLerCenariosCsv`, sete de `TestLerCenarioTerminal` e 15 de `TestIntegracaoCenariosCsv`.
+As primeiras verificações de
 exportação foram pontuais; os testes persistentes de integração agora também conferem a saída
 CSV e sua precisão no fluxo completo, usando arquivos temporários.
 
@@ -806,9 +859,18 @@ A suíte verifica:
   limites aceitos, médias fracionárias e arquivos malformados. Também verificam mensagens com
   registro e coluna, ausência de efeitos na importação e preservação do arquivo de entrada.
 - Leitura do exemplo e conferência de 2.200 e 11.000 feedbacks com `calcular_consumo_cenario`.
-- Oito métodos de integração: resultados e análises do exemplo, cenário único de 200 usuários,
+- Sete métodos de leitura manual: estrutura, tipos, espaços, nome vazio, regras numéricas,
+  repetição somente do campo inválido, limites aceitos, médias fracionárias e cancelamento.
+- Quinze métodos de integração: resultados e análises do exemplo, cenário único de 200 usuários,
   três registros na ordem do arquivo, capacidade independente, erros sem sobrescrever resultados,
-  arquivos vazios ou malformados sem criar saídas e execução a partir de outra pasta.
+  arquivos vazios ou malformados sem criar saídas e execução a partir de outra pasta. Incluem modo
+  manual sem CSV, opções inválidas seguidas de válidas, igualdade entre os dois modos e cancelamento
+  sem criar ou sobrescrever resultados. As exportações de teste usam saídas temporárias.
+
+Os testes usam `patch("builtins.input", side_effect=[...])` para simular respostas e exceções,
+sem exigir digitação na suíte. A lista de chamadas confirma qual pergunta foi repetida.
+Os testes CSV selecionam explicitamente a opção 1. O teste de importação também impede chamadas
+a `input()`, leitura de CSV, impressão ou exportação ao importar o módulo.
 
 A auxiliar de validação é exercitada pelas chamadas às funções de cálculo. A suíte cobre os casos
 descritos; não é uma verificação exaustiva de todas as entradas possíveis nem uma medição de consumo
@@ -847,7 +909,7 @@ Para executar apenas os testes do cenário completo:
 Os comandos usam diretamente o ambiente do projeto, independentemente de `python` no PATH.
 Também é possível executar `test_calculadora.py` diretamente com esse mesmo interpretador.
 
-A execução completa após a integração retornou `Ran 144 tests` e `OK` .
+A execução completa após a entrada manual retornou `Ran 158 tests` e `OK` .
 `assertEqual` confere resultados, `assertIsInstance` verifica tipos de retorno e `assertRaises`
 confirma as exceções esperadas. Uma
 exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
@@ -862,19 +924,19 @@ implementação e a refatoração das validações. Esses números são registro
 representam a quantidade de testes salvos atualmente.
 
 O fluxo principal trata falhas de leitura do CSV com mensagem e encerramento sem exportação.
-Chamadas diretas inválidas às funções continuam levantando suas exceções; não há interface
-interativa para corrigir entradas durante a execução.
+Chamadas diretas inválidas às funções continuam levantando suas exceções. Na entrada manual,
+o campo inválido pode ser corrigido durante a execução; no modo CSV, o erro encerra o programa.
 
 ### Próximos incrementos
 
 O primeiro DataFrame, a seleção e ordenação dos custos, o filtro por orçamento, a coluna de saldo,
-o resumo dos extremos mensais, a exportação e a leitura de CSV integrada ao fluxo principal já
+o resumo dos extremos mensais, a exportação, a leitura de CSV e a entrada manual com menu já
 foram implementados na `.venv-win`.
 Os próximos incrementos poderão aprofundar a análise dos cenários, preservando as funções
 existentes e os tipos monetários.
 
 As alternativas pesquisadas ainda precisam ser revisadas antes da substituição dos preços didáticos.
-A integração dos cenários importados já está concluída. Catálogo de preços, entrada pelo terminal,
+A integração dos cenários importados e a entrada manual já estão concluídas. Catálogo de preços,
 novas análises, gráficos e dashboard continuam dependendo de incrementos próprios.
 
 ## Primeira versão planejada
