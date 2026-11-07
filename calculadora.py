@@ -1,6 +1,7 @@
 from decimal import Decimal
 from math import isfinite
 from pathlib import Path
+from warnings import catch_warnings, simplefilter
 
 import pandas as pd
 
@@ -262,6 +263,66 @@ def calcular_cenario(
             "custo_total_anual_br": calcular_custo_anual(custo_total_mensal_br),
         },
     }
+
+
+def ler_cenarios_csv(caminho):
+    """Lê hipóteses de consumo em UTF-8, sem executar os cenários."""
+    colunas = (
+        "cenario", "usuarios_ativos", "respostas_por_usuario", "taxa_acerto",
+        "proporcao_acertos_com_feedback", "tokens_entrada", "tokens_saida",
+    )
+    try:
+        # Não permitir que campos extras sejam descartados ou usados como índice.
+        with catch_warnings():
+            simplefilter("error", pd.errors.ParserWarning)
+            tabela = pd.read_csv(
+                caminho, dtype=str, keep_default_na=False, encoding="utf-8-sig",
+                sep=",", index_col=False, on_bad_lines="error", skip_blank_lines=False,
+            )
+    except pd.errors.EmptyDataError as erro:
+        raise ValueError("CSV vazio: informe o cabeçalho e pelo menos um cenário.") from erro
+    except (pd.errors.ParserError, pd.errors.ParserWarning) as erro:
+        raise ValueError(f"CSV malformado: {erro}") from erro
+
+    ausentes = [coluna for coluna in colunas if coluna not in tabela.columns]
+    inesperadas = [coluna for coluna in tabela.columns if coluna not in colunas]
+    if ausentes or inesperadas:
+        raise ValueError(
+            f"Colunas incorretas: ausentes={ausentes}; inesperadas={inesperadas}."
+        )
+    if tabela.empty:
+        raise ValueError("CSV sem registros de dados: informe pelo menos um cenário.")
+
+    cenarios = []
+    for numero, registro in enumerate(tabela.to_dict(orient="records"), start=1):
+        valores = {}
+        for coluna in colunas:
+            texto = registro[coluna]
+            if not isinstance(texto, str) or not texto.strip():
+                raise ValueError(f"Registro {numero}, coluna '{coluna}': campo obrigatório vazio.")
+            texto = texto.strip()
+            if coluna == "cenario":
+                valores[coluna] = texto
+                continue
+            try:
+                valor = int(texto) if coluna == "usuarios_ativos" else float(texto)
+            except ValueError as erro:
+                formato = "um inteiro sem parte decimal" if coluna == "usuarios_ativos" else "um número"
+                raise ValueError(
+                    f"Registro {numero}, coluna '{coluna}': informe {formato}."
+                ) from erro
+            try:
+                validar_numero_nao_negativo(valor, coluna)
+                if coluna in ("taxa_acerto", "proporcao_acertos_com_feedback") and valor > 1:
+                    raise ValueError("A taxa deve estar entre 0 e 1, inclusive.")
+            except ValueError as erro:
+                raise ValueError(f"Registro {numero}, coluna '{coluna}': {erro}") from erro
+            valores[coluna] = valor
+        cenarios.append({
+            "nome": valores["cenario"],
+            "hipoteses_consumo": {coluna: valores[coluna] for coluna in colunas[1:]},
+        })
+    return cenarios
 
 
 if __name__ == "__main__":

@@ -1,8 +1,16 @@
 import unittest
+import csv
+import io
+import runpy
+from contextlib import redirect_stdout
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from decimal import Decimal
 
 from calculadora import (
+    ler_cenarios_csv,
     calcular_cenario,
     calcular_consumo_cenario,
     calcular_custo_ia_cenario,
@@ -942,6 +950,251 @@ class TestCalcularCenario(unittest.TestCase):
         for entrada in entradas:
             entrada["observacao"] = "Cenário didático"
         self.assertEqual(calcular_cenario(*entradas), esperado)
+
+
+class TestLerCenariosCsv(unittest.TestCase):
+    colunas = [
+        "cenario", "usuarios_ativos", "respostas_por_usuario", "taxa_acerto",
+        "proporcao_acertos_com_feedback", "tokens_entrada", "tokens_saida",
+    ]
+
+    def setUp(self):
+        temporario = TemporaryDirectory(prefix="liteart_cenarios_")
+        self.addCleanup(temporario.cleanup)
+        self.caminho = Path(temporario.name) / "cenarios.csv"
+        self.registro = ["Cenário de teste", "100", "40", "0.60", "0.25", "500", "300"]
+
+    def escrever(self, registros, colunas=None, encoding="utf-8"):
+        with self.caminho.open("w", encoding=encoding, newline="") as arquivo:
+            escritor = csv.writer(arquivo)
+            escritor.writerow(self.colunas if colunas is None else colunas)
+            escritor.writerows(registros)
+        return self.caminho
+
+    def test_leitura_valida_tipos_e_estrutura(self):
+        self.escrever([self.registro])
+        esperado = [{
+            "nome": "Cenário de teste",
+            "hipoteses_consumo": {
+                "usuarios_ativos": 100, "respostas_por_usuario": 40.0,
+                "taxa_acerto": 0.6, "proporcao_acertos_com_feedback": 0.25,
+                "tokens_entrada": 500.0, "tokens_saida": 300.0,
+            },
+        }]
+        for caminho in (self.caminho, str(self.caminho)):
+            with self.subTest(caminho=caminho):
+                resultado = ler_cenarios_csv(caminho)
+                self.assertEqual(resultado, esperado)
+                hipoteses = resultado[0]["hipoteses_consumo"]
+                self.assertIs(type(hipoteses["usuarios_ativos"]), int)
+                for coluna in self.colunas[2:]:
+                    self.assertIs(type(hipoteses[coluna]), float)
+
+    def test_exemplo_ordem_e_feedbacks_dos_dois_cenarios(self):
+        caminho = Path(__file__).resolve().parent / "dados" / "cenarios_exemplo.csv"
+        cenarios = ler_cenarios_csv(caminho)
+        self.assertEqual([c["nome"] for c in cenarios], [
+            "Cenário didático: 100 usuários", "Cenário didático: 500 usuários",
+        ])
+        self.assertEqual([c["hipoteses_consumo"]["usuarios_ativos"] for c in cenarios], [100, 500])
+        self.assertEqual([
+            calcular_consumo_cenario(c["hipoteses_consumo"])["feedbacks_mensais"]
+            for c in cenarios
+        ], [2200, 11000])
+
+    def test_dicionarios_independentes(self):
+        self.escrever([self.registro, ["Outro cenário", *self.registro[1:]]])
+        primeiro, segundo = ler_cenarios_csv(self.caminho)
+        self.assertIsNot(primeiro, segundo)
+        self.assertIsNot(primeiro["hipoteses_consumo"], segundo["hipoteses_consumo"])
+        primeiro["hipoteses_consumo"]["usuarios_ativos"] = 999
+        self.assertEqual(segundo["hipoteses_consumo"]["usuarios_ativos"], 100)
+
+    def test_remove_espacos_externos(self):
+        self.escrever([[f"  {valor}  " for valor in self.registro]])
+        resultado = ler_cenarios_csv(self.caminho)[0]
+        self.assertEqual(resultado["nome"], "Cenário de teste")
+        self.assertEqual(resultado["hipoteses_consumo"]["usuarios_ativos"], 100)
+
+    def test_utf8_com_e_sem_bom(self):
+        for encoding in ("utf-8", "utf-8-sig"):
+            with self.subTest(encoding=encoding):
+                self.escrever([self.registro], encoding=encoding)
+                self.assertEqual(ler_cenarios_csv(self.caminho)[0]["nome"], "Cenário de teste")
+
+    def test_colunas_em_outra_ordem(self):
+        self.escrever([list(reversed(self.registro))], list(reversed(self.colunas)))
+        self.assertEqual(ler_cenarios_csv(self.caminho)[0]["hipoteses_consumo"]["usuarios_ativos"], 100)
+
+    def test_arquivo_inexistente(self):
+        with self.assertRaises(FileNotFoundError):
+            ler_cenarios_csv(self.caminho)
+
+    def test_arquivo_vazio(self):
+        for conteudo in ("", "\ufeff"):
+            with self.subTest(conteudo=conteudo):
+                self.caminho.write_text(conteudo, encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "CSV vazio"):
+                    ler_cenarios_csv(self.caminho)
+
+    def test_somente_cabecalho(self):
+        self.escrever([])
+        with self.assertRaisesRegex(ValueError, "sem registros"):
+            ler_cenarios_csv(self.caminho)
+
+    def test_colunas_ausentes_e_inesperadas(self):
+        casos = [
+            (self.colunas[:-1], "tokens_saida"),
+            ([*self.colunas, "preco"], "preco"),
+            (["nome", *self.colunas[1:]], "cenario"),
+            ([*self.colunas, "taxa_acerto"], "taxa_acerto"),
+        ]
+        for colunas, nome in casos:
+            with self.subTest(colunas=colunas):
+                self.escrever([], colunas)
+                with self.assertRaises(ValueError) as erro:
+                    ler_cenarios_csv(self.caminho)
+                self.assertIn(nome, str(erro.exception))
+                self.assertIn("Colunas incorretas", str(erro.exception))
+
+    def test_campos_vazios_identificam_registro_e_coluna(self):
+        for indice, coluna in enumerate(self.colunas):
+            for vazio in ("", "   "):
+                with self.subTest(coluna=coluna, vazio=vazio):
+                    registro = self.registro.copy()
+                    registro[indice] = vazio
+                    self.escrever([self.registro, registro])
+                    with self.assertRaises(ValueError) as erro:
+                        ler_cenarios_csv(self.caminho)
+                    self.assertIn("Registro 2", str(erro.exception))
+                    self.assertIn(coluna, str(erro.exception))
+                    self.assertIn("vazio", str(erro.exception))
+
+    def test_textos_numericos_invalidos(self):
+        for indice, coluna in enumerate(self.colunas[1:], start=1):
+            with self.subTest(coluna=coluna):
+                registro = self.registro.copy()
+                registro[indice] = "abc"
+                self.escrever([registro])
+                with self.assertRaises(ValueError) as erro:
+                    ler_cenarios_csv(self.caminho)
+                self.assertIn("Registro 1", str(erro.exception))
+                self.assertIn(coluna, str(erro.exception))
+
+    def test_negativos_em_todas_as_hipoteses(self):
+        for indice, coluna in enumerate(self.colunas[1:], start=1):
+            with self.subTest(coluna=coluna):
+                registro = self.registro.copy()
+                registro[indice] = "-1"
+                self.escrever([registro])
+                with self.assertRaises(ValueError) as erro:
+                    ler_cenarios_csv(self.caminho)
+                self.assertIn("Registro 1", str(erro.exception))
+                self.assertIn(coluna, str(erro.exception))
+
+    def test_infinito_nan_e_overflow(self):
+        for indice, coluna in enumerate(self.colunas[1:], start=1):
+            for invalido in ("inf", "-inf", "Infinity", "NaN", "1e999"):
+                with self.subTest(coluna=coluna, invalido=invalido):
+                    registro = self.registro.copy()
+                    registro[indice] = invalido
+                    self.escrever([registro])
+                    with self.assertRaises(ValueError) as erro:
+                        ler_cenarios_csv(self.caminho)
+                    self.assertIn("Registro 1", str(erro.exception))
+                    self.assertIn(coluna, str(erro.exception))
+
+    def test_usuarios_fracionarios_nao_sao_truncados(self):
+        for invalido in ("100.5", "100.0"):
+            with self.subTest(invalido=invalido):
+                registro = self.registro.copy()
+                registro[1] = invalido
+                self.escrever([registro])
+                with self.assertRaisesRegex(ValueError, "Registro 1.*usuarios_ativos.*inteiro"):
+                    ler_cenarios_csv(self.caminho)
+
+    def test_taxas_acima_de_um(self):
+        for indice in (3, 4):
+            with self.subTest(coluna=self.colunas[indice]):
+                registro = self.registro.copy()
+                registro[indice] = "1.01"
+                self.escrever([registro])
+                with self.assertRaisesRegex(ValueError, f"Registro 1.*{self.colunas[indice]}.*entre 0 e 1"):
+                    ler_cenarios_csv(self.caminho)
+
+    def test_zero_usuarios_e_taxas_nos_limites(self):
+        for taxa in ("0", "1"):
+            with self.subTest(taxa=taxa):
+                self.escrever([["Limites", "0", "0", taxa, taxa, "0", "0"]])
+                hipoteses = ler_cenarios_csv(self.caminho)[0]["hipoteses_consumo"]
+                self.assertEqual(hipoteses["usuarios_ativos"], 0)
+                self.assertEqual(hipoteses["taxa_acerto"], float(taxa))
+                self.assertEqual(hipoteses["proporcao_acertos_com_feedback"], float(taxa))
+                self.assertEqual(calcular_consumo_cenario(hipoteses)["feedbacks_mensais"], 0)
+
+    def test_medias_fracionarias_validas(self):
+        self.escrever([["Frações", "100", "40.5", "0.60", "0.25", "500.5", "300.25"]])
+        hipoteses = ler_cenarios_csv(self.caminho)[0]["hipoteses_consumo"]
+        self.assertEqual(hipoteses["respostas_por_usuario"], 40.5)
+        self.assertEqual(hipoteses["tokens_entrada"], 500.5)
+        self.assertEqual(hipoteses["tokens_saida"], 300.25)
+        self.assertEqual(calcular_consumo_cenario(hipoteses)["respostas_mensais"], 4050)
+
+    def test_campos_extras_nao_viram_indice_nem_sao_descartados(self):
+        for registros in (
+            [[*self.registro, "extra"]],
+            [self.registro, [*self.registro, "extra"]],
+            [[*self.registro, ""]],
+        ):
+            with self.subTest(registros=registros):
+                self.escrever(registros)
+                with self.assertRaisesRegex(ValueError, "CSV malformado"):
+                    ler_cenarios_csv(self.caminho)
+
+    def test_registro_com_campos_faltando(self):
+        self.escrever([self.registro, self.registro[:-1]])
+        with self.assertRaisesRegex(ValueError, "Registro 2.*tokens_saida.*vazio"):
+            ler_cenarios_csv(self.caminho)
+
+    def test_aspas_malformadas(self):
+        self.escrever([])
+        with self.caminho.open("a", encoding="utf-8") as arquivo:
+            arquivo.write('"Nome sem fechar,100,40,0.6,0.25,500,300\n')
+        with self.assertRaisesRegex(ValueError, "CSV malformado"):
+            ler_cenarios_csv(self.caminho)
+
+    def test_registro_em_branco_nao_e_descartado(self):
+        self.escrever([self.registro, [], self.registro])
+        with self.assertRaisesRegex(ValueError, "Registro 2.*cenario.*vazio"):
+            ler_cenarios_csv(self.caminho)
+
+    def test_numero_de_registro_independe_de_linhas_fisicas(self):
+        primeiro = ["Nome com vírgula,\ne quebra de linha", *self.registro[1:]]
+        segundo = ["Segundo", "abc", *self.registro[2:]]
+        self.escrever([primeiro, segundo])
+        with self.assertRaisesRegex(ValueError, "Registro 2.*usuarios_ativos"):
+            ler_cenarios_csv(self.caminho)
+
+    def test_nao_imprime_nem_altera_o_arquivo(self):
+        self.escrever([self.registro])
+        antes = self.caminho.read_bytes()
+        arquivos_antes = list(self.caminho.parent.iterdir())
+        with redirect_stdout(io.StringIO()) as saida:
+            ler_cenarios_csv(self.caminho)
+        self.assertEqual(saida.getvalue(), "")
+        self.assertEqual(self.caminho.read_bytes(), antes)
+        self.assertEqual(list(self.caminho.parent.iterdir()), arquivos_antes)
+
+    def test_importacao_nao_le_csv_nem_cria_arquivos(self):
+        script = Path(__file__).resolve().parent / "calculadora.py"
+        with patch("pandas.read_csv", side_effect=AssertionError("leitura na importação")), \
+                patch("pandas.DataFrame.to_csv", side_effect=AssertionError("exportação na importação")), \
+                patch.object(Path, "mkdir", side_effect=AssertionError("mkdir na importação")), \
+                redirect_stdout(io.StringIO()) as saida:
+            estado = runpy.run_path(str(script), run_name="calculadora_importada")
+        self.assertEqual(saida.getvalue(), "")
+        self.assertIn("ler_cenarios_csv", estado)
+        self.assertNotIn("tabela_cenarios", estado)
 
 
 if __name__ == "__main__":

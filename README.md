@@ -23,6 +23,8 @@ como referência inicial. As entradas são definidas em cinco dicionários no bl
 hipóteses de consumo e capacidade, preços de IA e infraestrutura e cotação. Ainda não há entrada
 interativa. O terminal apresenta a comparação didática de 100 e 500 usuários e o primeiro
 DataFrame, criado a partir da lista de resumos dos cenários.
+A função de leitura e validação de cenários por CSV já está disponível para chamada manual,
+mas ainda não alimenta essa execução: os cenários principais continuam definidos no código.
 
 ### Funcionalidades implementadas
 
@@ -35,6 +37,7 @@ DataFrame, criado a partir da lista de resumos dos cenários.
 - Resumo do menor e maior custo mensal e da diferença entre os extremos, preservando `Decimal`.
 - Formatação monetária com duas casas decimais nas tabelas e resumos, somente na apresentação.
 - Exportação dos dois cenários e sete colunas de `tabela_cenarios` para `resultados/cenarios.csv`.
+- Função `ler_cenarios_csv(caminho)` com validação e CSV de exemplo, ainda sem integração principal.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -78,8 +81,8 @@ coordenadora de infraestrutura recebe preços, capacidade e cotação. Os result
 nos dicionários de entrada.
 
 Essa organização prepara a reutilização dos cálculos em diferentes cenários. O cenário completo já
-pode ser calculado por uma função. Leitura de CSV e consulta automática de câmbio ainda não foram
-implementadas.
+pode ser calculado por uma função. A leitura validada de hipóteses por CSV está disponível,
+mas sua integração ao fluxo principal e a consulta automática de câmbio ainda não foram implementadas.
 
 Na última refatoração, a saída completa foi comparada antes e depois e permaneceu idêntica. Os 111
 métodos de teste também passaram. Os testes das funções usam entradas próprias; alterações nos
@@ -372,7 +375,8 @@ A apresentação usa `to_string()` com `index=False` e formatadores monetários 
 `index=False` oculta a numeração das linhas. A representação textual é usada somente na impressão;
 os valores financeiros da tabela continuam sendo objetos `Decimal`.
 Os cenários permanecem didáticos, sem despesas reais ou capacidade de atendimento comprovada.
-A tabela já é exportada para CSV; a importação de hipóteses de cenários continua planejada.
+A tabela já é exportada para CSV. A função de leitura de hipóteses está disponível, mas sua
+integração à execução principal continua pendente.
 
 As verificações pontuais confirmaram o formato `(2, 7)`, a ordem dos campos, a igualdade com a
 lista e sua preservação desde antes da criação da tabela, além dos resultados exatos dos dois
@@ -555,8 +559,9 @@ o custo exibido como `67.20` é exportado como `67.200000`, preservando a precis
 
 CSV armazena texto e não preserva o tipo Python `Decimal`. Para recuperar a precisão, os campos
 financeiros devem ser lidos como texto e convertidos diretamente para `Decimal`, sem passagem
-intermediária por float. A leitura feita para conferir o arquivo não constitui uma funcionalidade
-de importação de cenários; essa entrada de hipóteses ainda depende de implementação e validação.
+intermediária por float. A releitura do arquivo de resultados foi uma conferência de exportação.
+A função `ler_cenarios_csv` lê outro formato, destinado às hipóteses de consumo, descrito abaixo;
+ela ainda não está integrada ao fluxo principal.
 Os DataFrames e `resumos_cenarios` mantêm seus valores financeiros como objetos Decimal.
 
 A regra `/resultados/` do `.gitignore` exclui a pasta de arquivos gerados do versionamento.
@@ -571,7 +576,71 @@ sem inserir esse valor nos cenários reais.
 Também foram confirmadas a preservação da lista e dos quatro DataFrames, a regeneração sem
 duplicatas ao executar de outra pasta e a importação do módulo sem impressão, criação ou alteração
 do CSV. Os 111 testes existentes passaram na implementação. Essas conferências específicas foram
-roteiros pontuais; não foram adicionados testes persistentes de CSV ao repositório.
+roteiros pontuais; não foram adicionados testes persistentes de exportação. Os novos testes de
+leitura de hipóteses são descritos na próxima seção.
+
+### Leitura e validação de hipóteses por CSV
+
+`ler_cenarios_csv(caminho)` recebe um caminho de arquivo e retorna uma lista de dicionários,
+preservando a ordem dos registros. Cada item contém `nome` e `hipoteses_consumo`, com as seis
+hipóteses esperadas por `calcular_consumo_cenario`. Os dicionários são independentes.
+A função não executa cenários, não imprime, não exporta e não altera o arquivo de origem.
+
+**A leitura ainda não está integrada à execução principal.** Executar `calculadora.py` continua
+utilizando os cenários definidos no código e exportando os resultados como antes. Integrar os
+cenários lidos será o próximo incremento; a chamada manual abaixo apenas retorna as hipóteses.
+
+O arquivo versionável `dados/cenarios_exemplo.csv` contém os cenários de 100 e 500 usuários,
+com nomes distintos, e exatamente estas sete colunas:
+
+| Coluna | Unidade e preenchimento |
+| --- | --- |
+| `cenario` | Nome textual obrigatório; espaços externos são removidos |
+| `usuarios_ativos` | Usuários/mês; inteiro não negativo, como `100`; `100.0` e `100.5` são recusados |
+| `respostas_por_usuario` | Respostas/usuário/mês; número finito não negativo; médias fracionárias são aceitas |
+| `taxa_acerto` | Proporção entre 0 e 1, inclusive; `0.60` representa 60%, não preencher com `60` ou `60%` |
+| `proporcao_acertos_com_feedback` | Proporção dos acertos com feedback entre 0 e 1; `0.25` representa 25% |
+| `tokens_entrada` | Tokens/feedback de entrada; número finito não negativo; médias fracionárias são aceitas |
+| `tokens_saida` | Tokens/feedback de saída faturável; número finito não negativo; médias fracionárias são aceitas |
+
+O formato aceito usa cabeçalho, vírgula entre campos, ponto decimal e UTF-8 com ou sem BOM.
+Todas as colunas são obrigatórias; sua ordem pode variar, mas colunas ausentes ou inesperadas são
+rejeitadas pelos nomes. Valores com vírgulas ou quebras de linha precisam estar entre aspas,
+conforme o formato CSV. Não deixar campos ou registros em branco.
+
+No exemplo, ambos os cenários usam 40 respostas por usuário, taxa de acerto `0.60`, proporção
+de acertos com feedback `0.25`, 500 tokens de entrada e 300 de saída. As hipóteses são didáticas;
+o arquivo não comprova consumo real nem capacidade de atendimento. Preços, cotação e capacidade
+permanecem separados: esse CSV contém somente o nome e as hipóteses de consumo, não custos ou
+resultados calculados. Ele não tem o mesmo esquema de `resultados/cenarios.csv`.
+
+A leitura começa com `pd.read_csv()`, `dtype=str` e `keep_default_na=False`, preservando os
+textos para validação explícita. Os espaços externos são removidos; usuários são convertidos
+diretamente para `int`, sem truncar frações. As outras cinco hipóteses viram `float`, tipo já
+aceito pelas funções de consumo. Não há campos monetários nessa entrada: a regra de preservar
+Decimal continua valendo para os dados financeiros.
+
+São recusados arquivo vazio ou só com cabeçalho, nome ou campo vazio, textos não numéricos,
+negativos, infinito, NaN e taxas fora do intervalo. As validações numéricas existentes são
+reutilizadas. Campos extras não podem ser descartados silenciosamente nem usados como índice.
+Arquivos malformados falham claramente, sem devolver resultados parciais.
+
+Erros de campo geram `ValueError` com registro de dados, coluna e explicação, como
+`Registro 2, coluna 'usuarios_ativos': informe um inteiro sem parte decimal.`
+A contagem começa em 1 e não corresponde necessariamente à linha física do arquivo, pois campos
+entre aspas podem conter quebras de linha. Erros estruturais identificam o problema do CSV ou os
+nomes das colunas; arquivo inexistente preserva `FileNotFoundError`.
+
+Para uma chamada manual, no PowerShell, sem executar o fluxo principal:
+
+```powershell
+Set-Location -LiteralPath 'D:\Natan\LiteArt Cost Analytics'
+& '.\.venv-win\Scripts\python.exe' -B -c "from calculadora import ler_cenarios_csv; print(ler_cenarios_csv('dados/cenarios_exemplo.csv'))"
+```
+
+O `print` pertence ao comando de conferência, não à função. Ele apresenta a lista de hipóteses;
+não calcula os cenários nem regenera o CSV de resultados. Importar `calculadora` também não
+lê o exemplo ou gera arquivos.
 
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
@@ -615,7 +684,8 @@ Set-Location -LiteralPath 'D:\Natan\LiteArt Cost Analytics'
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B calculadora.py
 ```
 
-Ao concluir, o terminal informa o arquivo salvo. Executar novamente substitui esse arquivo com os resultados atuais.
+Ao concluir, o terminal informa o arquivo salvo. Executar novamente substitui esse arquivo com
+os resultados atuais.
 
 Os comandos conferem a versão do Pandas e executam a calculadora com o interpretador escolhido,
 sem precisar ativar o ambiente ou alterar o PATH. `-X utf8` mantém os acentos na saída capturada,
@@ -663,13 +733,14 @@ hipóteses representam o consumo real do LiteArt.
 ### Testes automatizados
 
 O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest` , da biblioteca padrão
-do Python. São 111 métodos de teste, distribuídos em 11 classes: sete para os cálculos, três para as
-coordenadoras de partes do cenário e uma para o cenário completo. Parte dos métodos usa `subTest`
+do Python. São 136 métodos de teste, distribuídos em 12 classes: sete para os cálculos, três para as
+coordenadoras de partes do cenário, uma para o cenário completo e uma para a leitura de CSV.
+Parte dos métodos usa `subTest`
 para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
 
-A contagem foi reconferida no arquivo atual. A exportação não acrescentou métodos à suíte;
-as verificações específicas de escrita, releitura e precisão do CSV foram pontuais, conforme
-descrito na seção de exportação.
+A contagem foi reconferida no arquivo atual. `TestLerCenariosCsv` acrescentou 25 métodos persistentes
+aos 111 anteriores. As verificações de escrita, releitura e precisão do CSV de resultados foram
+pontuais e continuam distintas dos testes automatizados da nova função de entrada.
 
 A suíte verifica:
 
@@ -691,6 +762,11 @@ A suíte verifica:
   preços gratuitos, cotação, estrutura, erros dos campos, preservação e chaves adicionais.
 - Onze métodos para o cenário completo: resultados dos quatro grupos, zeros, preços gratuitos,
   câmbio, erros propagados, preservação das entradas e independência das execuções.
+- Vinte e cinco métodos para leitura de CSV: estrutura e tipos, ordem, independência, espaços,
+  UTF-8 com ou sem BOM, arquivo ausente ou vazio, cabeçalhos, campos e números inválidos,
+  limites aceitos, médias fracionárias e arquivos malformados. Também verificam mensagens com
+  registro e coluna, ausência de efeitos na importação e preservação do arquivo de entrada.
+- Leitura do exemplo e conferência de 2.200 e 11.000 feedbacks com `calcular_consumo_cenario`.
 
 A auxiliar de validação é exercitada pelas chamadas às funções de cálculo. A suíte cobre os casos
 descritos; não é uma verificação exaustiva de todas as entradas possíveis nem uma medição de consumo
@@ -729,8 +805,9 @@ Para executar apenas os testes do cenário completo:
 Os comandos usam diretamente o ambiente do projeto, independentemente de `python` no PATH.
 Também é possível executar `test_calculadora.py` diretamente com esse mesmo interpretador.
 
-A última execução retornou `Ran 111 tests` e `OK` . `assertEqual` confere resultados,
-`assertIsInstance` verifica tipos de retorno e `assertRaises` confirma as exceções esperadas. Uma
+A execução completa após a função de leitura retornou `Ran 136 tests` e `OK` .
+`assertEqual` confere resultados, `assertIsInstance` verifica tipos de retorno e `assertRaises`
+confirma as exceções esperadas. Uma
 exceção capturada por `assertRaises` faz parte do comportamento que o teste verifica.
 
 Além da suíte, foi conferida a execução do cenário principal com 100 e zero usuários: os totais
@@ -748,14 +825,15 @@ tratamento pode interromper o script com a mensagem do erro.
 ### Próximos incrementos
 
 O primeiro DataFrame, a seleção e ordenação dos custos, o filtro por orçamento, a coluna de saldo,
-o resumo dos extremos mensais e a exportação para CSV já foram implementados na `.venv-win`.
+o resumo dos extremos mensais, a exportação e a função de leitura de CSV já foram implementados
+na `.venv-win`.
 Os próximos incrementos poderão aprofundar a análise dos cenários, preservando as funções
 existentes e os tipos monetários.
 
 As alternativas pesquisadas ainda precisam ser revisadas antes da substituição dos preços didáticos.
-A importação de hipóteses por CSV continua planejada, com definição do formato de entrada e
-validação antes dos cálculos. Catálogo de preços, entrada pelo terminal, novas análises, gráficos
-e dashboard dependem de incrementos próprios.
+O próximo incremento será integrar os cenários retornados por `ler_cenarios_csv` ao fluxo
+principal; a leitura e validação isoladas já estão disponíveis. Catálogo de preços, entrada pelo
+terminal, novas análises, gráficos e dashboard dependem de incrementos próprios.
 
 ## Primeira versão planejada
 
@@ -777,13 +855,13 @@ representarão despesas efetivamente realizadas nem comprovarão a capacidade do
 | --- | --- |
 | Python | Lógica e cálculos |
 | Pandas | DataFrame dos cenários, seleção, ordenação, filtro, saldo e agregações de custos; análises adicionais previstas |
-| CSV | Exportação de resultados implementada; importação de cenários e catálogo de preços planejados |
+| CSV | Exportação e leitura validada de hipóteses implementadas; integração principal e catálogo pendentes |
 | Plotly | Gráficos interativos |
 | Streamlit | Interface do dashboard |
 | Git e GitHub | Versionamento e hospedagem do repositório |
 
-Python, Pandas e a exportação CSV já são utilizados. Importação de dados, Plotly e Streamlit
-serão introduzidos gradualmente, conforme a necessidade de cada etapa.
+Python, Pandas, exportação e leitura validada de CSV já são utilizados. A integração das entradas,
+Plotly e Streamlit serão introduzidos gradualmente, conforme a necessidade de cada etapa.
 
 ## Etapas de desenvolvimento
 

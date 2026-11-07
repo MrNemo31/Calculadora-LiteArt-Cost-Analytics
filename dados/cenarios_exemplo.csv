@@ -1,0 +1,3 @@
+cenario,usuarios_ativos,respostas_por_usuario,taxa_acerto,proporcao_acertos_com_feedback,tokens_entrada,tokens_saida
+Cenário didático: 100 usuários,100,40,0.60,0.25,500,300
+Cenário didático: 500 usuários,500,40,0.60,0.25,500,300

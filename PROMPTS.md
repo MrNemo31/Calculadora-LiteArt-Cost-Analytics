@@ -1075,3 +1075,54 @@ de exportação; as conferências específicas foram roteiros pontuais em memór
 A importação de hipóteses por CSV continua planejada, sem funcionalidade de entrada neste incremento.
 
 **Marco deste registro:** documentação de 07/11/2026, até a exportação da tabela para CSV.
+
+## 28. Leitura e validação de hipóteses de cenários por CSV
+
+**Data:** 07/11/2026.
+
+**Etapa:** primeira parte da importação, ainda separada da execução principal.
+
+**Objetivo dos pedidos:** ler hipóteses de consumo com validação explícita, fornecer um exemplo
+e acrescentar testes automatizados, preservando os cálculos e a exportação existentes.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar `ler_cenarios_csv(caminho)` usando Pandas, com leitura inicial como texto, validação das sete
+colunas e conversões compatíveis com as funções atuais. Acrescentar o exemplo de 100 e 500 usuários
+e testes com arquivos temporários. Identificar registro e coluna nos erros de campo e impedir
+perda silenciosa de dados. Documentar somente o comportamento implementado, distinguindo a função
+disponível da integração principal pendente, sem commit ou push.
+
+**Participação e aprendizado:** as explicações abordaram inferência de tipos, leitura como texto,
+conversões explícitas, proporções entre 0 e 1 e o retorno de dicionários independentes.
+Também diferenciaram hipóteses de consumo, dados financeiros e resultados exportados.
+
+**Decisões registradas:**
+
+- Usar `dtype=str`, `keep_default_na=False`, vírgula e UTF-8 com ou sem BOM em `pd.read_csv()`.
+- Conferir colunas antes dos registros, remover espaços externos e rejeitar campos vazios.
+- Converter usuários diretamente para int e as demais hipóteses para float, aceitando médias
+  fracionárias e reutilizando as validações de números finitos e não negativos.
+- Exigir taxas entre 0 e 1 e rejeitar usuários com representação fracionária, sem truncamento.
+- Retornar uma lista com `nome` e `hipoteses_consumo` por registro, preservando a ordem.
+- Rejeitar arquivos inválidos sem retorno parcial, preservando `FileNotFoundError` quando ausentes.
+- Criar `dados/cenarios_exemplo.csv` somente com nome e seis hipóteses de consumo.
+- Manter cenários do código e exportação no fluxo principal; a nova função ainda não é chamada ali.
+
+**Contribuição para o projeto:** a função, o exemplo e 25 novos métodos persistentes de teste foram
+implementados. A leitura do exemplo preservou nomes, ordem e tipos e produziu 2.200 e 11.000
+feedbacks ao chamar `calcular_consumo_cenario`. Os testes cobrem entradas válidas, BOM, espaços,
+independência, ausência de arquivo, arquivos vazios, colunas incorretas, campos vazios, regras
+numéricas, limites aceitos, arquivos malformados e mensagens com registro e coluna.
+
+A suíte completa passou com 136 métodos em 12 classes. Subtests exercitam várias entradas dentro
+de alguns métodos e não aumentam essa contagem. A classe de leitura usa arquivos temporários para
+os casos de validação e também verifica importação sem leitura, impressão ou geração de arquivos.
+As conferências de igualdade da saída principal e de preservação das funções e do bloco principal
+foram pontuais; não devem ser confundidas com os novos testes persistentes da função de leitura.
+
+A calculadora foi executada com a `.venv-win` e manteve a saída anterior. O CSV de exemplo pode ser
+versionado. Integrar os cenários importados ao fluxo principal será o próximo incremento; a chamada
+manual da função não calcula cenários nem substitui as hipóteses definidas no código.
+
+**Marco deste registro:** documentação de 07/11/2026, até a leitura validada de cenários por CSV.
