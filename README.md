@@ -34,6 +34,7 @@ DataFrame, criado a partir da lista de resumos dos cenários.
 - Coluna calculada de saldo do orçamento, com sobra ou excesso por cenário em `Decimal`.
 - Resumo do menor e maior custo mensal e da diferença entre os extremos, preservando `Decimal`.
 - Formatação monetária com duas casas decimais nas tabelas e resumos, somente na apresentação.
+- Exportação dos dois cenários e sete colunas de `tabela_cenarios` para `resultados/cenarios.csv`.
 - Organização das hipóteses de consumo e capacidade, preços e cotação em dicionários separados.
 - Cálculo do consumo de um cenário a partir das hipóteses, com retorno em um novo dicionário.
 - Volume mensal de respostas, acertos, erros e feedbacks.
@@ -371,7 +372,7 @@ A apresentação usa `to_string()` com `index=False` e formatadores monetários 
 `index=False` oculta a numeração das linhas. A representação textual é usada somente na impressão;
 os valores financeiros da tabela continuam sendo objetos `Decimal`.
 Os cenários permanecem didáticos, sem despesas reais ou capacidade de atendimento comprovada.
-Ainda não há leitura ou exportação de CSV.
+A tabela já é exportada para CSV; a importação de hipóteses de cenários continua planejada.
 
 As verificações pontuais confirmaram o formato `(2, 7)`, a ordem dos campos, a igualdade com a
 lista e sua preservação desde antes da criação da tabela, além dos resultados exatos dos dois
@@ -533,6 +534,45 @@ Também confirmou a exibição de `1.236` como `1.24` sem alterar o Decimal e a 
 `Decimal('67.200000')` nos dados. Os 111 testes existentes passaram na `.venv-win`.
 Essa conferência específica de precisão e apresentação não foi adicionada como teste persistente.
 
+### Exportação da tabela de cenários para CSV
+
+A execução exporta diretamente `tabela_cenarios` para `resultados/cenarios.csv`, com os dois
+cenários na ordem original, de 100 e depois 500 usuários, e os sete campos descritos acima.
+Não são exportadas a comparação ordenada, a tabela filtrada ou a coluna de saldo.
+
+O caminho usa `Path(__file__).resolve().parent`: o destino é relativo à pasta de `calculadora.py`,
+independentemente da pasta em que o terminal foi aberto. A pasta `resultados` é criada
+automaticamente quando necessário. Cada execução substitui o CSV anterior, sem acumular linhas,
+e apresenta no terminal o caminho completo do arquivo salvo.
+
+O arquivo usa UTF-8, campos separados por vírgula, ponto decimal e cabeçalho. O índice do
+DataFrame não é exportado, e os números não recebem símbolos monetários ou separadores de milhares.
+Os nomes dos cenários mantêm seus acentos.
+
+O terminal continua apresentando duas casas decimais. O CSV recebe os valores completos dos dados,
+sem formatadores de exibição, `:.2f`, `float_format` ou conversão para float. Por exemplo,
+o custo exibido como `67.20` é exportado como `67.200000`, preservando a precisão original.
+
+CSV armazena texto e não preserva o tipo Python `Decimal`. Para recuperar a precisão, os campos
+financeiros devem ser lidos como texto e convertidos diretamente para `Decimal`, sem passagem
+intermediária por float. A leitura feita para conferir o arquivo não constitui uma funcionalidade
+de importação de cenários; essa entrada de hipóteses ainda depende de implementação e validação.
+Os DataFrames e `resumos_cenarios` mantêm seus valores financeiros como objetos Decimal.
+
+A regra `/resultados/` do `.gitignore` exclui a pasta de arquivos gerados do versionamento.
+O CSV pode ser regenerado executando a calculadora; não precisa ser enviado ao Git.
+
+Na conferência da implementação, o arquivo apresentou duas linhas de dados e sete colunas, com
+cabeçalhos corretos, sem índice adicional e com acentos preservados. Os oito campos financeiros
+foram lidos como texto e reconstruídos como Decimal, iguais aos originais, inclusive nas casas
+decimais. Uma escrita e leitura pontual em arquivo temporário preservou `Decimal("1.23456789")`,
+sem inserir esse valor nos cenários reais.
+
+Também foram confirmadas a preservação da lista e dos quatro DataFrames, a regeneração sem
+duplicatas ao executar de outra pasta e a importação do módulo sem impressão, criação ou alteração
+do CSV. Os 111 testes existentes passaram na implementação. Essas conferências específicas foram
+roteiros pontuais; não foram adicionados testes persistentes de CSV ao repositório.
+
 ### Pesquisa de hospedagem e alternativas de arquitetura
 
 A pesquisa inicial de 2026-10-28 comparou três combinações para hospedar o backend e o PostgreSQL:
@@ -575,6 +615,8 @@ Set-Location -LiteralPath 'D:\Natan\LiteArt Cost Analytics'
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B calculadora.py
 ```
 
+Ao concluir, o terminal informa o arquivo salvo. Executar novamente substitui esse arquivo com os resultados atuais.
+
 Os comandos conferem a versão do Pandas e executam a calculadora com o interpretador escolhido,
 sem precisar ativar o ambiente ou alterar o PATH. `-X utf8` mantém os acentos na saída capturada,
 e `-B` evita gerar bytecode. Se Pandas não estiver disponível, prepare essa dependência no ambiente
@@ -586,7 +628,8 @@ A `.venv` anterior, baseada em MSYS2, permanece separada e preservada.
 
 O cenário didático e os `print()` ficam dentro de `if __name__ == "__main__":` . Ao executar o
 arquivo diretamente, o cenário é calculado e apresentado. Ao importar suas funções, esse bloco não é
-executado, permitindo reutilizá-las nos testes sem imprimir os resultados do cenário.
+executado, permitindo reutilizá-las nos testes sem imprimir os resultados do cenário nem criar
+ou modificar o CSV.
 
 ### Validação das entradas
 
@@ -623,6 +666,10 @@ O arquivo `test_calculadora.py` contém uma suíte reproduzível com `unittest` 
 do Python. São 111 métodos de teste, distribuídos em 11 classes: sete para os cálculos, três para as
 coordenadoras de partes do cenário e uma para o cenário completo. Parte dos métodos usa `subTest`
 para verificar várias entradas; essas tentativas não são contadas separadamente no total de métodos.
+
+A contagem foi reconferida no arquivo atual. A exportação não acrescentou métodos à suíte;
+as verificações específicas de escrita, releitura e precisão do CSV foram pontuais, conforme
+descrito na seção de exportação.
 
 A suíte verifica:
 
@@ -700,14 +747,15 @@ tratamento pode interromper o script com a mensagem do erro.
 
 ### Próximos incrementos
 
-O primeiro DataFrame, a seleção e ordenação dos custos, o filtro por orçamento, a coluna de saldo
-e o resumo dos extremos mensais já estão implementados e validados com Pandas na `.venv-win`.
+O primeiro DataFrame, a seleção e ordenação dos custos, o filtro por orçamento, a coluna de saldo,
+o resumo dos extremos mensais e a exportação para CSV já foram implementados na `.venv-win`.
 Os próximos incrementos poderão aprofundar a análise dos cenários, preservando as funções
 existentes e os tipos monetários.
 
 As alternativas pesquisadas ainda precisam ser revisadas antes da substituição dos preços didáticos.
-Leitura e exportação de CSV, ampliação das análises, gráficos e dashboard serão introduzidos
-gradualmente.
+A importação de hipóteses por CSV continua planejada, com definição do formato de entrada e
+validação antes dos cálculos. Catálogo de preços, entrada pelo terminal, novas análises, gráficos
+e dashboard dependem de incrementos próprios.
 
 ## Primeira versão planejada
 
@@ -729,13 +777,13 @@ representarão despesas efetivamente realizadas nem comprovarão a capacidade do
 | --- | --- |
 | Python | Lógica e cálculos |
 | Pandas | DataFrame dos cenários, seleção, ordenação, filtro, saldo e agregações de custos; análises adicionais previstas |
-| CSV | Formato de arquivo para armazenamento inicial dos preços |
+| CSV | Exportação de resultados implementada; importação de cenários e catálogo de preços planejados |
 | Plotly | Gráficos interativos |
 | Streamlit | Interface do dashboard |
 | Git e GitHub | Versionamento e hospedagem do repositório |
 
-Python e Pandas já são utilizados. CSV, Plotly e Streamlit serão introduzidos gradualmente,
-conforme a necessidade de cada etapa.
+Python, Pandas e a exportação CSV já são utilizados. Importação de dados, Plotly e Streamlit
+serão introduzidos gradualmente, conforme a necessidade de cada etapa.
 
 ## Etapas de desenvolvimento
 

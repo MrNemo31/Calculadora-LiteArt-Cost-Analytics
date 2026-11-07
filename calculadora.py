@@ -1,5 +1,6 @@
 from decimal import Decimal
 from math import isfinite
+from pathlib import Path
 
 import pandas as pd
 
@@ -496,4 +497,17 @@ if __name__ == "__main__":
     print(f"Menor custo mensal: R$ {menor_custo_mensal_br:.2f}")
     print(f"Maior custo mensal: R$ {maior_custo_mensal_br:.2f}")
     print(f"Diferença entre os extremos: R$ {diferenca_custos_mensais_br:.2f}")
+
+    caminho_csv = Path(__file__).resolve().parent / "resultados" / "cenarios.csv"
+    caminho_csv.parent.mkdir(parents=True, exist_ok=True)
+    tabela_cenarios.to_csv(
+        caminho_csv,
+        header=True,
+        index=False,
+        encoding="utf-8",
+        sep=",",
+        decimal=".",
+        mode="w",
+    )
+    print(f"\nCSV salvo em: {caminho_csv}")
 

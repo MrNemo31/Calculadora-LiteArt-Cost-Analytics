@@ -1026,3 +1026,52 @@ de precisão e apresentação foi pontual; não foram adicionados novos testes a
 repositório. A atualização documental preserva código, testes, planejamento e dependências.
 
 **Marco deste registro:** documentação de 06/11/2026, até a formatação monetária no terminal.
+
+## 27. Exportação dos cenários para CSV com precisão financeira
+
+**Data:** 07/11/2026.
+
+**Etapa:** primeira exportação dos resultados calculados.
+
+**Objetivo dos pedidos:** salvar a tabela atual em CSV, preservando a precisão financeira,
+os dados de origem e as saídas existentes, com explicações de cada parte.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Exportar somente `tabela_cenarios` para `resultados/cenarios.csv`, relativo à pasta da calculadora.
+Criar a pasta automaticamente, substituir o arquivo a cada execução e informar seu caminho.
+Usar UTF-8, vírgula, ponto decimal, cabeçalho e ausência de índice, sem formatadores ou conversões
+para float. Conferir estrutura, acentos, precisão, repetição da execução, preservação dos dados,
+importação silenciosa e testes existentes. Documentar a implementação somente em README e PROMPTS,
+sem alterar o CSV nesta revisão e sem commit ou push.
+
+**Participação e aprendizado:** as explicações abordaram `Path`, `__file__`, a criação da pasta
+com `mkdir`, os parâmetros de `to_csv()` e a diferença entre precisão dos dados e apresentação.
+Também distinguiram a releitura de conferência da futura importação de hipóteses de cenários.
+
+**Decisões registradas:**
+
+- Usar a pasta de `calculadora.py` como referência, independentemente do diretório do terminal.
+- Criar a pasta com `mkdir(parents=True, exist_ok=True)` e escrever o CSV com `mode="w"`.
+- Exportar diretamente os dois cenários e sete colunas na ordem original, sem índice adicional.
+- Preservar os valores completos, sem arredondamento de exibição ou passagem por float.
+- Ignorar a pasta gerada com `/resultados/` no `.gitignore`, preservando as regras anteriores.
+- Manter a exportação no bloco principal, sem efeitos ao importar o módulo.
+
+**Contribuição para o projeto:** a exportação foi concluída. As verificações pontuais confirmaram
+duas linhas de dados, sete colunas, cabeçalhos, ordem e acentos. Os oito valores financeiros foram
+lidos como texto e convertidos diretamente para Decimal, com igualdade exata aos originais,
+incluindo suas casas decimais. O valor `Decimal("1.23456789")` também foi preservado em escrita e
+leitura com arquivo temporário, sem inserção nos cenários reais.
+
+A lista e os quatro DataFrames permaneceram iguais, incluindo valores, tipos, colunas, índices
+e ordem. A execução repetida a partir de outra pasta regenerou o mesmo CSV, sem acumular linhas.
+A importação não imprimiu resultados, não criou o arquivo ausente e não modificou o existente.
+O Git confirmou que o CSV está ignorado, e as saídas anteriores do terminal foram preservadas.
+
+Os 111 testes existentes passaram durante a implementação. A suíte atual continua com 111 métodos
+em 11 classes, com uso de subtests em parte dos métodos. Não foram adicionados testes persistentes
+de exportação; as conferências específicas foram roteiros pontuais em memória e arquivo temporário.
+A importação de hipóteses por CSV continua planejada, sem funcionalidade de entrada neste incremento.
+
+**Marco deste registro:** documentação de 07/11/2026, até a exportação da tabela para CSV.
