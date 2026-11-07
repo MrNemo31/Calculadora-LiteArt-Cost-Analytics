@@ -326,15 +326,12 @@ def ler_cenarios_csv(caminho):
 
 
 if __name__ == "__main__":
-    # Cenário didático: hipóteses de consumo, não dados reais do LiteArt.
-    hipoteses_consumo = {
-        "usuarios_ativos": 100,
-        "respostas_por_usuario": 40,
-        "taxa_acerto": 60 / 100,
-        "proporcao_acertos_com_feedback": 25 / 100,
-        "tokens_entrada": 500,
-        "tokens_saida": 300,
-    }
+    caminho_cenarios = Path(__file__).resolve().parent / "dados" / "cenarios_exemplo.csv"
+    try:
+        # Validar o arquivo inteiro antes de calcular ou escrever resultados.
+        cenarios_didaticos = ler_cenarios_csv(caminho_cenarios)
+    except (OSError, ValueError) as erro:
+        raise SystemExit(f"Erro ao ler cenários de '{caminho_cenarios}': {erro}") from erro
 
     # Cotação didática em reais por dólar, não uma cotação pesquisada.
     cotacao = {
@@ -352,6 +349,11 @@ if __name__ == "__main__":
         "quantidade_backend": 2,
         "quantidade_banco": 1,
     }
+    for cenario in cenarios_didaticos:
+        cenario["hipoteses_capacidade"] = hipoteses_capacidade.copy()
+
+    primeiro_cenario = cenarios_didaticos[0]
+    hipoteses_consumo = primeiro_cenario["hipoteses_consumo"]
 
     # Preços pesquisados: GPT-6 Luna, Standard, entrada sem cache.
     # Fonte: https://developers.openai.com/api/docs/models/gpt-6-luna
@@ -363,7 +365,8 @@ if __name__ == "__main__":
 
     # Executar o cenário completo antes de apresentar os resultados.
     resultado_cenario = calcular_cenario(
-        hipoteses_consumo, hipoteses_capacidade, precos_ia, precos_infraestrutura, cotacao
+        hipoteses_consumo, primeiro_cenario["hipoteses_capacidade"],
+        precos_ia, precos_infraestrutura, cotacao
     )
     consumo_cenario = resultado_cenario["consumo"]
     custos_ia_cenario = resultado_cenario["custos_ia"]
@@ -402,6 +405,7 @@ if __name__ == "__main__":
     custo_total_anual_br = totais_cenario["custo_total_anual_br"]
 
     # Exibição dos resultados para conferência manual.
+    print(f"\nDetalhamento do primeiro cenário importado: {primeiro_cenario['nome']}")
     print("Respostas no mês:", respostas_mensais)
     print("Acertos estimados:", acertos_mensais)
     print("Erros estimados:", erros_mensais)
@@ -436,24 +440,6 @@ if __name__ == "__main__":
     print(f"Custo total mensal estimado (BRL): R$ {custo_total_mensal_br:.2f}")
     print(f"Custo total anual estimado (USD): US$ {custo_total_anual_usd:.2f}")
     print(f"Custo total anual estimado (BRL): R$ {custo_total_anual_br:.2f}")
-
-    # Cópias independentes: alterar o consumo de um cenário não altera o outro.
-    consumo_100_usuarios = hipoteses_consumo.copy()
-    consumo_500_usuarios = hipoteses_consumo.copy()
-    consumo_500_usuarios["usuarios_ativos"] = 500
-
-    cenarios_didaticos = [
-        {
-            "nome": "Cenário didático: 100 usuários",
-            "hipoteses_consumo": consumo_100_usuarios,
-            "hipoteses_capacidade": hipoteses_capacidade.copy(),
-        },
-        {
-            "nome": "Cenário didático: 500 usuários",
-            "hipoteses_consumo": consumo_500_usuarios,
-            "hipoteses_capacidade": hipoteses_capacidade.copy(),
-        },
-    ]
 
     # Preços e cotação compartilhados; a capacidade é uma hipótese, não uma garantia.
     comparacao_cenarios = []
@@ -554,7 +540,7 @@ if __name__ == "__main__":
     print("Saldo positivo indica sobra; saldo negativo indica excesso sobre o orçamento.")
     print(analise_orcamento.to_string(index=False, formatters=formatadores_monetarios))
 
-    print("\nResumo dos custos mensais dos dois cenários didáticos:")
+    print("\nResumo dos custos mensais dos cenários didáticos:")
     print(f"Menor custo mensal: R$ {menor_custo_mensal_br:.2f}")
     print(f"Maior custo mensal: R$ {maior_custo_mensal_br:.2f}")
     print(f"Diferença entre os extremos: R$ {diferenca_custos_mensais_br:.2f}")

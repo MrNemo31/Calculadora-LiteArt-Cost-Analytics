@@ -2,6 +2,8 @@ import unittest
 import csv
 import io
 import runpy
+import subprocess
+import sys
 from contextlib import redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -1195,6 +1197,180 @@ class TestLerCenariosCsv(unittest.TestCase):
         self.assertEqual(saida.getvalue(), "")
         self.assertIn("ler_cenarios_csv", estado)
         self.assertNotIn("tabela_cenarios", estado)
+
+
+class TestIntegracaoCenariosCsv(unittest.TestCase):
+    def setUp(self):
+        temporario = TemporaryDirectory(prefix="liteart_integracao_")
+        self.addCleanup(temporario.cleanup)
+        self.raiz = Path(temporario.name)
+        self.script = self.raiz / "calculadora.py"
+        origem = Path(__file__).resolve().parent
+        self.script.write_bytes((origem / "calculadora.py").read_bytes())
+        self.entrada = self.raiz / "dados" / "cenarios_exemplo.csv"
+        self.entrada.parent.mkdir()
+        self.saida = self.raiz / "resultados" / "cenarios.csv"
+        self.exemplo = (origem / "dados" / "cenarios_exemplo.csv").read_bytes()
+
+    def escrever(self, registros):
+        with self.entrada.open("w", encoding="utf-8", newline="") as arquivo:
+            escritor = csv.writer(arquivo)
+            escritor.writerow(TestLerCenariosCsv.colunas)
+            escritor.writerows(registros)
+
+    def executar(self):
+        with redirect_stdout(io.StringIO()) as texto:
+            estado = runpy.run_path(str(self.script), run_name="__main__")
+        return estado, texto.getvalue()
+
+    def executar_processo(self, pasta=None):
+        return subprocess.run(
+            [sys.executable, "-X", "utf8", "-B", str(self.script)],
+            cwd=self.raiz if pasta is None else pasta,
+            capture_output=True, text=True, encoding="utf-8",
+        )
+
+    def conferir_exportacao(self, estado):
+        with self.saida.open(encoding="utf-8", newline="") as arquivo:
+            leitor = csv.DictReader(arquivo)
+            self.assertEqual(leitor.fieldnames, list(estado["tabela_cenarios"].columns))
+            registros = list(leitor)
+        self.assertEqual(len(registros), len(estado["resumos_cenarios"]))
+        for registro, resumo in zip(registros, estado["resumos_cenarios"], strict=True):
+            self.assertEqual(registro["cenario"], resumo["cenario"])
+            self.assertEqual(int(registro["usuarios_ativos"]), resumo["usuarios_ativos"])
+            for campo in (
+                "custo_ia_mensal_br", "custo_infra_mensal_br",
+                "custo_total_mensal_br", "custo_total_anual_br",
+            ):
+                self.assertIsInstance(resumo[campo], Decimal)
+                self.assertEqual(Decimal(registro[campo]).as_tuple(), resumo[campo].as_tuple())
+
+    def test_exemplo_preserva_resultados_tabelas_e_precisao(self):
+        self.entrada.write_bytes(self.exemplo)
+        estado, texto = self.executar()
+        self.assertEqual(estado["tabela_cenarios"].shape, (2, 7))
+        self.assertEqual(list(estado["tabela_cenarios"]["usuarios_ativos"]), [100, 500])
+        for resumo, esperado in zip(estado["resumos_cenarios"], [
+            (2200, Decimal("2.20"), Decimal("65.00"), Decimal("67.20"), Decimal("806.40")),
+            (11000, Decimal("11.00"), Decimal("65.00"), Decimal("76.00"), Decimal("912.00")),
+        ], strict=True):
+            self.assertEqual(tuple(resumo[campo] for campo in (
+                "feedbacks_mensais", "custo_ia_mensal_br", "custo_infra_mensal_br",
+                "custo_total_mensal_br", "custo_total_anual_br",
+            )), esperado)
+        self.assertEqual(list(estado["comparacao_custos"]["usuarios_ativos"]), [500, 100])
+        self.assertEqual(list(estado["cenarios_no_orcamento"]["usuarios_ativos"]), [100])
+        self.assertEqual(list(estado["analise_orcamento"]["saldo_orcamento_br"]), [
+            Decimal("-6.00"), Decimal("2.80"),
+        ])
+        for nome, esperado in [
+            ("menor_custo_mensal_br", Decimal("67.20")),
+            ("maior_custo_mensal_br", Decimal("76.00")),
+            ("diferenca_custos_mensais_br", Decimal("8.80")),
+        ]:
+            self.assertIsInstance(estado[nome], Decimal)
+            self.assertEqual(estado[nome], esperado)
+        for nome in ("tabela_cenarios", "comparacao_custos", "cenarios_no_orcamento", "analise_orcamento"):
+            for coluna in estado[nome].columns:
+                if coluna.startswith("custo_") or coluna == "saldo_orcamento_br":
+                    self.assertTrue(all(isinstance(v, Decimal) for v in estado[nome][coluna]))
+        self.assertIn("Detalhamento do primeiro cenário importado: Cenário didático: 100 usuários", texto)
+        self.assertIn("Menor custo mensal: R$ 67.20", texto)
+        self.assertEqual(self.entrada.read_bytes(), self.exemplo)
+        self.conferir_exportacao(estado)
+
+    def test_cenario_unico_de_200_usuarios_chega_ao_fluxo_completo(self):
+        self.escrever([["Cenário temporário: 200 usuários", "200", "40", "0.60", "0.25", "500", "300"]])
+        estado, texto = self.executar()
+        resumo = estado["resumos_cenarios"][0]
+        self.assertEqual(resumo["feedbacks_mensais"], 4400)
+        self.assertEqual(resumo["custo_ia_mensal_br"], Decimal("4.40"))
+        self.assertEqual(resumo["custo_total_mensal_br"], Decimal("69.40"))
+        self.assertEqual(resumo["custo_total_anual_br"], Decimal("832.80"))
+        self.assertEqual(estado["tabela_cenarios"].shape, (1, 7))
+        for nome in ("tabela_cenarios", "comparacao_custos", "cenarios_no_orcamento", "analise_orcamento"):
+            self.assertEqual(list(estado[nome]["usuarios_ativos"]), [200])
+        self.assertEqual(estado["feedbacks_mensais"], 4400)
+        self.assertEqual(estado["custo_total_mensal_br"], Decimal("69.40"))
+        self.assertEqual(estado["diferenca_custos_mensais_br"], Decimal("0.00"))
+        self.assertIn("Detalhamento do primeiro cenário importado: Cenário temporário: 200 usuários", texto)
+        self.assertIn("Custo total mensal estimado (BRL): R$ 69.40", texto)
+        self.conferir_exportacao(estado)
+
+    def test_tres_cenarios_preservam_ordem_do_arquivo(self):
+        self.escrever([
+            [nome, usuarios, "40", "0.60", "0.25", "500", "300"]
+            for nome, usuarios in [("Primeiro", "200"), ("Segundo", "500"), ("Terceiro", "100")]
+        ])
+        estado, _ = self.executar()
+        self.assertEqual(estado["tabela_cenarios"].shape, (3, 7))
+        self.assertEqual(list(estado["tabela_cenarios"]["cenario"]), ["Primeiro", "Segundo", "Terceiro"])
+        self.assertEqual(list(estado["comparacao_custos"]["usuarios_ativos"]), [500, 200, 100])
+        self.assertEqual(estado["primeiro_cenario"]["nome"], "Primeiro")
+        self.assertEqual(estado["feedbacks_mensais"], 4400)
+        self.conferir_exportacao(estado)
+
+    def test_capacidade_e_copia_independente_por_cenario(self):
+        self.entrada.write_bytes(self.exemplo)
+        estado, _ = self.executar()
+        primeiro, segundo = estado["cenarios_didaticos"]
+        capacidade = estado["hipoteses_capacidade"]
+        self.assertEqual(primeiro["hipoteses_capacidade"], capacidade)
+        self.assertIsNot(primeiro["hipoteses_capacidade"], capacidade)
+        self.assertIsNot(primeiro["hipoteses_capacidade"], segundo["hipoteses_capacidade"])
+        primeiro["hipoteses_capacidade"]["quantidade_backend"] = 999
+        self.assertEqual(segundo["hipoteses_capacidade"]["quantidade_backend"], 2)
+        self.assertEqual(capacidade["quantidade_backend"], 2)
+
+    def test_arquivo_inexistente_encerra_sem_sobrescrever_resultados(self):
+        self.saida.parent.mkdir()
+        self.saida.write_text("resultado anterior\n", encoding="utf-8")
+        antes = (self.saida.read_bytes(), self.saida.stat().st_mtime_ns)
+        processo = self.executar_processo()
+        self.assertNotEqual(processo.returncode, 0)
+        self.assertIn("Erro ao ler cenários", processo.stderr)
+        self.assertIn(str(self.entrada), processo.stderr)
+        self.assertEqual(processo.stdout, "")
+        self.assertEqual((self.saida.read_bytes(), self.saida.stat().st_mtime_ns), antes)
+
+    def test_erro_no_segundo_registro_impede_saida_parcial(self):
+        self.escrever([
+            ["Válido", "100", "40", "0.60", "0.25", "500", "300"],
+            ["Inválido", "abc", "40", "0.60", "0.25", "500", "300"],
+        ])
+        self.saida.parent.mkdir()
+        self.saida.write_text("preservar este resultado\n", encoding="utf-8")
+        antes = (self.saida.read_bytes(), self.saida.stat().st_mtime_ns)
+        processo = self.executar_processo()
+        self.assertNotEqual(processo.returncode, 0)
+        self.assertEqual(processo.stdout, "")
+        self.assertIn("Registro 2", processo.stderr)
+        self.assertIn("usuarios_ativos", processo.stderr)
+        self.assertEqual((self.saida.read_bytes(), self.saida.stat().st_mtime_ns), antes)
+
+    def test_csv_vazio_ou_malformado_nao_cria_pasta_de_resultados(self):
+        cabecalho = ",".join(TestLerCenariosCsv.colunas) + "\n"
+        for conteudo in ("", cabecalho, cabecalho + '"aspas sem fechar'):
+            with self.subTest(conteudo=conteudo):
+                self.entrada.write_text(conteudo, encoding="utf-8")
+                with self.assertRaises(SystemExit) as erro, redirect_stdout(io.StringIO()) as texto:
+                    runpy.run_path(str(self.script), run_name="__main__")
+                self.assertNotEqual(erro.exception.code, 0)
+                self.assertIn("Erro ao ler cenários", str(erro.exception))
+                self.assertEqual(texto.getvalue(), "")
+                self.assertFalse(self.saida.parent.exists())
+
+    def test_execucao_de_outra_pasta_localiza_entrada_e_saida(self):
+        self.entrada.write_bytes(self.exemplo)
+        outra_pasta = self.raiz / "outra_pasta"
+        outra_pasta.mkdir()
+        processo = self.executar_processo(outra_pasta)
+        self.assertEqual(processo.returncode, 0, processo.stderr)
+        self.assertIn(str(self.saida), processo.stdout)
+        self.assertIn("Menor custo mensal: R$ 67.20", processo.stdout)
+        self.assertTrue(self.saida.exists())
+        self.assertFalse((outra_pasta / "resultados").exists())
 
 
 if __name__ == "__main__":

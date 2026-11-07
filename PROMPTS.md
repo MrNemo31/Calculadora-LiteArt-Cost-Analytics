@@ -1126,3 +1126,59 @@ versionado. Integrar os cenários importados ao fluxo principal será o próximo
 manual da função não calcula cenários nem substitui as hipóteses definidas no código.
 
 **Marco deste registro:** documentação de 07/11/2026, até a leitura validada de cenários por CSV.
+
+## 29. Integração dos cenários do CSV ao fluxo principal
+
+**Data:** 07/11/2026.
+
+**Etapa:** execução completa com hipóteses de consumo importadas.
+
+**Objetivo dos pedidos:** utilizar os cenários lidos nas análises e na exportação, preservando
+as funções, a precisão monetária e os resultados anteriores diante de falhas de leitura.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Localizar o CSV pela pasta da calculadora e validar todos os registros antes dos cálculos.
+Substituir a lista manual, associar capacidade independente e reutilizar o fluxo existente.
+Detalhar o primeiro cenário e encerrar com erro claro se a leitura falhar, sem gerar saídas.
+Acrescentar testes de integração temporários e documentar somente o comportamento implementado,
+preservando os demais arquivos nesta revisão, sem commit ou push.
+
+**Participação e aprendizado:** as explicações abordaram caminhos relativos ao script, validação
+antes de produzir resultados, cópias de capacidade e reutilização das funções de cálculo.
+Também distinguiram a ordem dos registros da ordenação própria da comparação por custo.
+
+**Decisões registradas:**
+
+- Ler `dados/cenarios_exemplo.csv` com referência em `Path(__file__).resolve().parent`.
+- Usar a lista retornada por `ler_cenarios_csv`, aceitando qualquer quantidade não vazia de
+  cenários válidos, sem alternativa fixa quando a leitura falhar.
+- Associar uma cópia de `hipoteses_capacidade` a cada cenário; manter preços e cotação separados.
+- Identificar e utilizar o primeiro cenário do CSV no detalhamento individual.
+- Remover o dicionário inicial fixo de consumo, `consumo_100_usuarios`, `consumo_500_usuarios`
+  e a construção manual da lista de cenários.
+- Preservar análises, formatação, Decimal e exportação; retirar a referência fixa a dois cenários
+  do título do resumo para admitir outros arquivos válidos.
+- Tratar falhas de leitura somente no fluxo principal, com mensagem e saída diferente de zero,
+  preservando as exceções da função isolada e os arquivos de resultados anteriores.
+
+**Contribuição para o projeto:** a integração foi concluída. Os testes confirmaram os cenários de
+100 e 500 usuários, com 2.200 e 11.000 feedbacks, totais mensais de R$ 67,20 e R$ 76,00 e anuais
+de R$ 806,40 e R$ 912,00. Também conferiram tabela, ordenação, filtro, saldos, agregações e Decimal
+nas colunas financeiras, além da exportação com precisão completa.
+
+Um CSV temporário com somente 200 usuários produziu 4.400 feedbacks, R$ 4,40 de IA, R$ 69,40 de
+total mensal e R$ 832,80 anuais, chegando às tabelas e à exportação. Um arquivo com três cenários
+confirmou a ordem original e a ordenação separada por custo. O exemplo versionado foi preservado.
+
+Foram acrescentados oito métodos persistentes em `TestIntegracaoCenariosCsv`, usando cópias
+temporárias da aplicação, entradas e saídas temporárias. Eles conferem também independência da
+capacidade, execução de outra pasta e erros por arquivo ausente, inválido ou incompleto, sem
+sobrescrever resultados ou produzir saídas parciais. O teste existente de importação silenciosa
+continuou passando, sem leitura, impressão ou exportação ao importar o módulo.
+
+A suíte completa passou com 144 métodos em 13 classes. Subtests não aumentam essa contagem.
+A execução real da calculadora confirmou os resultados do exemplo; a comparação das funções
+existentes foi uma verificação pontual, sem alteração de seus cálculos ou da função de leitura.
+
+**Marco deste registro:** documentação de 07/11/2026, até o fluxo principal integrado ao CSV.
