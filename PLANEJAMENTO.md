@@ -1,67 +1,74 @@
 # Planejamento — LiteArt Cost Analytics
 
-Planejamento iniciado na Etapa 1 e revisado em 06/11/2026 conforme o código e os testes atuais.
-As pesquisas mantêm suas datas históricas; esta revisão não atualiza tarifas. Funcionalidades
-implementadas, decisões de planejamento e evoluções futuras estão identificadas separadamente.
+Planejamento iniciado na Etapa 1 e revisado em 08/11/2026 conforme o código e os testes atuais.
+As pesquisas mantêm suas datas históricas; esta revisão não atualiza tarifas. O MVP é a calculadora
+no terminal. Dashboard e análise completa dos custos de software são evoluções posteriores.
 
 ## 1. Pergunta principal
 
-Quanto custa manter o LiteArt durante um mês, considerando infraestrutura fixa e feedbacks
-pedagógicos de IA?
+Quanto custam os feedbacks de IA do LiteArt por mês e por ano, em USD e BRL, considerando as
+hipóteses de consumo, as tarifas do modelo de referência e a cotação configurada?
 
 ## 2. Escopo inicial, estado atual e próxima entrega
 
-### Escopo inicial histórico
+### Escopo inicial histórico e decisão de foco
 
-O primeiro recorte previa:
+O recorte inicial previa um cenário mensal com feedbacks de IA, backend e PostgreSQL de custo fixo,
+conversão cambial e total operacional mensal e anual. O projeto evoluiu para leitura de cenários,
+entrada manual e análises com Pandas, incluindo experimentos de orçamento.
 
-- Um projeto e um cenário mensal por execução, usando GPT-6 Luna (`gpt-6-luna`) como referência
-  inicial.
-- Planos de backend e PostgreSQL com mensalidades fixas conhecidas, dentro de seus limites.
-- Feedbacks de texto por meio da API da OpenAI.
-- Conversão de USD para BRL com cotação informada manualmente.
-- Detalhamento de infraestrutura e IA, total mensal em reais e projeção anual constante.
+A decisão atual é **adiar infraestrutura e orçamento no fluxo principal para concentrar o MVP em
+estimativas de IA no terminal**. A visão mais ampla de análise de custos de software permanece.
+A calculadora simula despesas sem chamadas reais às APIs e sem validar qualidade pedagógica.
 
-A calculadora simula custos sem fazer chamadas reais às APIs. O recorte inicial evoluiu para a
-comparação de dois cenários didáticos na mesma execução, mantendo um único modelo de referência.
+### Funcionalidades atuais do MVP
 
-### Funcionalidades implementadas
+- Menu para importar o CSV atual ou preencher um único cenário pelo terminal, sem exigir CSV.
+- Leitura e validação compartilhada das seis hipóteses de consumo, com correção por campo.
+- CSV de entrada localizado a partir de `calculadora.py`, validado integralmente antes dos cálculos.
+- Cálculo de consumo com `calcular_consumo_cenario()` e de IA com `calcular_custo_ia_cenario()`.
+- Preços e cotação configurados no código, separados das hipóteses; não há consulta cambial automática.
+- Uma tabela com nove campos, na ordem dos cenários, sem detalhamento individual redundante.
+- Resumo de menor custo mensal de IA em BRL, maior e diferença somente com mais de um cenário.
+- Decimal nas quatro colunas financeiras; símbolos R$ e US$ e padrão brasileiro apenas na exibição.
+- Exportação completa para `resultados/cenarios.csv`, substituindo o arquivo anterior.
+- Erros de leitura e cancelamento antes de exportar, preservando resultados anteriores.
+- Importação do módulo sem interação, leitura de CSV, impressão ou exportação.
 
-- Funções de consumo, IA, infraestrutura, conversão e totais mensais e anuais, com validações.
-- Comparação didática de 100 e 500 usuários; consumo, capacidade, preços e cotação definidos no código.
-- Lista `resumos_cenarios` e DataFrame `tabela_cenarios`, com duas linhas e sete colunas.
-- Seleção de três colunas em `comparacao_custos`, ordenada por custo mensal decrescente.
-- Filtro com máscara booleana e `.loc` para custos menores ou iguais ao orçamento de R$ 70,00.
-- Cópia em `analise_orcamento` e coluna de saldo: orçamento menos custo mensal, sem receitas.
-- Resumo com `.min()`, `.max()` e diferença entre os custos dos dois cenários completos.
-- Valores financeiros em `Decimal`; duas casas decimais somente na apresentação, inclusive tabelas.
-- Execução dos cenários no bloco principal e importação das funções sem imprimir resultados.
-
-| Resultado didático | 100 usuários | 500 usuários |
+| Resultado didático de IA | 100 usuários | 500 usuários |
 | --- | ---: | ---: |
 | Feedbacks mensais | 2.200 | 11.000 |
-| IA mensal | R$ 2,20 | R$ 11,00 |
-| Infraestrutura mensal | R$ 65,00 | R$ 65,00 |
-| Total mensal | R$ 67,20 | R$ 76,00 |
-| Total anual constante | R$ 806,40 | R$ 912,00 |
-| Saldo do orçamento de R$ 70,00 | R$ 2,80 | −R$ 6,00 |
+| Tokens mensais de entrada | 1.100.000 | 5.500.000 |
+| Tokens mensais de saída | 660.000 | 3.300.000 |
+| IA mensal em USD | US$ 0,44 | US$ 2,20 |
+| IA mensal em BRL | R$ 2,20 | R$ 11,00 |
+| IA anual em USD | US$ 5,28 | US$ 26,40 |
+| IA anual em BRL | R$ 26,40 | R$ 132,00 |
 
-O filtro inclui somente 100 usuários. O menor custo mensal é R$ 67,20, o maior é R$ 76,00 e a
-diferença é R$ 8,80. Os dados de cálculo permanecem em Decimal; os formatadores e
-`resumo_exibicao` produzem textos apenas para exibição. Saldo não representa lucro.
-Os cenários não comprovam consumo real nem capacidade da infraestrutura. O [README](README.md)
-detalha a implementação e sua execução com Pandas na `.venv-win`.
+O exemplo usa GPT-6 Luna, tarifas já configuradas de US$ 0,10/US$ 0,50 por milhão de tokens de
+entrada/saída e cotação didática de R$ 5,00 por USD. Não são tarifas revalidadas nesta revisão nem
+cotação atual. O anual considera 12 meses constantes. Os resultados não incluem o custo operacional
+completo da aplicação e não comprovam consumo real nem capacidade da infraestrutura.
 
-### Escopo da próxima entrega
+### Recursos implementados fora do fluxo principal
 
-**O próximo incremento de código será somente exportar a tabela atual `tabela_cenarios` para CSV.**
-Serão preservadas as funções, as saídas e a precisão interna. Antes da escrita, serão definidos
-o formato e o destino do arquivo, conforme a etapa 1 da seção 10. A exportação ainda não existe.
-Importação, entrada pelo terminal, catálogo e seleção de modelos, gráficos e interface dependem
-de decisões e implementações próprias, nos incrementos seguintes.
+`calcular_custo_servico()`, `calcular_custo_infra_cenario()` e `calcular_cenario()` permanecem no
+código com seus testes unitários. Não são chamados para produzir o resultado principal de IA.
+A associação de capacidade, o orçamento fixo, a ordenação de custos operacionais, o filtro e a
+coluna de saldo saíram do bloco principal; não são opções do menu. Os experimentos anteriores são
+históricos, e sua retomada dependerá de novo incremento. Não há função autônoma de orçamento a
+apresentar como disponível.
 
-Referência de arquitetura do LiteArt: Flutter, backend Node.js/NestJS e PostgreSQL. Firebase é uma
-alternativa em estudo, registrada na seção 6, sem substituir essa referência.
+### Próxima entrega e recursos ainda planejados
+
+O próximo passo é pesquisar e definir a consulta de cotação, com fonte ainda pendente. Depois,
+implementar consulta com opção manual e consolidar documentação e validação da instalação para
+fechar a versão do MVP. O roteiro da seção 10 detalha essa sequência.
+
+Catálogo e seleção de modelos, comparação de provedores, gráficos, dashboard, integração futura de
+infraestrutura e orçamento e análises avançadas não fazem parte dessa entrega.
+A arquitetura de referência do LiteArt continua Flutter, backend Node.js/NestJS e PostgreSQL,
+com Firebase como alternativa em estudo. O [README](README.md) descreve a execução atual.
 
 ## 3. Tipos de informação
 
@@ -93,36 +100,59 @@ quantidades diferentes de questões.
 A preferência por feedback nos erros é uma hipótese de produto baseada em pesquisa exploratória
 inicial, ainda a validar.
 
-## 5. Entradas do cenário
+## 5. Entradas e arquivos atuais
 
-| Entrada | Unidade | Tipo | Significado |
-| --- | --- | --- | --- |
-| Nome do cenário | Texto | Configuração | Identifica a simulação |
-| Preço mensal do plano de backend | USD/mês ou BRL/mês por unidade | Preço pesquisado | Hospedagem do backend |
-| Quantidade de unidades de backend | Quantidade | Hipótese de capacidade | Unidades contratadas; duas no cenário didático atual |
-| Preço mensal do plano de banco | USD/mês ou BRL/mês por unidade | Preço pesquisado | Serviço PostgreSQL |
-| Quantidade de unidades de banco | Quantidade | Hipótese de capacidade | Unidades contratadas; uma no cenário didático atual |
-| Provedor da API | Texto | Configuração | OpenAI na primeira versão; identifica quem fornece a API e define as tarifas |
-| Modelo de IA | Identificador | Configuração | Modelo específico da OpenAI na primeira versão, usado para pesquisar as tarifas |
-| Preço de tokens de entrada | USD por 1 milhão de tokens | Preço pesquisado | Tarifa de entrada sem desconto de cache |
-| Preço de tokens de saída | USD por 1 milhão de tokens | Preço pesquisado | Tarifa da saída faturável |
-| Usuários ativos no cenário | Usuários/mês | Hipótese de consumo | Estudantes que respondem questões e estão incluídos na regra de feedback |
-| Respostas por usuário | Respostas/usuário/mês | Hipótese de consumo | Média de tentativas avaliadas por estudante |
-| Taxa de acerto | Percentual das respostas | Hipótese de consumo | Parcela correta do total de respostas do cenário |
-| Acertos com feedback | Percentual dos acertos | Hipótese de consumo | Parcela dos acertos para a qual a opção está ativada |
-| Tokens médios de entrada | Tokens/feedback | Hipótese de consumo | Todo o conteúdo enviado para gerar um feedback |
-| Tokens médios de saída faturáveis | Tokens/feedback | Hipótese de consumo | Saída cobrada por feedback; verificar as regras do modelo escolhido |
-| Cotação | BRL por USD | Configuração | Taxa hipotética informada para a conversão |
+O menu recebe somente a escolha do modo. O modo manual e o CSV informam nome e seis hipóteses:
 
-Os tokens de entrada devem considerar instruções, enunciado, resposta do estudante e demais
-conteúdos enviados. A saída faturável pode diferir do texto visível, conforme o modelo escolhido.
+| Campo de entrada | Unidade e regra |
+| --- | --- |
+| `cenario` | Nome não vazio; no retorno das funções, corresponde a `nome` |
+| `usuarios_ativos` | Usuários/mês; representação inteira não negativa |
+| `respostas_por_usuario` | Média de respostas/usuário/mês; finita e não negativa |
+| `taxa_acerto` | Proporção das respostas corretas, entre 0 e 1 |
+| `proporcao_acertos_com_feedback` | Proporção dos acertos com feedback, entre 0 e 1 |
+| `tokens_entrada` | Média de tokens de entrada/feedback; finita e não negativa |
+| `tokens_saida` | Média de tokens de saída faturáveis/feedback; finita e não negativa |
 
-A tabela descreve o significado das entradas planejadas. No código atual, os preços de
-infraestrutura ainda são inventados para aprendizado; somente as tarifas de IA têm a referência
-pesquisada indicada. Provedor e modelo ainda não são selecionáveis. As entradas são definidas em
-dicionários no bloco principal, sem CSV ou formulário de terminal.
+O formato atual usa ponto decimal, sem separadores de milhares; `0.60` representa 60%.
+Usuários como `100.0` ou `100.5` são rejeitados. Médias podem ser fracionárias. Os tokens de entrada
+incluem instruções, enunciado, resposta e estrutura da requisição; a saída faturável pode superar o
+texto visível, conforme o modelo.
+
+`dados/cenarios_exemplo.csv` é versionável, usa UTF-8 com ou sem BOM, cabeçalho e vírgula, com essas
+sete colunas. Contém os cenários de 100 e 500 usuários, mas aceita outros registros válidos.
+A leitura começa com texto, valida colunas e registros e retorna `nome` e `hipoteses_consumo`.
+Os cenários seguem a ordem de entrada. O modo manual produz um cenário no mesmo formato, sem CSV.
+
+Preços do modelo e cotação ficam no código e não são perguntados no terminal. Não há associação de
+capacidade no fluxo atual. Hipóteses de capacidade e preços de infraestrutura pertencem ao escopo
+mais amplo preservado para o futuro; as pesquisas da seção 6 não significam contratação ou cálculo
+ativo desses serviços no MVP.
+
+### Arquivos com finalidades diferentes
+
+| Arquivo | Finalidade e estado |
+| --- | --- |
+| `dados/cenarios_exemplo.csv` | Entrada de hipóteses de consumo, já integrada ao fluxo |
+| `resultados/cenarios.csv` | Resultados estimados de IA, gerados e ignorados pelo Git |
+| Catálogo de preços | Planejado; não é um dos dois arquivos anteriores |
+
+O CSV de resultados tem nove colunas, nesta ordem: `cenario`, `usuarios_ativos`,
+`feedbacks_mensais`, `tokens_entrada_total`, `tokens_saida_total`, `custo_ia_mensal_usd`,
+`custo_ia_mensal_br`, `custo_ia_anual_usd` e `custo_ia_anual_br`. Deixou de incluir infraestrutura
+e totais operacionais. Usa UTF-8, vírgula, ponto decimal, cabeçalho e ausência de índice.
+O destino é relativo a `calculadora.py`; a pasta é criada e o arquivo é substituído a cada execução
+concluída. Não há acumulação de linhas nem formatação monetária aplicada ao conteúdo exportado.
+
+CSV não preserva tipos Python: ao recuperar valores financeiros, ler como texto e converter
+diretamente para `Decimal`, sem float intermediário. Prever a mesma regra para o futuro catálogo.
+Não reutilizar resultados como se fossem as hipóteses de entrada.
 
 ## 6. Registro dos preços e suas fontes
+
+As pesquisas abaixo são registros históricos. As referências de infraestrutura apoiam uma
+evolução futura; não integram o fluxo principal do MVP de IA. Datas, preços, fontes e ressalvas
+foram preservados, sem revalidação comercial ou escolha de novos serviços nesta revisão.
 
 Para cada tarifa, registrar:
 
@@ -389,6 +419,12 @@ Cloud. Não duplicar o custo de execução do mesmo serviço ao comparar compone
 
 ## 7. Fórmulas
 
+As fórmulas de consumo e IA (1 a 8) sustentam o MVP atual. A conversão de IA para BRL é
+custo em USD × cotação; o anual de IA em cada moeda é o mensal × 12. As fórmulas 9 a 11
+preservam o escopo operacional mais amplo para evolução futura e não descrevem a saída atual.
+Os exemplos e a discussão pedagógica datados abaixo são históricos, sem chamadas reais à API;
+o MVP continua sendo a calculadora no terminal. Na entrada atual, digitar proporções com ponto.
+
 Para calcular, converter os percentuais em proporções: 60% corresponde a 0,60.
 
 1. **Respostas mensais** = usuários ativos × respostas por usuário.
@@ -512,148 +548,121 @@ LiteArt.
 
 ## 8. Validação dos cálculos
 
-- Quantidades e preços não podem ser negativos; a cotação deve ser maior que zero.
-- Percentuais devem estar entre 0% e 100%.
-- Zero usuários ou zero respostas deve produzir zero feedbacks e custo variável de IA zero; custos
-  fixos permanecem.
-- Com feedback em 100% dos acertos, o total de feedbacks deve corresponder ao total de respostas.
-- Com feedback em 0% dos acertos, apenas os erros devem gerar chamadas.
-- As contas devem reproduzir o exemplo didático antes de receber dados pesquisados.
+- Usuários devem ser inteiros não negativos; médias e preços devem ser finitos e não negativos.
+- Taxas são proporções entre 0 e 1, inclusive; a cotação validada pelas funções deve ser positiva.
+- Zero usuários ou zero respostas produz zero feedbacks e custo variável de IA zero.
+- Feedback em todos os acertos faz os feedbacks corresponderem ao total de respostas; proporção
+  zero nos acertos mantém somente os feedbacks dos erros.
+- Médias podem gerar contagens estimadas fracionárias; não arredondar etapas para inteiros.
+- Preços e custos financeiros permanecem Decimal, sem float ou arredondamento intermediário.
+- A apresentação usa padrão brasileiro e duas casas, com R$ ou US$, sem substituir os dados.
+- A exportação preserva valores completos; a conferência relê texto e reconstrói Decimal diretamente.
+- CSV inválido ou cancelamento não pode produzir resultado parcial nem sobrescrever o anterior.
 
-Médias e proporções podem produzir contagens estimadas fracionárias. Não arredondar cada etapa para
-inteiros. A implementação já mantém preços, custos e saldos como `Decimal`, sem conversão para
-float ou arredondamento intermediário. `:.2f` e os formatadores de `to_string()` arredondam somente
-a representação exibida; os valores usados nos cálculos, filtros e ordenação não são substituídos.
+A capacidade real dos serviços não é validada pela calculadora. Os cálculos de mensalidade fixa e
+cenário completo permanecem testados separadamente, mesmo fora da execução principal.
 
 ### Testes existentes e verificações pontuais
 
-`test_calculadora.py` contém **111 métodos de teste em 11 classes**, usando `unittest`:
-sete classes para cálculos, três para coordenadoras de partes do cenário e uma para o cenário
-completo. Alguns métodos usam `subTest` para percorrer várias entradas; cada tentativa não é
-contada como um método adicional. Os 111 métodos passaram nas verificações registradas.
+`test_calculadora.py` contém **165 métodos em 15 classes**, todos aprovados na execução desta revisão.
+São 111 métodos em 11 classes de cálculos e coordenadoras, 25 de leitura CSV, quatro de formatação,
+sete de leitura manual e 18 de integração. Subtests são combinações dentro desses métodos, sem
+ampliar essa contagem.
 
-As conferências dos DataFrames, filtros, saldos, agregações e apresentação foram roteiros
-pontuais executados em memória, conforme o histórico em [PROMPTS.md](PROMPTS.md). Não foram
-acrescentados métodos persistentes para essas operações. A execução da calculadora complementa
-a suíte, que testa as funções com suas próprias entradas. Novas etapas deverão incluir testes
-pertinentes ao comportamento acrescentado, sem confundir verificações temporárias com a suíte.
+As integrações persistentes simulam digitação e usam arquivos temporários. Conferem ambos os modos,
+cenário único e múltiplos cenários, ordem, erros, cancelamento, execução de outra pasta, símbolos
+monetários, precisão e nove colunas exportadas. Também comprovam que o caminho principal não chama
+infraestrutura nem o cenário completo. Os testes específicos dessas funções foram preservados.
+A importação do módulo continua testada sem interação, leitura de CSV ou geração de resultados.
+
+Os roteiros pontuais históricos de DataFrames, filtros e saldos estão no [registro](PROMPTS.md).
+Não equivalem a novos testes persistentes. Esta atualização altera somente documentação e não
+adiciona métodos de teste. Para repetir a suíte no ambiente existente:
+
+```powershell
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest -q
+```
 
 ## 9. Limitações e melhorias posteriores
 
-### Limites da primeira versão
+### Limites do MVP no terminal
 
-O escopo atual não inclui cobrança excedente aos planos, impostos, tarifas de pagamento,
-descontos de cache, processamento em lote, ferramentas adicionais da API, imagens, áudio ou novas
-tentativas. Essas exclusões devem acompanhar a interpretação do resultado.
+O resultado cobre somente IA. Não inclui infraestrutura, despesas operacionais completas,
+impostos, tarifas de pagamento, descontos de cache, processamento em lote, ferramentas adicionais,
+imagens, áudio ou novas tentativas. A cotação é didática e fixa na configuração; não é consultada
+automaticamente. Não há integração real com APIs de IA nem validação da qualidade pedagógica.
 
-As mensalidades não comprovam capacidade para atender ao cenário. A necessidade de mudar de plano
-dependerá de medições e testes futuros.
+Os tokens são hipóteses, não médias medidas. A projeção anual constante não simula crescimento ou
+mudanças de câmbio e tarifas. A fonte cambial ainda será definida, sem presumir uma integração.
 
-### Melhorias posteriores ao roteiro principal
+### Evoluções posteriores ao fechamento do MVP
 
-- Guardar junto aos resultados o modelo, a cotação e a referência dos preços, incluindo fonte e
-  data, para permitir reproduzir a simulação. Esses metadados ainda não compõem a tabela atual.
-- Comparar políticas de feedback nos acertos, mantendo explícitas as hipóteses de comportamento.
-- Documentar as dependências e o preparo do ambiente para facilitar a instalação em outros
-  computadores. O README já descreve o ambiente utilizado; a reprodução completa será aprimorada.
-- Simular crescimento e evolução mensal das despesas, em vez de apenas multiplicar um mês por 12.
-- Estimar receita Premium, custo por usuário e ponto de equilíbrio. Ainda não há cálculo de receitas.
-
-Antes de substituir preços didáticos, revisar as alternativas históricas da seção 6 e confirmar
-região, franquias, cadastro e preços da configuração escolhida. Ofertas por consumo exigem
-hipóteses adicionais de recursos e tempo; não devem ser tratadas como mensalidades fixas.
-Manter NestJS e PostgreSQL como referência, com Firebase como alternativa em estudo.
-
-Uma futura medição real de tokens exigirá definir esforço de raciocínio, amostra e método de
-medição. Isso não bloqueia a simulação com hipóteses e não faz parte do próximo incremento.
-
-## 10. Roteiro incremental das próximas entregas
-
-As etapas abaixo são decisões de planejamento, ainda não funcionalidades implementadas.
-Cada uma será dividida em alterações pequenas, com explicação, verificação e documentação.
-Somente a etapa 1 é o próximo incremento de código; as demais dependem de definições próprias.
-
-### 1. Exportar os resultados atuais para CSV
-
-- Exportar somente `tabela_cenarios`, com seus dois registros e sete campos, sem recalcular
-  cenários nem acrescentar metadados, entrada interativa ou outras tabelas nesta primeira entrega.
-- Definir antes da implementação: nomes e ordem dos campos, caminho e nome do arquivo, separador,
-  codificação, separador decimal e tratamento do índice. Essas escolhas ainda estão em aberto.
-- Serializar os valores financeiros a partir dos Decimal originais, sem passar por float nem
-  reutilizar textos arredondados de `resumo_exibicao` ou da impressão no terminal.
-- Prever testes de escrita e releitura controlada que comparem campos e valores exatos; a leitura
-  usada para conferir o arquivo não equivale à funcionalidade de importar cenários da etapa 2.
-- Manter os DataFrames, os cálculos e as saídas existentes preservados.
-
-### 2. Importar hipóteses de cenários por CSV, com validação
-
-Os três tipos de arquivo têm finalidades distintas:
-
-| Arquivo planejado | Finalidade | Etapa |
-| --- | --- | --- |
-| Resultados exportados | Registrar valores já calculados por cenário | 1 |
-| Entrada de cenários | Informar hipóteses de consumo e capacidade para novos cálculos | 2 |
-| Catálogo de preços | Registrar serviços ou modelos, tarifas e suas referências | 4 |
-
-- Definir o esquema de entrada: campos, tipos, unidades, nomes obrigatórios e associação das
-  hipóteses às configurações. Não presumir que o CSV de resultados serve como entrada de cenários.
-- Retomar as decisões de separador, codificação e separador decimal, além da representação das
-  taxas: proporções entre 0 e 1 ou percentuais entre 0 e 100, com conversão explícita e documentada.
-- Fornecer um CSV de exemplo e instruções de preenchimento, com unidades e valores permitidos.
-- Ler valores monetários como texto e convertê-los diretamente para `Decimal`, sem passagem
-  intermediária por float. CSV não preserva tipos Python: a conversão deverá ser explícita,
-  inclusive para os campos monetários do futuro catálogo e para resultados relidos.
-- Validar colunas obrigatórias, campos ausentes, tipos e valores inválidos, reutilizando as
-  regras das funções existentes. Informar linha e campo nas mensagens de erro.
-- Separar a leitura e conversão das funções de cálculo; não iniciar os cálculos com dados inválidos.
-- Prever testes de leitura e escrita para valores monetários exatos, taxas, campos ausentes e
-  entradas inválidas. A apresentação com duas casas não deve reduzir a precisão dos dados.
-
-### 3. Permitir informar valores pelo terminal
-
-- Começar com poucas entradas via `input()`, explicando a conversão do texto para cada tipo.
-- Reutilizar as validações existentes e apresentar mensagens claras para valores inválidos.
-- Manter a coleta de dados separada das funções de cálculo, preparando sua reutilização na interface.
-- Manter o cenário didático disponível para comparação e verificar a preservação dos cálculos.
-- Considerar argumentos com `argparse` apenas como evolução opcional após a entrada básica.
-
-### 4. Organizar preços e selecionar um modelo de IA; depois comparar modelos
-
-- Preservar GPT-6 Luna como referência até implementar a seleção; não alterar tarifas nesta revisão.
-- Definir um catálogo com provedor, identificador do modelo, tarifas de entrada e saída, moeda,
-  unidade de cobrança, fonte, data e condições aplicáveis. Separar os registros de infraestrutura
-  dos modelos de IA e respeitar as unidades próprias de cada serviço.
-- Manter preços pesquisados, hipóteses de consumo, configurações e resultados estimados separados.
-- Começar selecionando um modelo para a simulação. Só depois ampliar para comparar modelos e
-  provedores, incluindo Claude, Qwen e Gemini, além das alternativas da OpenAI já previstas.
-- Pesquisar o modelo e o provedor específicos antes de incluí-los. Normalizar unidades quando
-  necessário, preservando valor, moeda e unidade originais e a referência da pesquisa.
-- Comparar a mesma tarefa pedagógica e o mesmo volume de feedbacks, usando hipóteses de tokens
-  específicas por modelo ou declarando explicitamente a simplificação de um consumo comum.
-- Comparar custos não exige chamadas reais às APIs nem comprova qualidade pedagógica equivalente.
-  A seleção não implica integração para gerar feedbacks; a ferramenta continua sendo uma simulação.
-- Prever validação do catálogo e testes da seleção e dos custos sem depender de mudanças comerciais.
-
-### 5. Criar gráficos com Plotly
-
-- Começar com barras do custo mensal por cenário e barras empilhadas de IA e infraestrutura.
-- Identificar moeda, unidades, categorias e natureza didática das hipóteses nos gráficos.
-- Diferenciar a projeção anual constante já implementada de uma simulação de crescimento mensal,
-  que exigirá novas hipóteses e cálculos e permanece como evolução futura.
-- Manter os Decimal como fonte dos cálculos; qualquer adaptação para visualização deverá ficar
-  separada dos dados monetários e ser conferida contra os valores originais.
-- Avaliar as dependências e sua instalação apenas nessa etapa; Plotly ainda não é utilizado.
-
-### 6. Exportar gráficos e criar a interface com Streamlit
-
-- Prever exportação em PNG e JPEG e, opcionalmente, HTML para manter a interatividade.
-- A exportação estática programática com Plotly pode exigir Kaleido e Chrome/Chromium compatível.
-  Avaliar versões e instalação somente nessa etapa. Referência técnica, consultada em 06/11/2026:
+- Criar catálogo com provedor, identificador de modelo, tarifas, moeda, unidade, fonte, data e
+  condições. Começar com seleção de um modelo; depois comparar provedores, incluindo Claude,
+  Qwen, Gemini e alternativas da OpenAI já previstas, mediante pesquisa própria.
+- Manter separados preços pesquisados, configurações, hipóteses e estimativas. Usar hipóteses de
+  tokens por modelo ou declarar explicitamente a simplificação comum. Comparar custo não exige
+  chamadas reais nem comprova qualidade pedagógica equivalente.
+- Guardar modelo, cotação e referência dos preços nos resultados para reproduzir a simulação;
+  esses metadados ainda não fazem parte das nove colunas exportadas.
+- Retomar infraestrutura, capacidade e orçamento em incrementos próprios. Reutilizar as funções
+  preservadas, sem inferir capacidade a partir de mensalidades ou tratar saldo como lucro.
+- Comparar políticas de feedback nos acertos; simular crescimento, receita Premium, custo por
+  usuário e ponto de equilíbrio. Ainda não há receitas nem essas análises no fluxo atual.
+- Criar gráficos com Plotly, começando por barras do custo mensal de IA por cenário. Barras
+  empilhadas de IA e infraestrutura dependem da retomada desse escopo; diferenciar projeção anual
+  constante de crescimento mensal.
+- Planejar exportação gráfica em PNG e JPEG e, opcionalmente, HTML interativo. A exportação estática
+  programática pode exigir Kaleido e Chrome/Chromium compatível; avaliar instalação nessa etapa.
+  Referência consultada em 06/11/2026:
   [exportação estática do Plotly](https://plotly.com/python/static-image-export/).
-- Prever no Streamlit campos de entrada, seleção de modelos, envio de CSV, tabelas e gráficos.
-- Reutilizar leitura, validações e funções de cálculo, sem colocar regras financeiras na interface.
-- Verificar arquivos exportados e comportamento da interface antes de planejar a publicação.
-  Streamlit, exportação gráfica e disponibilização do dashboard ainda não foram implementados.
+- Criar posteriormente dashboard com Streamlit: entradas, seleção de modelos, envio de CSV,
+  tabelas e gráficos, reutilizando validações e cálculos. O dashboard não define o MVP atual.
+- Considerar `argparse` como alternativa opcional futura à entrada interativa.
 
-Testes e documentação acompanham cada incremento. A consolidação e a publicação da aplicação
-ficam para depois da interface; o versionamento não depende de existir um dashboard.
+Antes de aplicar infraestrutura pesquisada, revisar as alternativas históricas da seção 6,
+região, franquias, cadastro e preços. Ofertas por consumo exigem hipóteses de recursos e tempo;
+não devem ser tratadas como mensalidades fixas. Preservar NestJS e PostgreSQL como referência,
+com Firebase como alternativa em estudo. Nenhuma estimativa comprova a capacidade da implantação.
+
+Uma medição real de tokens exigirá esforço de raciocínio, amostra e método definidos. Isso não
+bloqueia a simulação didática nem faz parte do próximo incremento.
+
+## 10. Roteiro incremental para fechar o MVP
+
+CSV de entrada validado, preenchimento manual e exportação de resultados já estão implementados.
+As próximas etapas abaixo são planejamento, não funcionalidades concluídas. Cada incremento deverá
+preservar os contratos atuais, receber testes pertinentes e manter documentação coerente.
+
+### 1. Pesquisar e definir a consulta de cotação
+
+- Pesquisar fontes e suas condições, documentação, disponibilidade e limites antes de escolher.
+- Definir o significado da taxa em BRL por USD, data de referência, atualização e tratamento de
+  indisponibilidade. Não confundir uma taxa publicada com a taxa efetivamente paga.
+- Definir como recuperar os valores com precisão e como apresentar a origem da cotação.
+- Manter explícita a decisão pendente: nenhuma fonte cambial foi escolhida ou integrada.
+
+Este é o próximo incremento de pesquisa e decisão. Não atualizar tarifas de IA nem presumir que
+pesquisar uma fonte já implementa a consulta.
+
+### 2. Implementar consulta com opção manual
+
+- Após definir a fonte, implementar a consulta e permitir informar a cotação manualmente.
+- Validar número finito e positivo e preservar Decimal; evitar float intermediário para a taxa.
+- Apresentar falhas de consulta claramente e permitir a alternativa manual, sem substituição oculta.
+- Separar obtenção da taxa dos cálculos, para reutilização e testes sem depender da rede.
+- Conferir os dois modos de cenários e os valores estimados com cotações controladas nos testes.
+
+Essa etapa ainda não existe: hoje a cotação permanece fixa na configuração do código.
+
+### 3. Consolidar documentação e validar a instalação
+
+- Documentar as dependências e o preparo do ambiente para reproduzir a instalação em outro computador.
+- Validar execução no ambiente isolado, menu, campos, mensagens, precisão e exportação de nove colunas.
+- Executar a suíte completa, incluindo infraestrutura e cálculo completo preservados.
+- Revisar exemplos, limitações e instruções de execução para fechar a versão da calculadora no terminal.
+- Manter explícitos o anual constante, a natureza estimada e a ausência de chamadas reais à IA.
+
+Catálogo, modelos selecionáveis, gráficos, dashboard, infraestrutura e análises avançadas ficam
+para etapas posteriores, conforme a seção 9. O fechamento desta versão não depende de publicar um
+dashboard; o versionamento acompanha os incrementos do projeto.

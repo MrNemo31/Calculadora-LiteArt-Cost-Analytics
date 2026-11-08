@@ -1236,3 +1236,63 @@ As conferências de entrada e integração descritas acima são testes persisten
 das funções de cálculo existentes foi uma verificação pontual de preservação do escopo.
 
 **Marco deste registro:** documentação de 07/11/2026, até o menu e a entrada manual de cenários.
+
+## 31. MVP no terminal focado em custos de IA e apresentação brasileira
+
+**Data:** 08/11/2026.
+
+**Etapa:** simplificação do fluxo principal e alinhamento da documentação ao MVP de IA.
+
+**Objetivo dos pedidos:** concentrar a versão atual nas estimativas de feedbacks de IA, melhorar a
+legibilidade do terminal e preservar precisão, funções reutilizáveis e testes das etapas anteriores.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Melhorar mensagens e apresentação monetária; simplificar o cálculo e a saída para IA, mantendo os
+modos CSV e manual. Retirar infraestrutura e orçamento da execução principal sem eliminar as
+funções de infraestrutura e cálculo completo nem seus testes. Exportar as mesmas nove informações
+da tabela final, com precisão completa. Atualizar README e planejamento conforme a implementação,
+preservando os registros históricos e sem commit ou push.
+
+**Participação e aprendizado:** as explicações distinguiram os dados Decimal dos textos exibidos,
+a composição do consumo e a coordenação dos custos de IA. A simplificação separou o escopo da
+calculadora no terminal da visão futura de custos completos e dashboard.
+
+**Decisões registradas:**
+
+- Usar `formatar_moeda_br()` e formatadores em `to_string()` para milhares, vírgula decimal e duas
+  casas, com R$ ou US$ em cada valor financeiro da tabela, sem float ou dependência regional.
+- Manter ponto decimal, taxas de 0 a 1 e as validações na entrada; não aplicar formatação ao CSV.
+- Reutilizar diretamente `calcular_consumo_cenario()` e `calcular_custo_ia_cenario()` nos dois modos.
+- Retirar associação de capacidade, infraestrutura, totais operacionais, orçamento, filtro e saldo
+  do bloco principal; preservar `calcular_custo_servico()`, `calcular_custo_infra_cenario()` e
+  `calcular_cenario()` e seus testes para evolução futura.
+- Apresentar modelo, tarifas e cotação configurados, uma tabela na ordem de entrada e, somente com
+  múltiplos cenários, menor custo de IA mensal em BRL, maior e diferença.
+- Exportar nove colunas: cenário, usuários, feedbacks, tokens de entrada e saída, IA mensal em USD
+  e BRL e IA anual em USD e BRL. Infraestrutura e totais operacionais saíram do CSV de resultados;
+  o formato de entrada foi preservado.
+- Manter Decimal nos dados, valores completos na exportação e anual constante de 12 meses.
+- Adiar a definição da fonte e a implementação da consulta cambial com opção manual; consolidar
+  documentação e validar instalação antes de fechar o MVP no terminal. Dashboard continua futuro.
+
+**Contribuição para o projeto:** a simplificação está implementada. O exemplo de 100 usuários
+produz 2.200 feedbacks, 1.100.000/660.000 tokens de entrada/saída, IA mensal de US$ 0,44/R$ 2,20 e
+anual de US$ 5,28/R$ 26,40. Para 500 usuários, são 11.000 feedbacks, 5.500.000/3.300.000 tokens,
+US$ 2,20/R$ 11,00 mensais e US$ 26,40/R$ 132,00 anuais. Não são custos operacionais completos.
+
+A suíte atual tem 165 métodos em 15 classes e passou nesta atualização da documentação, com
+`python -X utf8 -B -m unittest -q` usando a `.venv-win`. Inclui quatro métodos persistentes de
+formatação e 18 de integração. As integrações foram ajustadas ao contrato de nove colunas de IA,
+aos dois modos e à saída única; comprovam ausência de chamadas aos cálculos de infraestrutura e
+cenário completo, preservação de Decimal, símbolos monetários, erros e cancelamento sem sobrescrita.
+Usam digitação simulada e arquivos temporários. O cenário único de 200 usuários é coberto com
+4.400 feedbacks e IA de US$ 0,88/R$ 4,40 mensais e US$ 10,56/R$ 52,80 anuais.
+
+Os 111 métodos das funções de cálculo e coordenadoras permanecem, incluindo infraestrutura e
+cenário completo. Subtests não aumentam a contagem. A conferência do código, dos cabeçalhos e da
+preservação do escopo nesta revisão é pontual; esta edição modifica somente os três documentos e
+não cria novos testes automatizados. Os registros anteriores retratam os escopos de suas datas.
+
+**Marco deste registro:** documentação de 08/11/2026, com MVP de IA no terminal e consulta cambial
+pendente, sem integração real com APIs de IA nem validação de qualidade pedagógica.

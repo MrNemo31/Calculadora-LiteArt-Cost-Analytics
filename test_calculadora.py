@@ -9,9 +9,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from decimal import Decimal
+from decimal import Decimal, getcontext, localcontext
+
+import pandas as pd
+from pandas.testing import assert_frame_equal
 
 from calculadora import (
+    formatar_moeda_br,
     ler_cenario_terminal,
     ler_cenarios_csv,
     calcular_cenario,
@@ -1201,6 +1205,44 @@ class TestLerCenariosCsv(unittest.TestCase):
         self.assertNotIn("tabela_cenarios", estado)
 
 
+class TestFormatarMoedaBr(unittest.TestCase):
+    def test_exemplos_zero_e_negativos(self):
+        for valor, esperado in [
+            ("1400", "1.400,00"), ("67.2", "67,20"), ("-6", "-6,00"),
+            ("1234567.89", "1.234.567,89"), ("0", "0,00"), ("-1234.56", "-1.234,56"),
+        ]:
+            with self.subTest(valor=valor):
+                self.assertEqual(formatar_moeda_br(Decimal(valor)), esperado)
+
+    def test_arredonda_so_o_texto_e_preserva_precisao_original(self):
+        valor = Decimal("1234.56789")
+        antes = valor.as_tuple()
+        self.assertEqual(formatar_moeda_br(valor), "1.234,57")
+        self.assertEqual(valor.as_tuple(), antes)
+        self.assertEqual(valor, Decimal("1234.56789"))
+
+    def test_nao_altera_o_contexto_decimal(self):
+        antes = repr(getcontext())
+        formatar_moeda_br(Decimal("1.23456789"))
+        self.assertEqual(repr(getcontext()), antes)
+        with localcontext() as contexto:
+            contexto.prec = 2
+            contexto_antes = repr(contexto)
+            self.assertEqual(formatar_moeda_br(Decimal("1234567.89")), "1.234.567,89")
+            self.assertEqual(repr(contexto), contexto_antes)
+        self.assertEqual(repr(getcontext()), antes)
+
+    def test_independe_de_locale_e_nao_converte_para_float(self):
+        valor = Decimal("12345678901234567890.123456789")
+        with patch("locale.localeconv", side_effect=AssertionError("locale")), \
+                patch("locale.setlocale", side_effect=AssertionError("locale")), \
+                patch("builtins.float", side_effect=AssertionError("float")):
+            resultado = formatar_moeda_br(valor)
+        self.assertEqual(resultado, "12.345.678.901.234.567.890,12")
+        self.assertNotIn("R$", resultado)
+        self.assertNotIn("US$", resultado)
+
+
 class TestLerCenarioTerminal(unittest.TestCase):
     entradas_validas = ["Cenário manual", "100", "40", "0.60", "0.25", "500", "300"]
 
@@ -1225,7 +1267,8 @@ class TestLerCenarioTerminal(unittest.TestCase):
             self.assertIs(type(resultado["hipoteses_consumo"][coluna]), float)
         self.assertEqual(len(perguntas), 7)
         self.assertIn("ponto decimal", texto)
-        self.assertIn("0.60 significa 60%", texto)
+        self.assertIn("0.60 corresponde a 60%", texto)
+        self.assertIn("sem separadores de milhares", texto)
         self.assertIn("usuários/mês", perguntas[1].args[0])
         self.assertIn("respostas/usuário/mês", perguntas[2].args[0])
         self.assertIn("tokens/feedback", perguntas[5].args[0])
@@ -1293,6 +1336,11 @@ class TestLerCenarioTerminal(unittest.TestCase):
 
 
 class TestIntegracaoCenariosCsv(unittest.TestCase):
+    colunas_resultado = [
+        "cenario", "usuarios_ativos", "feedbacks_mensais", "tokens_entrada_total", "tokens_saida_total",
+        "custo_ia_mensal_usd", "custo_ia_mensal_br", "custo_ia_anual_usd", "custo_ia_anual_br",
+    ]
+
     def setUp(self):
         temporario = TemporaryDirectory(prefix="liteart_integracao_")
         self.addCleanup(temporario.cleanup)
@@ -1328,50 +1376,53 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
     def conferir_exportacao(self, estado):
         with self.saida.open(encoding="utf-8", newline="") as arquivo:
             leitor = csv.DictReader(arquivo)
-            self.assertEqual(leitor.fieldnames, list(estado["tabela_cenarios"].columns))
+            self.assertEqual(leitor.fieldnames, self.colunas_resultado)
             registros = list(leitor)
+        self.assertEqual(list(estado["tabela_cenarios"].columns), self.colunas_resultado)
         self.assertEqual(len(registros), len(estado["resumos_cenarios"]))
         for registro, resumo in zip(registros, estado["resumos_cenarios"], strict=True):
+            self.assertEqual(len(registro), 9)
             self.assertEqual(registro["cenario"], resumo["cenario"])
             self.assertEqual(int(registro["usuarios_ativos"]), resumo["usuarios_ativos"])
-            for campo in (
-                "custo_ia_mensal_br", "custo_infra_mensal_br",
-                "custo_total_mensal_br", "custo_total_anual_br",
-            ):
+            for campo in ("feedbacks_mensais", "tokens_entrada_total", "tokens_saida_total"):
+                self.assertEqual(Decimal(registro[campo]), Decimal(str(resumo[campo])))
+            for campo in self.colunas_resultado[5:]:
                 self.assertIsInstance(resumo[campo], Decimal)
+                self.assertEqual(registro[campo], str(resumo[campo]))
                 self.assertEqual(Decimal(registro[campo]).as_tuple(), resumo[campo].as_tuple())
 
     def test_exemplo_preserva_resultados_tabelas_e_precisao(self):
         self.entrada.write_bytes(self.exemplo)
         estado, texto = self.executar()
-        self.assertEqual(estado["tabela_cenarios"].shape, (2, 7))
-        self.assertEqual(list(estado["tabela_cenarios"]["usuarios_ativos"]), [100, 500])
+        tabela = estado["tabela_cenarios"]
+        self.assertEqual(tabela.shape, (2, 9))
+        self.assertEqual(list(tabela["usuarios_ativos"]), [100, 500])
+        self.assertEqual(list(tabela.index), [0, 1])
         for resumo, esperado in zip(estado["resumos_cenarios"], [
-            (2200, Decimal("2.20"), Decimal("65.00"), Decimal("67.20"), Decimal("806.40")),
-            (11000, Decimal("11.00"), Decimal("65.00"), Decimal("76.00"), Decimal("912.00")),
+            (2200, 1100000, 660000, Decimal("0.44"), Decimal("2.20"), Decimal("5.28"), Decimal("26.40")),
+            (11000, 5500000, 3300000, Decimal("2.20"), Decimal("11.00"), Decimal("26.40"), Decimal("132.00")),
         ], strict=True):
-            self.assertEqual(tuple(resumo[campo] for campo in (
-                "feedbacks_mensais", "custo_ia_mensal_br", "custo_infra_mensal_br",
-                "custo_total_mensal_br", "custo_total_anual_br",
-            )), esperado)
-        self.assertEqual(list(estado["comparacao_custos"]["usuarios_ativos"]), [500, 100])
-        self.assertEqual(list(estado["cenarios_no_orcamento"]["usuarios_ativos"]), [100])
-        self.assertEqual(list(estado["analise_orcamento"]["saldo_orcamento_br"]), [
-            Decimal("-6.00"), Decimal("2.80"),
-        ])
+            self.assertEqual(tuple(resumo[campo] for campo in self.colunas_resultado[2:]), esperado)
         for nome, esperado in [
-            ("menor_custo_mensal_br", Decimal("67.20")),
-            ("maior_custo_mensal_br", Decimal("76.00")),
+            ("menor_custo_mensal_br", Decimal("2.20")),
+            ("maior_custo_mensal_br", Decimal("11.00")),
             ("diferenca_custos_mensais_br", Decimal("8.80")),
         ]:
             self.assertIsInstance(estado[nome], Decimal)
             self.assertEqual(estado[nome], esperado)
-        for nome in ("tabela_cenarios", "comparacao_custos", "cenarios_no_orcamento", "analise_orcamento"):
-            for coluna in estado[nome].columns:
-                if coluna.startswith("custo_") or coluna == "saldo_orcamento_br":
-                    self.assertTrue(all(isinstance(v, Decimal) for v in estado[nome][coluna]))
-        self.assertIn("Detalhamento do primeiro cenário: Cenário didático: 100 usuários", texto)
-        self.assertIn("Menor custo mensal: R$ 67.20", texto)
+        self.assertIn("GPT-6 Luna (gpt-6-luna)", texto)
+        self.assertIn("Entrada sem cache: US$ 0,10 por milhão de tokens", texto)
+        self.assertIn("Saída faturável: US$ 0,50 por milhão de tokens", texto)
+        self.assertIn("Cotação utilizada: R$ 5,00 por US$ 1,00", texto)
+        self.assertIn("12 meses", texto)
+        self.assertIn("Menor custo de IA: R$ 2,20", texto)
+        self.assertEqual(texto.count("IA mensal (USD)"), 1)
+        self.assertEqual(texto.count("Infraestrutura"), 1)  # Somente a exclusão do escopo.
+        for trecho in ("orçamento", "Saldo", "Lista de resumos", "Detalhamento", "custo total", "{'cenario':"):
+            self.assertNotIn(trecho, texto)
+        for nome in ("hipoteses_capacidade", "precos_infraestrutura", "orcamento_mensal_br",
+                     "analise_orcamento", "cenarios_no_orcamento", "comparacao_custos"):
+            self.assertNotIn(nome, estado)
         self.assertEqual(self.entrada.read_bytes(), self.exemplo)
         self.conferir_exportacao(estado)
 
@@ -1380,17 +1431,17 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
         estado, texto = self.executar()
         resumo = estado["resumos_cenarios"][0]
         self.assertEqual(resumo["feedbacks_mensais"], 4400)
+        self.assertEqual(resumo["tokens_entrada_total"], 2200000)
+        self.assertEqual(resumo["tokens_saida_total"], 1320000)
+        self.assertEqual(resumo["custo_ia_mensal_usd"], Decimal("0.88"))
         self.assertEqual(resumo["custo_ia_mensal_br"], Decimal("4.40"))
-        self.assertEqual(resumo["custo_total_mensal_br"], Decimal("69.40"))
-        self.assertEqual(resumo["custo_total_anual_br"], Decimal("832.80"))
-        self.assertEqual(estado["tabela_cenarios"].shape, (1, 7))
-        for nome in ("tabela_cenarios", "comparacao_custos", "cenarios_no_orcamento", "analise_orcamento"):
-            self.assertEqual(list(estado[nome]["usuarios_ativos"]), [200])
-        self.assertEqual(estado["feedbacks_mensais"], 4400)
-        self.assertEqual(estado["custo_total_mensal_br"], Decimal("69.40"))
-        self.assertEqual(estado["diferenca_custos_mensais_br"], Decimal("0.00"))
-        self.assertIn("Detalhamento do primeiro cenário: Cenário temporário: 200 usuários", texto)
-        self.assertIn("Custo total mensal estimado (BRL): R$ 69.40", texto)
+        self.assertEqual(resumo["custo_ia_anual_usd"], Decimal("10.56"))
+        self.assertEqual(resumo["custo_ia_anual_br"], Decimal("52.80"))
+        self.assertEqual(estado["tabela_cenarios"].shape, (1, 9))
+        self.assertEqual(list(estado["tabela_cenarios"]["usuarios_ativos"]), [200])
+        self.assertNotIn("Resumo da IA mensal", texto)
+        self.assertNotIn("menor_custo_mensal_br", estado)
+        self.assertIn("Cenário temporário: 200 usuários", texto)
         self.conferir_exportacao(estado)
 
     def test_tres_cenarios_preservam_ordem_do_arquivo(self):
@@ -1398,25 +1449,35 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
             [nome, usuarios, "40", "0.60", "0.25", "500", "300"]
             for nome, usuarios in [("Primeiro", "200"), ("Segundo", "500"), ("Terceiro", "100")]
         ])
-        estado, _ = self.executar()
-        self.assertEqual(estado["tabela_cenarios"].shape, (3, 7))
+        estado, texto = self.executar()
+        self.assertEqual(estado["tabela_cenarios"].shape, (3, 9))
         self.assertEqual(list(estado["tabela_cenarios"]["cenario"]), ["Primeiro", "Segundo", "Terceiro"])
-        self.assertEqual(list(estado["comparacao_custos"]["usuarios_ativos"]), [500, 200, 100])
-        self.assertEqual(estado["primeiro_cenario"]["nome"], "Primeiro")
-        self.assertEqual(estado["feedbacks_mensais"], 4400)
+        self.assertEqual(list(estado["tabela_cenarios"]["custo_ia_mensal_br"]), [
+            Decimal("4.40"), Decimal("11.00"), Decimal("2.20"),
+        ])
+        self.assertIn("Resumo da IA mensal", texto)
         self.conferir_exportacao(estado)
 
-    def test_capacidade_e_copia_independente_por_cenario(self):
+    def test_principal_nao_chama_infraestrutura_nem_cenario_completo(self):
         self.entrada.write_bytes(self.exemplo)
-        estado, _ = self.executar()
-        primeiro, segundo = estado["cenarios_didaticos"]
-        capacidade = estado["hipoteses_capacidade"]
-        self.assertEqual(primeiro["hipoteses_capacidade"], capacidade)
-        self.assertIsNot(primeiro["hipoteses_capacidade"], capacidade)
-        self.assertIsNot(primeiro["hipoteses_capacidade"], segundo["hipoteses_capacidade"])
-        primeiro["hipoteses_capacidade"]["quantidade_backend"] = 999
-        self.assertEqual(segundo["hipoteses_capacidade"]["quantidade_backend"], 2)
-        self.assertEqual(capacidade["quantidade_backend"], 2)
+        for entradas, quantidade in [(["1"], 2), (["2", *TestLerCenarioTerminal.entradas_validas], 1)]:
+            with self.subTest(modo=entradas[0]):
+                chamadas = []
+                def observar(frame, evento, arg):
+                    if evento == "call" and frame.f_code.co_filename == str(self.script):
+                        nome = frame.f_code.co_name
+                        self.assertNotIn(nome, ("calcular_cenario", "calcular_custo_infra_cenario", "calcular_custo_servico"))
+                        chamadas.append(nome)
+                perfil_anterior = sys.getprofile()
+                try:
+                    sys.setprofile(observar)
+                    estado, _ = self.executar(entradas)
+                finally:
+                    sys.setprofile(perfil_anterior)
+                self.assertEqual(chamadas.count("calcular_consumo_cenario"), quantidade)
+                self.assertEqual(chamadas.count("calcular_custo_ia_cenario"), quantidade)
+                for cenario in estado["cenarios_didaticos"]:
+                    self.assertEqual(set(cenario), {"nome", "hipoteses_consumo"})
 
     def test_arquivo_inexistente_encerra_sem_sobrescrever_resultados(self):
         self.saida.parent.mkdir()
@@ -1467,7 +1528,7 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
         processo = self.executar_processo(outra_pasta)
         self.assertEqual(processo.returncode, 0, processo.stderr)
         self.assertIn(str(self.saida), processo.stdout)
-        self.assertIn("Menor custo mensal: R$ 67.20", processo.stdout)
+        self.assertIn("Menor custo de IA: R$ 2,20", processo.stdout)
         self.assertTrue(self.saida.exists())
         self.assertFalse((outra_pasta / "resultados").exists())
 
@@ -1478,18 +1539,16 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
         resumo = estado["resumos_cenarios"][0]
         self.assertEqual(resumo["feedbacks_mensais"], 2200)
         for coluna, esperado in [
+            ("custo_ia_mensal_usd", Decimal("0.44")),
             ("custo_ia_mensal_br", Decimal("2.20")),
-            ("custo_total_mensal_br", Decimal("67.20")),
-            ("custo_total_anual_br", Decimal("806.40")),
+            ("custo_ia_anual_usd", Decimal("5.28")),
+            ("custo_ia_anual_br", Decimal("26.40")),
         ]:
             self.assertIsInstance(resumo[coluna], Decimal)
             self.assertEqual(resumo[coluna], esperado)
-        for nome in ("tabela_cenarios", "comparacao_custos", "cenarios_no_orcamento", "analise_orcamento"):
-            self.assertEqual(list(estado[nome]["usuarios_ativos"]), [100])
-        self.assertEqual(estado["menor_custo_mensal_br"], Decimal("67.20"))
-        self.assertEqual(estado["maior_custo_mensal_br"], Decimal("67.20"))
-        self.assertEqual(estado["diferenca_custos_mensais_br"], Decimal("0.00"))
-        self.assertIn("Detalhamento do primeiro cenário: Cenário manual", texto)
+        self.assertEqual(estado["tabela_cenarios"].shape, (1, 9))
+        self.assertNotIn("Resumo da IA mensal", texto)
+        self.assertNotIn("orçamento", texto)
         self.conferir_exportacao(estado)
         self.assertFalse(self.entrada.exists())
 
@@ -1503,7 +1562,7 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
     def test_menu_invalido_seguido_de_manual(self):
         estado, texto = self.executar(["3", " 2 ", *TestLerCenarioTerminal.entradas_validas])
         self.assertIn("Opção inválida", texto)
-        self.assertEqual(estado["tabela_cenarios"].shape, (1, 7))
+        self.assertEqual(estado["tabela_cenarios"].shape, (1, 9))
         self.assertEqual(estado["resumos_cenarios"][0]["cenario"], "Cenário manual")
 
     def test_dois_modos_produzem_os_mesmos_resultados(self):
@@ -1512,8 +1571,7 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
         self.escrever([TestLerCenarioTerminal.entradas_validas])
         importado, _ = self.executar(["1"])
         self.assertEqual(manual["resumos_cenarios"], importado["resumos_cenarios"])
-        for nome in ("tabela_cenarios", "comparacao_custos", "cenarios_no_orcamento", "analise_orcamento"):
-            self.assertTrue(manual[nome].equals(importado[nome]))
+        assert_frame_equal(manual["tabela_cenarios"], importado["tabela_cenarios"], check_exact=True)
         self.assertEqual(self.saida.read_bytes(), exportacao_manual)
 
     def test_cancelamento_preserva_resultado_existente(self):
@@ -1545,6 +1603,74 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
         self.assertNotEqual(processo.returncode, 0)
         self.assertIn("Entrada cancelada", processo.stderr)
         self.assertFalse(self.saida.parent.exists())
+
+    def test_tabela_unica_formatada_preserva_os_dados(self):
+        self.entrada.write_bytes(self.exemplo)
+        original = pd.DataFrame.to_string
+        tabelas_conferidas = []
+        def conferir(tabela, *args, **kwargs):
+            antes = tabela.copy(deep=True)
+            tipos = [[(type(v), v.as_tuple() if isinstance(v, Decimal) else v)
+                      for v in tabela[c]] for c in tabela.columns]
+            resultado = original(tabela, *args, **kwargs)
+            assert_frame_equal(tabela, antes, check_exact=True)
+            self.assertEqual(tipos, [[(type(v), v.as_tuple() if isinstance(v, Decimal) else v)
+                                     for v in tabela[c]] for c in tabela.columns])
+            self.assertFalse(kwargs["index"])
+            self.assertEqual(len(kwargs["header"]), 9)
+            self.assertEqual(kwargs["header"][0], "Cenário")
+            self.assertEqual(kwargs["header"][-1], "IA anual (BRL)")
+            self.assertEqual(set(kwargs["formatters"]), set(self.colunas_resultado[5:]))
+            for coluna, esperado in {
+                "custo_ia_mensal_usd": "US$ 0,44",
+                "custo_ia_mensal_br": "R$ 2,20",
+                "custo_ia_anual_usd": "US$ 5,28",
+                "custo_ia_anual_br": "R$ 26,40",
+            }.items():
+                self.assertEqual(kwargs["formatters"][coluna](tabela.loc[0, coluna]), esperado)
+                self.assertIn(esperado, resultado)
+            tabelas_conferidas.append(tabela)
+            return resultado
+        with patch.object(pd.DataFrame, "to_string", conferir):
+            estado, texto = self.executar()
+        self.assertEqual(len(tabelas_conferidas), 1)
+        self.assertIn("0,44", texto)
+        self.assertIn("26,40", texto)
+        self.assertNotIn("resumo_exibicao", estado)
+        self.assertEqual(estado["resumos_cenarios"][0]["custo_ia_mensal_br"].as_tuple(),
+                         Decimal("2.200000").as_tuple())
+        for coluna in self.colunas_resultado[5:]:
+            self.assertTrue(all(isinstance(v, Decimal) for v in estado["tabela_cenarios"][coluna]))
+        self.conferir_exportacao(estado)
+
+    def test_exportacao_tem_nove_campos_de_ia_e_precisao_completa_nos_dois_modos(self):
+        cabecalho = ",".join(self.colunas_resultado) + "\n"
+        esperado_csv = cabecalho + (
+            "Cenário didático: 100 usuários,100,2200.0,1100000.0,660000.0,0.4400,2.200000,5.2800,26.400000\n"
+            "Cenário didático: 500 usuários,500,11000.0,5500000.0,3300000.0,2.200,11.00000,26.400,132.00000\n"
+        )
+        esperado_manual = cabecalho + (
+            "Cenário manual,100,2200.0,1100000.0,660000.0,0.4400,2.200000,5.2800,26.400000\n"
+        )
+        self.entrada.write_bytes(self.exemplo)
+        for entradas, esperado in [
+            (["1"], esperado_csv), (["2", *TestLerCenarioTerminal.entradas_validas], esperado_manual),
+        ]:
+            with self.subTest(modo=entradas[0]):
+                estado, _ = self.executar(entradas)
+                self.assertEqual(self.saida.read_text(encoding="utf-8"), esperado)
+                self.conferir_exportacao(estado)
+
+    def test_agrupa_valores_monetarios_sem_formatar_quantidades_como_moeda(self):
+        estado, texto = self.executar(["2", "Turma grande", "10000", "40", "0.60", "0.25", "500", "300"])
+        self.assertIn("2.640,00", texto)
+        self.assertNotIn("10.000,00", texto)
+        self.assertNotIn("220.000,00", texto)
+        resumo = estado["resumos_cenarios"][0]
+        self.assertEqual(resumo["usuarios_ativos"], 10000)
+        self.assertEqual(resumo["feedbacks_mensais"], 220000)
+        self.assertEqual(resumo["custo_ia_anual_br"], Decimal("2640.00"))
+        self.conferir_exportacao(estado)
 
 
 if __name__ == "__main__":

@@ -265,38 +265,48 @@ def calcular_cenario(
     }
 
 
+def formatar_moeda_br(valor):
+    """Retorna texto com milhares, vírgula decimal e duas casas, sem alterar o Decimal."""
+    texto = f"{valor:,.2f}"
+    return texto.translate(str.maketrans(",.", ".,"))
+
+
 def converter_hipotese_consumo(texto, coluna):
     """Converte uma hipótese textual e valida as regras compartilhadas das entradas."""
     if not texto:
-        raise ValueError("Campo obrigatório vazio.")
+        raise ValueError("Campo obrigatório vazio. Digite um valor.")
     try:
         valor = int(texto) if coluna == "usuarios_ativos" else float(texto)
     except ValueError as erro:
-        formato = "um inteiro sem parte decimal" if coluna == "usuarios_ativos" else "um número"
+        formato = (
+            "um inteiro sem parte decimal (ex.: 100)" if coluna == "usuarios_ativos"
+            else "um número com ponto decimal, sem separadores de milhares (ex.: 40.5)"
+        )
         raise ValueError(f"Informe {formato}.") from erro
 
     validar_numero_nao_negativo(valor, coluna)
     if coluna in ("taxa_acerto", "proporcao_acertos_com_feedback") and valor > 1:
-        raise ValueError("A taxa deve estar entre 0 e 1, inclusive.")
+        raise ValueError("A taxa deve estar entre 0 e 1, inclusive. Use 0.60 para 60%.")
     return valor
 
 
 def ler_cenario_terminal():
     """Solicita um cenário, repetindo somente entradas inválidas."""
-    print("Use ponto decimal para frações. Taxas são proporções de 0 a 1: 0.60 significa 60%.")
+    print("Use ponto decimal para frações (ex.: 40.5), sem separadores de milhares.")
+    print("As taxas são proporções entre 0 e 1: 0.60 corresponde a 60%.")
     while True:
-        nome = input("Nome do cenário: ").strip()
+        nome = input("Nome do cenário (ex.: Turma de revisão): ").strip()
         if nome:
             break
-        print("O nome do cenário é obrigatório.")
+        print("O nome do cenário é obrigatório. Digite um nome antes de continuar.")
 
     perguntas = (
-        ("usuarios_ativos", "Usuários ativos (inteiro, usuários/mês): "),
-        ("respostas_por_usuario", "Respostas por usuário (respostas/usuário/mês): "),
-        ("taxa_acerto", "Taxa de acerto (proporção de 0 a 1): "),
-        ("proporcao_acertos_com_feedback", "Acertos com feedback (proporção de 0 a 1): "),
-        ("tokens_entrada", "Tokens de entrada (média de tokens/feedback): "),
-        ("tokens_saida", "Tokens de saída faturáveis (média de tokens/feedback): "),
+        ("usuarios_ativos", "Usuários ativos (inteiro, usuários/mês; ex.: 100): "),
+        ("respostas_por_usuario", "Respostas por usuário (respostas/usuário/mês; ex.: 40): "),
+        ("taxa_acerto", "Taxa de acerto (proporção de 0 a 1; ex.: 0.60): "),
+        ("proporcao_acertos_com_feedback", "Acertos com feedback (proporção de 0 a 1; ex.: 0.25): "),
+        ("tokens_entrada", "Tokens de entrada (média de tokens/feedback; ex.: 500): "),
+        ("tokens_saida", "Tokens de saída faturáveis (média de tokens/feedback; ex.: 300): "),
     )
     hipoteses = {}
     for coluna, pergunta in perguntas:
@@ -305,7 +315,7 @@ def ler_cenario_terminal():
             try:
                 valor = converter_hipotese_consumo(texto, coluna)
             except ValueError as erro:
-                print(f"{coluna}: {erro}")
+                print(f"Corrija {coluna}: {erro}")
             else:
                 hipoteses[coluna] = valor
                 break
@@ -366,12 +376,13 @@ def ler_cenarios_csv(caminho):
 if __name__ == "__main__":
     try:
         while True:
-            print("\n1 — Importar cenários do CSV atual.")
-            print("2 — Informar um cenário pelo terminal.")
-            opcao = input("Escolha 1 ou 2: ").strip()
+            print("\nComo deseja informar os cenários?")
+            print("1 — Importar dados/cenarios_exemplo.csv.")
+            print("2 — Preencher um único cenário pelo terminal.")
+            opcao = input("Digite 1 ou 2: ").strip()
             if opcao in ("1", "2"):
                 break
-            print("Opção inválida. Informe 1 para CSV ou 2 para preenchimento pelo terminal.")
+            print("Opção inválida. Digite 1 para importar o CSV ou 2 para preencher pelo terminal.")
 
         if opcao == "1":
             caminho_cenarios = Path(__file__).resolve().parent / "dados" / "cenarios_exemplo.csv"
@@ -390,23 +401,6 @@ if __name__ == "__main__":
         "brl_por_usd": Decimal("5.00"),
     }
 
-    # Infraestrutura didática em USD: preços inventados, não planos pesquisados.
-    precos_infraestrutura = {
-        "backend_mensal_por_unidade_usd": Decimal("5.00"),
-        "banco_mensal_por_unidade_usd": Decimal("3.00"),
-    }
-
-    # Hipóteses de capacidade: quantidades contratadas, não preços.
-    hipoteses_capacidade = {
-        "quantidade_backend": 2,
-        "quantidade_banco": 1,
-    }
-    for cenario in cenarios_didaticos:
-        cenario["hipoteses_capacidade"] = hipoteses_capacidade.copy()
-
-    primeiro_cenario = cenarios_didaticos[0]
-    hipoteses_consumo = primeiro_cenario["hipoteses_consumo"]
-
     # Preços pesquisados: GPT-6 Luna, Standard, entrada sem cache.
     # Fonte: https://developers.openai.com/api/docs/models/gpt-6-luna
     # Consulta: 2026-10-23. Sem adicionais regionais, ferramentas ou cache.
@@ -415,187 +409,54 @@ if __name__ == "__main__":
         "saida_por_milhao_usd": Decimal("0.50"),
     }
 
-    # Executar o cenário completo antes de apresentar os resultados.
-    resultado_cenario = calcular_cenario(
-        hipoteses_consumo, primeiro_cenario["hipoteses_capacidade"],
-        precos_ia, precos_infraestrutura, cotacao
-    )
-    consumo_cenario = resultado_cenario["consumo"]
-    custos_ia_cenario = resultado_cenario["custos_ia"]
-    custos_infra_cenario = resultado_cenario["custos_infraestrutura"]
-    totais_cenario = resultado_cenario["totais"]
-
-    respostas_mensais = consumo_cenario["respostas_mensais"]
-    acertos_mensais = consumo_cenario["acertos_mensais"]
-    erros_mensais = consumo_cenario["erros_mensais"]
-    feedbacks_nos_acertos = consumo_cenario["feedbacks_nos_acertos"]
-    feedbacks_mensais = consumo_cenario["feedbacks_mensais"]
-    tokens_entrada_total = consumo_cenario["tokens_entrada_total"]
-    tokens_saida_total = consumo_cenario["tokens_saida_total"]
-
-    custo_entrada_usd = custos_ia_cenario["custo_entrada_usd"]
-    custo_saida_usd = custos_ia_cenario["custo_saida_usd"]
-    custo_ia_mensal_usd = custos_ia_cenario["custo_ia_mensal_usd"]
-    custo_entrada_br = custos_ia_cenario["custo_entrada_br"]
-    custo_saida_br = custos_ia_cenario["custo_saida_br"]
-    custo_ia_mensal_br = custos_ia_cenario["custo_ia_mensal_br"]
-    custo_ia_anual_usd = custos_ia_cenario["custo_ia_anual_usd"]
-    custo_ia_anual_br = custos_ia_cenario["custo_ia_anual_br"]
-
-    custo_backend_mensal_usd = custos_infra_cenario["custo_backend_mensal_usd"]
-    custo_banco_mensal_usd = custos_infra_cenario["custo_banco_mensal_usd"]
-    custo_infra_mensal_usd = custos_infra_cenario["custo_infra_mensal_usd"]
-    custo_backend_mensal_br = custos_infra_cenario["custo_backend_mensal_br"]
-    custo_banco_mensal_br = custos_infra_cenario["custo_banco_mensal_br"]
-    custo_infra_mensal_br = custos_infra_cenario["custo_infra_mensal_br"]
-    custo_infra_anual_usd = custos_infra_cenario["custo_infra_anual_usd"]
-    custo_infra_anual_br = custos_infra_cenario["custo_infra_anual_br"]
-
-    custo_total_mensal_usd = totais_cenario["custo_total_mensal_usd"]
-    custo_total_mensal_br = totais_cenario["custo_total_mensal_br"]
-    custo_total_anual_usd = totais_cenario["custo_total_anual_usd"]
-    custo_total_anual_br = totais_cenario["custo_total_anual_br"]
-
-    # Exibição dos resultados para conferência manual.
-    print(f"\nDetalhamento do primeiro cenário: {primeiro_cenario['nome']}")
-    print("Respostas no mês:", respostas_mensais)
-    print("Acertos estimados:", acertos_mensais)
-    print("Erros estimados:", erros_mensais)
-    print("Feedbacks nos acertos:", feedbacks_nos_acertos)
-    print("Total de feedbacks no mês:", feedbacks_mensais)
-    print("Total de tokens de entrada no mês:", tokens_entrada_total)
-    print("Total de tokens de saída no mês:", tokens_saida_total)
-
-    print(f"Custo mensal estimado de entrada (USD): US$ {custo_entrada_usd:.2f}")
-    print(f"Custo mensal estimado de saída (USD): US$ {custo_saida_usd:.2f}")
-    print(f"Custo mensal estimado de IA (USD): US$ {custo_ia_mensal_usd:.2f}")
-    print(f"Custo mensal estimado de entrada (BRL): R$ {custo_entrada_br:.2f}")
-    print(f"Custo mensal estimado de saída (BRL): R$ {custo_saida_br:.2f}")
-    print(f"Custo mensal estimado de IA (BRL): R$ {custo_ia_mensal_br:.2f}")
-
-    print("Custo anual ignorando a variação de preços e câmbio, apenas para conferência didática.")
-    print(f"Custo anual estimado de IA (USD): US$ {custo_ia_anual_usd:.2f}")
-    print(f"Custo anual estimado de IA (BRL): R$ {custo_ia_anual_br:.2f}")
-
-    print("Infraestrutura com preços didáticos, sem comprovação de capacidade dos planos.")
-    print(f"Custo mensal estimado de backend (USD): US$ {custo_backend_mensal_usd:.2f}")
-    print(f"Custo mensal estimado de backend (BRL): R$ {custo_backend_mensal_br:.2f}")
-    print(f"Custo mensal estimado de banco (USD): US$ {custo_banco_mensal_usd:.2f}")
-    print(f"Custo mensal estimado de banco (BRL): R$ {custo_banco_mensal_br:.2f}")
-    print(f"Custo mensal estimado de infraestrutura (USD): US$ {custo_infra_mensal_usd:.2f}")
-    print(f"Custo mensal estimado de infraestrutura (BRL): R$ {custo_infra_mensal_br:.2f}")
-    print(f"Custo anual estimado de infraestrutura (USD): US$ {custo_infra_anual_usd:.2f}")
-    print(f"Custo anual estimado de infraestrutura (BRL): R$ {custo_infra_anual_br:.2f}")
-
-    print("Total do cenário: infraestrutura e IA, com as hipóteses e exclusões do planejamento.")
-    print(f"Custo total mensal estimado (USD): US$ {custo_total_mensal_usd:.2f}")
-    print(f"Custo total mensal estimado (BRL): R$ {custo_total_mensal_br:.2f}")
-    print(f"Custo total anual estimado (USD): US$ {custo_total_anual_usd:.2f}")
-    print(f"Custo total anual estimado (BRL): R$ {custo_total_anual_br:.2f}")
-
-    # Preços e cotação compartilhados; a capacidade é uma hipótese, não uma garantia.
-    comparacao_cenarios = []
-    print("\nComparação de cenários didáticos")
-    print("Mesmos preços, cotação e unidades contratadas; capacidade não validada.")
+    resumos_cenarios = []
     for cenario in cenarios_didaticos:
-        resultado_comparacao = calcular_cenario(
-            cenario["hipoteses_consumo"],
-            cenario["hipoteses_capacidade"],
-            precos_ia,
-            precos_infraestrutura,
-            cotacao,
-        )
-        comparacao_cenarios.append({
-            "nome": cenario["nome"],
+        consumo = calcular_consumo_cenario(cenario["hipoteses_consumo"])
+        custos_ia = calcular_custo_ia_cenario(consumo, precos_ia, cotacao)
+        resumos_cenarios.append({
+            "cenario": cenario["nome"],
             "usuarios_ativos": cenario["hipoteses_consumo"]["usuarios_ativos"],
-            "resultado": resultado_comparacao,
+            "feedbacks_mensais": consumo["feedbacks_mensais"],
+            "tokens_entrada_total": consumo["tokens_entrada_total"],
+            "tokens_saida_total": consumo["tokens_saida_total"],
+            "custo_ia_mensal_usd": custos_ia["custo_ia_mensal_usd"],
+            "custo_ia_mensal_br": custos_ia["custo_ia_mensal_br"],
+            "custo_ia_anual_usd": custos_ia["custo_ia_anual_usd"],
+            "custo_ia_anual_br": custos_ia["custo_ia_anual_br"],
         })
 
-        print(f"\n{cenario['nome']}")
-        print("Usuários ativos:", cenario["hipoteses_consumo"]["usuarios_ativos"])
-        print("Feedbacks mensais:", resultado_comparacao["consumo"]["feedbacks_mensais"])
-        print(f"IA mensal: R$ {resultado_comparacao['custos_ia']['custo_ia_mensal_br']:.2f}")
-        print(f"Infraestrutura mensal: R$ {resultado_comparacao['custos_infraestrutura']['custo_infra_mensal_br']:.2f}")
-        print(f"Total mensal: R$ {resultado_comparacao['totais']['custo_total_mensal_br']:.2f}")
-        print(f"Total anual: R$ {resultado_comparacao['totais']['custo_total_anual_br']:.2f}")
-
-    # Uma linha por cenário e um valor por campo, sem refazer os cálculos.
-    resumos_cenarios = []
-    for comparacao in comparacao_cenarios:
-        resultado = comparacao["resultado"]
-        resumo = {
-            "cenario": comparacao["nome"],
-            "usuarios_ativos": comparacao["usuarios_ativos"],
-            "feedbacks_mensais": resultado["consumo"]["feedbacks_mensais"],
-            "custo_ia_mensal_br": resultado["custos_ia"]["custo_ia_mensal_br"],
-            "custo_infra_mensal_br": resultado["custos_infraestrutura"]["custo_infra_mensal_br"],
-            "custo_total_mensal_br": resultado["totais"]["custo_total_mensal_br"],
-            "custo_total_anual_br": resultado["totais"]["custo_total_anual_br"],
-        }
-        resumos_cenarios.append(resumo)
-
     tabela_cenarios = pd.DataFrame.from_records(resumos_cenarios, coerce_float=False)
-
-    comparacao_custos = tabela_cenarios[
-        ["cenario", "usuarios_ativos", "custo_total_mensal_br"]
-    ]
-    comparacao_custos = comparacao_custos.sort_values(
-        by="custo_total_mensal_br", ascending=False
-    )
-
-    # Limite didático de orçamento mensal, não um orçamento real do LiteArt.
-    orcamento_mensal_br = Decimal("70.00")
-    dentro_do_orcamento = comparacao_custos["custo_total_mensal_br"] <= orcamento_mensal_br
-    cenarios_no_orcamento = comparacao_custos.loc[dentro_do_orcamento]
-
-    analise_orcamento = comparacao_custos.copy()
-    analise_orcamento["saldo_orcamento_br"] = (
-        orcamento_mensal_br - analise_orcamento["custo_total_mensal_br"]
-    )
-
-    menor_custo_mensal_br = comparacao_custos["custo_total_mensal_br"].min()
-    maior_custo_mensal_br = comparacao_custos["custo_total_mensal_br"].max()
-    diferenca_custos_mensais_br = maior_custo_mensal_br - menor_custo_mensal_br
-
-    # Formatação somente na exibição; os dados continuam com a precisão de Decimal.
     formatadores_monetarios = {
-        coluna: "{:.2f}".format
-        for coluna in (
-            "custo_ia_mensal_br",
-            "custo_infra_mensal_br",
-            "custo_total_mensal_br",
-            "custo_total_anual_br",
-            "saldo_orcamento_br",
-        )
+        "custo_ia_mensal_usd": lambda valor: f"US$ {formatar_moeda_br(valor)}",
+        "custo_ia_mensal_br": lambda valor: f"R$ {formatar_moeda_br(valor)}",
+        "custo_ia_anual_usd": lambda valor: f"US$ {formatar_moeda_br(valor)}",
+        "custo_ia_anual_br": lambda valor: f"R$ {formatar_moeda_br(valor)}",
     }
-    print("\nLista de resumos dos cenários (custos em BRL):")
-    for resumo in resumos_cenarios:
-        resumo_exibicao = {
-            campo: f"{valor:.2f}" if isinstance(valor, Decimal) else valor
-            for campo, valor in resumo.items()
-        }
-        print(f"\n{resumo_exibicao}")
+    titulos_colunas = [
+        "Cenário", "Usuários ativos", "Feedbacks/mês", "Tokens entrada/mês", "Tokens saída/mês",
+        "IA mensal (USD)", "IA mensal (BRL)", "IA anual (USD)", "IA anual (BRL)",
+    ]
 
-    print("\nTabela de cenários (custos em BRL):")
-    print(tabela_cenarios.to_string(index=False, formatters=formatadores_monetarios))
+    print("\nEstimativa de custos de IA")
+    print("Modelo de referência: GPT-6 Luna (gpt-6-luna)")
+    print(f"Entrada sem cache: US$ {formatar_moeda_br(precos_ia['entrada_por_milhao_usd'])} por milhão de tokens")
+    print(f"Saída faturável: US$ {formatar_moeda_br(precos_ia['saida_por_milhao_usd'])} por milhão de tokens")
+    print(f"Cotação utilizada: R$ {formatar_moeda_br(cotacao['brl_por_usd'])} por US$ 1,00 (didática)")
+    print("Estimativas baseadas nas hipóteses informadas; não representam despesas medidas.")
+    print("Infraestrutura e demais despesas estão fora do escopo desta versão.")
+    print("O anual pressupõe 12 meses com consumo, preços e câmbio constantes.\n")
+    print(tabela_cenarios.to_string(
+        index=False, header=titulos_colunas, formatters=formatadores_monetarios,
+    ))
 
-    print("\nComparação de custos mensais em BRL (do maior para o menor):")
-    print(comparacao_custos.to_string(index=False, formatters=formatadores_monetarios))
-
-    print(f"\nCenários dentro do orçamento mensal didático de R$ {orcamento_mensal_br:.2f}:")
-    if cenarios_no_orcamento.empty:
-        print("Nenhum cenário avaliado cabe no orçamento mensal informado.")
-    else:
-        print(cenarios_no_orcamento.to_string(index=False, formatters=formatadores_monetarios))
-
-    print(f"\nSaldo por cenário com orçamento mensal didático de R$ {orcamento_mensal_br:.2f}:")
-    print("Saldo positivo indica sobra; saldo negativo indica excesso sobre o orçamento.")
-    print(analise_orcamento.to_string(index=False, formatters=formatadores_monetarios))
-
-    print("\nResumo dos custos mensais dos cenários didáticos:")
-    print(f"Menor custo mensal: R$ {menor_custo_mensal_br:.2f}")
-    print(f"Maior custo mensal: R$ {maior_custo_mensal_br:.2f}")
-    print(f"Diferença entre os extremos: R$ {diferenca_custos_mensais_br:.2f}")
+    if len(tabela_cenarios) > 1:
+        menor_custo_mensal_br = tabela_cenarios["custo_ia_mensal_br"].min()
+        maior_custo_mensal_br = tabela_cenarios["custo_ia_mensal_br"].max()
+        diferenca_custos_mensais_br = maior_custo_mensal_br - menor_custo_mensal_br
+        print("\nResumo da IA mensal em BRL:")
+        print(f"Menor custo de IA: R$ {formatar_moeda_br(menor_custo_mensal_br)}")
+        print(f"Maior custo de IA: R$ {formatar_moeda_br(maior_custo_mensal_br)}")
+        print(f"Diferença: R$ {formatar_moeda_br(diferenca_custos_mensais_br)}")
 
     caminho_csv = Path(__file__).resolve().parent / "resultados" / "cenarios.csv"
     caminho_csv.parent.mkdir(parents=True, exist_ok=True)
