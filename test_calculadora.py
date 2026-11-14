@@ -1,6 +1,8 @@
 import unittest
 import csv
 import io
+import json
+from http.client import IncompleteRead
 import runpy
 import subprocess
 import sys
@@ -8,6 +10,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
+from urllib.error import HTTPError, URLError
 
 from decimal import Decimal, getcontext, localcontext
 
@@ -15,6 +18,11 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from calculadora import (
+    ErroCotacaoBCB,
+    consultar_cotacao_bcb,
+    converter_cotacao,
+    formatar_cotacao_br,
+    ler_cotacao_terminal,
     formatar_moeda_br,
     ler_cenario_terminal,
     ler_cenarios_csv,
@@ -1197,6 +1205,7 @@ class TestLerCenariosCsv(unittest.TestCase):
         with patch("pandas.read_csv", side_effect=AssertionError("leitura na importação")), \
                 patch("pandas.DataFrame.to_csv", side_effect=AssertionError("exportação na importação")), \
                 patch("builtins.input", side_effect=AssertionError("pergunta na importação")), \
+                patch("urllib.request.urlopen", side_effect=AssertionError("rede na importação")), \
                 patch.object(Path, "mkdir", side_effect=AssertionError("mkdir na importação")), \
                 redirect_stdout(io.StringIO()) as saida:
             estado = runpy.run_path(str(script), run_name="calculadora_importada")
@@ -1335,6 +1344,169 @@ class TestLerCenarioTerminal(unittest.TestCase):
                         self.ler(entradas)
 
 
+class TestConsultarCotacaoBCB(unittest.TestCase):
+    def consultar(self, dados):
+        with patch("urllib.request.urlopen") as consulta, \
+                patch("builtins.input", side_effect=AssertionError("interação na consulta")), \
+                patch("builtins.print", side_effect=AssertionError("impressão na consulta")), \
+                patch.object(Path, "write_text", side_effect=AssertionError("escrita na consulta")):
+            consulta.return_value.__enter__.return_value.read.return_value = json.dumps(dados).encode("utf-8")
+            resultado = consultar_cotacao_bcb()
+            consulta.assert_called_once_with(
+                "https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados/ultimos/1?formato=json",
+                timeout=10,
+            )
+        return resultado
+
+    def test_resposta_valida_preserva_decimal_e_data_iso(self):
+        texto = "5.1234567890123456789012345678901234567890"
+        resultado = self.consultar([{"data": "12/11/2026", "valor": texto}])
+        self.assertEqual(set(resultado), {"brl_por_usd", "origem", "data_cotacao"})
+        self.assertIsInstance(resultado["brl_por_usd"], Decimal)
+        self.assertEqual(resultado["brl_por_usd"].as_tuple(), Decimal(texto).as_tuple())
+        self.assertEqual(resultado["data_cotacao"], "2026-11-12")
+        self.assertIn("última cotação diária disponível do BCB", resultado["origem"])
+
+    def test_rejeita_estruturas_incorretas_e_lista_vazia(self):
+        registro = {"data": "12/11/2026", "valor": "5.12"}
+        for dados in (None, {}, registro, "texto", 1, True, [], [registro, registro], [None], [[]]):
+            with self.subTest(dados=dados), self.assertRaisesRegex(ErroCotacaoBCB, "resposta inválida"):
+                self.consultar(dados)
+
+    def test_rejeita_campos_ausentes_e_tipos_incorretos(self):
+        for campo in ("data", "valor"):
+            for valor in (None, 5.12, 1, True, [], {}):
+                registro = {"data": "12/11/2026", "valor": "5.12"}
+                registro[campo] = valor
+                with self.subTest(campo=campo, valor=valor), \
+                        self.assertRaisesRegex(ErroCotacaoBCB, campo):
+                    self.consultar([registro])
+            registro = {"data": "12/11/2026", "valor": "5.12"}
+            del registro[campo]
+            with self.subTest(ausente=campo), self.assertRaisesRegex(ErroCotacaoBCB, campo):
+                self.consultar([registro])
+
+    def test_rejeita_datas_invalidas_ou_fora_do_formato(self):
+        for data in ("", "31/02/2026", "29/02/2025", "2026-11-12", "1/1/2026", "12/11/26"):
+            with self.subTest(data=data), self.assertRaises(ErroCotacaoBCB):
+                self.consultar([{"data": data, "valor": "5.12"}])
+        self.assertEqual(self.consultar([{"data": "29/02/2024", "valor": "5.12"}])["data_cotacao"],
+                         "2024-02-29")
+
+    def test_rejeita_taxas_invalidas_sem_substituicao(self):
+        for valor in ("", "abc", "0", "-1", "Infinity", "-Infinity", "NaN", "sNaN", "5,12", "1_000"):
+            with self.subTest(valor=valor), self.assertRaisesRegex(ErroCotacaoBCB, "Cotação"):
+                self.consultar([{"data": "12/11/2026", "valor": valor}])
+
+    def test_falhas_de_rede_http_e_timeout_nao_repetem_consulta(self):
+        erros = [
+            TimeoutError("tempo esgotado"), URLError("sem conexão"),
+            HTTPError("https://api.bcb.gov.br", 503, "indisponível", None, None),
+            OSError("conexão interrompida"),
+        ]
+        for erro in erros:
+            with self.subTest(erro=erro), patch("urllib.request.urlopen", side_effect=erro) as consulta:
+                with self.assertRaisesRegex(ErroCotacaoBCB, "Banco Central") as falha:
+                    consultar_cotacao_bcb()
+                self.assertIs(falha.exception.__cause__, erro)
+                consulta.assert_called_once()
+                if isinstance(erro, HTTPError):
+                    self.assertIn("HTTP 503", str(falha.exception))
+
+    def test_falhas_de_leitura_sao_explicitadas(self):
+        for erro in (OSError("leitura interrompida"), IncompleteRead(b"parcial", 20), TimeoutError()):
+            with self.subTest(erro=erro), patch("urllib.request.urlopen") as consulta:
+                consulta.return_value.__enter__.return_value.read.side_effect = erro
+                with self.assertRaises(ErroCotacaoBCB):
+                    consultar_cotacao_bcb()
+                consulta.assert_called_once()
+
+    def test_rejeita_json_e_codificacao_invalidos(self):
+        for resposta in (b"", b"<html>erro</html>", b"[{", b"\xff"):
+            with self.subTest(resposta=resposta), patch("urllib.request.urlopen") as consulta:
+                consulta.return_value.__enter__.return_value.read.return_value = resposta
+                with self.assertRaisesRegex(ErroCotacaoBCB, "JSON UTF-8"):
+                    consultar_cotacao_bcb()
+
+    def test_nao_oculta_erros_inesperados_ou_cancelamento(self):
+        for erro in (AssertionError("erro de programação"), KeyboardInterrupt(), EOFError()):
+            with self.subTest(erro=erro), patch("urllib.request.urlopen", side_effect=erro):
+                with self.assertRaises(type(erro)):
+                    consultar_cotacao_bcb()
+
+
+class TestLerCotacaoTerminal(unittest.TestCase):
+    def ler(self, entradas):
+        with patch("builtins.input", side_effect=entradas) as perguntas, \
+                redirect_stdout(io.StringIO()) as texto:
+            resultado = ler_cotacao_terminal()
+        return resultado, texto.getvalue(), perguntas
+
+    def test_manual_preserva_precisao_sem_rede_ou_data_bcb(self):
+        with patch("urllib.request.urlopen", side_effect=AssertionError("rede")) as consulta:
+            resultado, _, perguntas = self.ler([" 2 ", " 5.1234567890 "])
+        self.assertEqual(resultado, {
+            "brl_por_usd": Decimal("5.1234567890"), "origem": "manual", "data_cotacao": None,
+        })
+        self.assertIsInstance(resultado["brl_por_usd"], Decimal)
+        self.assertEqual(resultado["brl_por_usd"].as_tuple(), Decimal("5.1234567890").as_tuple())
+        self.assertEqual(perguntas.call_count, 2)
+        consulta.assert_not_called()
+
+    def test_manual_repete_somente_taxa_invalida(self):
+        invalidos = ["", "abc", "0", "-1", "Infinity", "NaN", "sNaN", "5,00", "1_000"]
+        with patch("urllib.request.urlopen", side_effect=AssertionError("rede")):
+            resultado, texto, perguntas = self.ler(["2", *invalidos, "5.00"])
+        self.assertEqual(resultado["brl_por_usd"], Decimal("5.00"))
+        self.assertEqual(texto.count("Corrija a cotação"), len(invalidos))
+        self.assertEqual(perguntas.call_count, len(invalidos) + 2)
+        for chamada in perguntas.call_args_list[1:]:
+            self.assertIn("Cotação em BRL por USD", chamada.args[0])
+
+    def test_menu_invalido_seguido_de_manual(self):
+        resultado, texto, _ = self.ler(["", "3", "abc", "2", "5"])
+        self.assertEqual(texto.count("Opção inválida"), 3)
+        self.assertEqual(resultado["brl_por_usd"], Decimal("5"))
+
+    def test_automatico_retorna_dados_sem_perguntar_taxa(self):
+        esperado = {"brl_por_usd": Decimal("5.1234"), "origem": "BCB", "data_cotacao": "2026-11-12"}
+        with patch("calculadora.consultar_cotacao_bcb", return_value=esperado) as consulta:
+            resultado, _, perguntas = self.ler(["1"])
+        self.assertEqual(resultado, esperado)
+        perguntas.assert_called_once()
+        consulta.assert_called_once_with()
+
+    def test_falha_automatica_oferece_manual_sem_nova_consulta(self):
+        with patch("calculadora.consultar_cotacao_bcb", side_effect=ErroCotacaoBCB("erro de rede")) as consulta:
+            resultado, texto, _ = self.ler(["1", "inválido", "1", "5.00"])
+        self.assertEqual(resultado["origem"], "manual")
+        self.assertIsNone(resultado["data_cotacao"])
+        self.assertIn("erro de rede", texto)
+        self.assertIn("Opção inválida", texto)
+        consulta.assert_called_once_with()
+
+    def test_falha_automatica_permite_cancelamento(self):
+        with patch("calculadora.consultar_cotacao_bcb", side_effect=ErroCotacaoBCB("falha")) as consulta:
+            with self.assertRaisesRegex(SystemExit, "Entrada cancelada"):
+                self.ler(["1", "2"])
+        consulta.assert_called_once_with()
+
+    def test_ctrl_c_e_fim_da_entrada_sao_propagados(self):
+        for erro in (EOFError, KeyboardInterrupt):
+            for entradas in ([erro], ["2", erro]):
+                with self.subTest(erro=erro, entradas=entradas), self.assertRaises(erro):
+                    self.ler(entradas)
+
+    def test_formatacao_da_taxa_preserva_casas_adicionais_e_valor(self):
+        for texto, esperado in [("5", "5,0000"), ("5.00", "5,0000"), ("5.1234", "5,1234"),
+                                ("5.1234567890", "5,1234567890"), ("1400.25", "1.400,2500")]:
+            with self.subTest(texto=texto):
+                taxa = converter_cotacao(texto)
+                antes = taxa.as_tuple()
+                self.assertEqual(formatar_cotacao_br(taxa), esperado)
+                self.assertEqual(taxa.as_tuple(), antes)
+
+
 class TestIntegracaoCenariosCsv(unittest.TestCase):
     colunas_resultado = [
         "cenario", "usuarios_ativos", "feedbacks_mensais", "tokens_entrada_total", "tokens_saida_total",
@@ -1344,7 +1516,7 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
     def setUp(self):
         temporario = TemporaryDirectory(prefix="liteart_integracao_")
         self.addCleanup(temporario.cleanup)
-        self.raiz = Path(temporario.name)
+        self.raiz = Path(temporario.name).resolve()
         self.script = self.raiz / "calculadora.py"
         origem = Path(__file__).resolve().parent
         self.script.write_bytes((origem / "calculadora.py").read_bytes())
@@ -1359,9 +1531,19 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
             escritor.writerow(TestLerCenariosCsv.colunas)
             escritor.writerows(registros)
 
-    def executar(self, entradas=None):
-        with patch("builtins.input", side_effect=["1"] if entradas is None else entradas), \
-                redirect_stdout(io.StringIO()) as texto:
+    def executar(self, entradas=None, entradas_cotacao=None, resposta_bcb=None, erro_bcb=None):
+        entradas = (["1"] if entradas is None else list(entradas)) + (
+            ["2", "5.00"] if entradas_cotacao is None else list(entradas_cotacao)
+        )
+        with patch("builtins.input", side_effect=entradas), \
+                patch("urllib.request.urlopen") as consulta, redirect_stdout(io.StringIO()) as texto:
+            self.consulta_bcb = consulta
+            if erro_bcb is not None:
+                consulta.side_effect = erro_bcb
+            elif resposta_bcb is not None:
+                consulta.return_value.__enter__.return_value.read.return_value = resposta_bcb
+            else:
+                consulta.side_effect = AssertionError("Este teste não deve consultar a rede.")
             estado = runpy.run_path(str(self.script), run_name="__main__")
         return estado, texto.getvalue()
 
@@ -1369,7 +1551,7 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
         return subprocess.run(
             [sys.executable, "-X", "utf8", "-B", str(self.script)],
             cwd=self.raiz if pasta is None else pasta,
-            input="1\n",
+            input="1\n2\n5.00\n",
             capture_output=True, text=True, encoding="utf-8",
         )
 
@@ -1413,7 +1595,10 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
         self.assertIn("GPT-6 Luna (gpt-6-luna)", texto)
         self.assertIn("Entrada sem cache: US$ 0,10 por milhão de tokens", texto)
         self.assertIn("Saída faturável: US$ 0,50 por milhão de tokens", texto)
-        self.assertIn("Cotação utilizada: R$ 5,00 por US$ 1,00", texto)
+        self.assertIn("Cotação utilizada: R$ 5,0000 por US$ 1,00", texto)
+        self.assertIn("Origem da cotação: manual", texto)
+        self.assertNotIn("Data de referência da cotação:", texto)
+        self.consulta_bcb.assert_not_called()
         self.assertIn("12 meses", texto)
         self.assertIn("Menor custo de IA: R$ 2,20", texto)
         self.assertEqual(texto.count("IA mensal (USD)"), 1)
@@ -1660,6 +1845,87 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
                 estado, _ = self.executar(entradas)
                 self.assertEqual(self.saida.read_text(encoding="utf-8"), esperado)
                 self.conferir_exportacao(estado)
+
+    def test_cotacao_bcb_unica_altera_somente_custos_em_brl(self):
+        self.entrada.write_bytes(self.exemplo)
+        manual, _ = self.executar()
+        resposta = b'[{"data":"12/11/2026","valor":"6.2500"}]'
+        automatico, texto = self.executar(entradas_cotacao=["1"], resposta_bcb=resposta)
+        self.consulta_bcb.assert_called_once_with(
+            "https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados/ultimos/1?formato=json", timeout=10,
+        )
+        self.assertEqual(automatico["cotacao"]["brl_por_usd"].as_tuple(), Decimal("6.2500").as_tuple())
+        self.assertIn("última cotação diária disponível do BCB", texto)
+        self.assertIn("Data de referência da cotação: 12/11/2026", texto)
+        self.assertIn("Cotação utilizada: R$ 6,2500 por US$ 1,00", texto)
+        self.assertIn("não inclui possíveis adicionais do meio de pagamento", texto)
+        for original, convertido, mensal, anual in zip(
+            manual["resumos_cenarios"], automatico["resumos_cenarios"],
+            [Decimal("2.75"), Decimal("13.75")], [Decimal("33.00"), Decimal("165.00")], strict=True,
+        ):
+            for coluna in self.colunas_resultado:
+                if coluna not in ("custo_ia_mensal_br", "custo_ia_anual_br"):
+                    self.assertEqual(original[coluna], convertido[coluna])
+            self.assertEqual(convertido["custo_ia_mensal_br"], mensal)
+            self.assertEqual(convertido["custo_ia_anual_br"], anual)
+        self.conferir_exportacao(automatico)
+
+    def test_taxa_manual_com_mais_casas_preserva_identificacao_e_exportacao(self):
+        estado, texto = self.executar(
+            ["2", *TestLerCenarioTerminal.entradas_validas], entradas_cotacao=["2", "5.1234567890"],
+        )
+        self.consulta_bcb.assert_not_called()
+        self.assertIn("R$ 5,1234567890 por US$ 1,00", texto)
+        self.assertIn("Origem da cotação: manual", texto)
+        self.assertNotIn("Data de referência da cotação:", texto)
+        self.assertEqual(estado["resumos_cenarios"][0]["custo_ia_mensal_br"], Decimal("2.254320987160"))
+        self.conferir_exportacao(estado)
+
+    def test_falha_bcb_seguida_de_manual_preserva_resultado_didatico(self):
+        estado, texto = self.executar(
+            ["2", *TestLerCenarioTerminal.entradas_validas],
+            entradas_cotacao=["1", "1", "5.00"], erro_bcb=URLError("sem conexão"),
+        )
+        self.consulta_bcb.assert_called_once()
+        self.assertIn("Não foi possível obter a cotação", texto)
+        self.assertEqual(estado["cotacao"], {
+            "brl_por_usd": Decimal("5.00"), "origem": "manual", "data_cotacao": None,
+        })
+        self.assertEqual(estado["resumos_cenarios"][0]["custo_ia_mensal_br"], Decimal("2.20"))
+        self.assertEqual(estado["resumos_cenarios"][0]["custo_ia_anual_br"], Decimal("26.40"))
+        self.conferir_exportacao(estado)
+
+    def test_falha_bcb_e_cancelamento_preservam_saida_ou_ausencia_de_pasta(self):
+        self.entrada.write_bytes(self.exemplo)
+        for existente in (False, True):
+            if existente:
+                self.saida.parent.mkdir()
+                self.saida.write_bytes(b"resultado anterior\n")
+                antes = (self.saida.read_bytes(), self.saida.stat().st_mtime_ns)
+            with self.subTest(existente=existente), self.assertRaisesRegex(SystemExit, "cancelada"):
+                self.executar(entradas_cotacao=["1", "2"], erro_bcb=TimeoutError("tempo esgotado"))
+            self.consulta_bcb.assert_called_once()
+            if existente:
+                self.assertEqual((self.saida.read_bytes(), self.saida.stat().st_mtime_ns), antes)
+            else:
+                self.assertFalse(self.saida.parent.exists())
+
+    def test_ctrl_c_e_eof_na_escolha_ou_digitacao_da_cotacao_nao_exportam(self):
+        self.entrada.write_bytes(self.exemplo)
+        self.saida.parent.mkdir()
+        self.saida.write_bytes(b"preservar\n")
+        antes = (self.saida.read_bytes(), self.saida.stat().st_mtime_ns)
+        for erro in (EOFError, KeyboardInterrupt):
+            for entradas in ([erro], ["2", erro], ["1", erro]):
+                with self.subTest(erro=erro, entradas=entradas), self.assertRaisesRegex(SystemExit, "cancelada"):
+                    self.executar(entradas_cotacao=entradas, erro_bcb=URLError("indisponível"))
+                self.assertEqual((self.saida.read_bytes(), self.saida.stat().st_mtime_ns), antes)
+
+    def test_csv_invalido_nao_pergunta_nem_consulta_cotacao(self):
+        with self.assertRaisesRegex(SystemExit, "Erro ao ler cenários"):
+            self.executar(entradas_cotacao=["1"])
+        self.consulta_bcb.assert_not_called()
+        self.assertFalse(self.saida.parent.exists())
 
     def test_agrupa_valores_monetarios_sem_formatar_quantidades_como_moeda(self):
         estado, texto = self.executar(["2", "Turma grande", "10000", "40", "0.60", "0.25", "500", "300"])

@@ -1,6 +1,11 @@
-from decimal import Decimal
+from datetime import datetime, date
+from decimal import Decimal, InvalidOperation
+from http.client import HTTPException
+import json
 from math import isfinite
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+import urllib.request
 from warnings import catch_warnings, simplefilter
 
 import pandas as pd
@@ -373,6 +378,108 @@ def ler_cenarios_csv(caminho):
     return cenarios
 
 
+class ErroCotacaoBCB(RuntimeError):
+    """Indica falha esperada na consulta ou nos dados recebidos do Banco Central."""
+
+
+def converter_cotacao(texto):
+    """Converte texto diretamente para Decimal e exige cotação finita e positiva."""
+    try:
+        if "," in texto or "_" in texto:
+            raise InvalidOperation
+        taxa = Decimal(texto.strip())
+    except InvalidOperation as erro:
+        raise ValueError("Cotação: informe um número com ponto decimal, sem separadores de milhares.") from erro
+    validar_numero_nao_negativo(taxa, "Cotação", (Decimal,))
+    if taxa <= 0:
+        raise ValueError("Cotação: o valor deve ser maior que zero.")
+    return taxa
+
+
+def consultar_cotacao_bcb():
+    """Consulta uma vez a última cotação diária disponível do BCB, SGS série 1."""
+    url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados/ultimos/1?formato=json"
+    try:
+        # O contexto HTTPS padrão verifica o certificado; não há nova tentativa automática.
+        with urllib.request.urlopen(url, timeout=10) as resposta:
+            conteudo = resposta.read()
+    except HTTPError as erro:
+        erro.close()
+        raise ErroCotacaoBCB(f"Banco Central: erro HTTP {erro.code} na consulta.") from erro
+    except TimeoutError as erro:
+        raise ErroCotacaoBCB("Banco Central: tempo limite de 10 segundos excedido na consulta ou leitura.") from erro
+    except (URLError, TimeoutError, OSError, HTTPException) as erro:
+        raise ErroCotacaoBCB(f"Banco Central: falha de rede ou leitura da resposta: {erro}") from erro
+
+    try:
+        dados = json.loads(conteudo.decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError) as erro:
+        raise ErroCotacaoBCB("Banco Central: resposta sem JSON UTF-8 válido.") from erro
+
+    try:
+        if not isinstance(dados, list) or len(dados) != 1 or not isinstance(dados[0], dict):
+            raise ValueError("esperada uma lista com um único registro.")
+        registro = dados[0]
+        for campo in ("data", "valor"):
+            if campo not in registro or not isinstance(registro[campo], str):
+                raise ValueError(f"campo '{campo}' obrigatório e do tipo texto.")
+        try:
+            data_cotacao = datetime.strptime(registro["data"], "%d/%m/%Y").date()
+        except ValueError as erro:
+            raise ValueError("campo 'data' deve conter uma data válida em DD/MM/AAAA.") from erro
+        if data_cotacao.strftime("%d/%m/%Y") != registro["data"]:
+            raise ValueError("campo 'data' deve usar DD/MM/AAAA.")
+        taxa = converter_cotacao(registro["valor"])
+    except ValueError as erro:
+        raise ErroCotacaoBCB(f"Banco Central: resposta inválida: {erro}") from erro
+
+    return {
+        "brl_por_usd": taxa,
+        "origem": "última cotação diária disponível do BCB (SGS série 1)",
+        "data_cotacao": data_cotacao.isoformat(),
+    }
+
+
+def ler_cotacao_terminal():
+    """Escolhe a origem da taxa; falha automática permite entrada manual ou cancelamento."""
+    while True:
+        print("\nComo deseja definir a cotação em reais por dólar (BRL por USD)?")
+        print("1 — Consultar Banco Central.")
+        print("2 — Informar manualmente.")
+        opcao = input("Digite 1 ou 2: ").strip()
+        if opcao in ("1", "2"):
+            break
+        print("Opção inválida. Digite 1 para consultar o BCB ou 2 para informar a cotação.")
+
+    if opcao == "1":
+        try:
+            return consultar_cotacao_bcb()
+        except ErroCotacaoBCB as erro:
+            print(f"Não foi possível obter a cotação. {erro}")
+            while True:
+                opcao = input("Digite 1 para informar manualmente ou 2 para cancelar: ").strip()
+                if opcao == "1":
+                    break
+                if opcao == "2":
+                    raise SystemExit("Entrada cancelada. Nenhum resultado foi gerado ou sobrescrito.")
+                print("Opção inválida. Escolha 1 para entrada manual ou 2 para cancelar.")
+
+    while True:
+        texto = input("Cotação em BRL por USD (ex.: 5.00; ponto decimal, sem milhares): ")
+        try:
+            taxa = converter_cotacao(texto)
+        except ValueError as erro:
+            print(f"Corrija a cotação: {erro}")
+        else:
+            return {"brl_por_usd": taxa, "origem": "manual", "data_cotacao": None}
+
+
+def formatar_cotacao_br(taxa):
+    """Exibe ao menos quatro casas, preservando casas adicionais da taxa Decimal."""
+    casas = max(4, -taxa.as_tuple().exponent)
+    return f"{taxa:,.{casas}f}".translate(str.maketrans(",.", ".,"))
+
+
 if __name__ == "__main__":
     try:
         while True:
@@ -393,13 +500,9 @@ if __name__ == "__main__":
                 raise SystemExit(f"Erro ao ler cenários de '{caminho_cenarios}': {erro}") from erro
         else:
             cenarios_didaticos = [ler_cenario_terminal()]
+        cotacao = ler_cotacao_terminal()
     except (KeyboardInterrupt, EOFError) as erro:
         raise SystemExit("\nEntrada cancelada. Nenhum resultado foi gerado ou sobrescrito.") from erro
-
-    # Cotação didática em reais por dólar, não uma cotação pesquisada.
-    cotacao = {
-        "brl_por_usd": Decimal("5.00"),
-    }
 
     # Preços pesquisados: GPT-6 Luna, Standard, entrada sem cache.
     # Fonte: https://developers.openai.com/api/docs/models/gpt-6-luna
@@ -441,7 +544,12 @@ if __name__ == "__main__":
     print("Modelo de referência: GPT-6 Luna (gpt-6-luna)")
     print(f"Entrada sem cache: US$ {formatar_moeda_br(precos_ia['entrada_por_milhao_usd'])} por milhão de tokens")
     print(f"Saída faturável: US$ {formatar_moeda_br(precos_ia['saida_por_milhao_usd'])} por milhão de tokens")
-    print(f"Cotação utilizada: R$ {formatar_moeda_br(cotacao['brl_por_usd'])} por US$ 1,00 (didática)")
+    print(f"Cotação utilizada: R$ {formatar_cotacao_br(cotacao['brl_por_usd'])} por US$ 1,00")
+    print(f"Origem da cotação: {cotacao['origem']}")
+    if cotacao["data_cotacao"] is not None:
+        referencia = date.fromisoformat(cotacao["data_cotacao"]).strftime("%d/%m/%Y")
+        print(f"Data de referência da cotação: {referencia}")
+    print("Taxa de referência para simulação; não inclui possíveis adicionais do meio de pagamento.")
     print("Estimativas baseadas nas hipóteses informadas; não representam despesas medidas.")
     print("Infraestrutura e demais despesas estão fora do escopo desta versão.")
     print("O anual pressupõe 12 meses com consumo, preços e câmbio constantes.\n")

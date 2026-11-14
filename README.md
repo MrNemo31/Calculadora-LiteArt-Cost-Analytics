@@ -20,11 +20,13 @@ infraestrutura e demais despesas estão fora do fluxo principal. A projeção an
 
 1. Escolher entre o CSV atual e um cenário manual; opções inválidas repetem o menu.
 2. Ler e validar todas as hipóteses antes de calcular ou gerar resultados.
-3. Calcular respostas, feedbacks e tokens com `calcular_consumo_cenario()`.
-4. Calcular custos de IA em USD e BRL com `calcular_custo_ia_cenario()`.
-5. Organizar `resumos_cenarios` em `tabela_cenarios` com Pandas, preservando a ordem da entrada.
-6. Apresentar a identificação da simulação e uma única tabela final.
-7. Exportar essa tabela para `resultados/cenarios.csv`, substituindo o arquivo anterior.
+3. Escolher entre consultar a cotação no Banco Central e informar BRL por USD manualmente.
+4. Obter uma taxa válida, reutilizada em todos os cenários da execução.
+5. Calcular respostas, feedbacks e tokens com `calcular_consumo_cenario()`.
+6. Calcular custos de IA em USD e BRL com `calcular_custo_ia_cenario()`.
+7. Organizar `resumos_cenarios` em `tabela_cenarios` com Pandas, preservando a ordem da entrada.
+8. Apresentar modelo, preços, origem e referência da cotação e uma única tabela final.
+9. Exportar essa tabela para `resultados/cenarios.csv`, substituindo o arquivo anterior.
 
 O primeiro cenário não recebe mais um detalhamento individual separado. A lista de dicionários,
 as tabelas redundantes e a ordenação por custo foram retiradas da apresentação principal.
@@ -34,20 +36,63 @@ não é exibido.
 
 ### Configurações da simulação
 
-Modelo, preços e cotação continuam nas configurações de `calculadora.py`, separados das hipóteses
-de consumo. Não são opções do menu nem campos solicitados no modo manual.
+Modelo e preços continuam nas configurações de `calculadora.py`, separados das hipóteses de consumo.
+Não são selecionáveis no menu. A cotação é escolhida após a validação dos cenários, com consulta ao
+Banco Central ou preenchimento manual, sem alterar o CSV de consumo.
 
 | Configuração atual | Valor |
 | --- | --- |
 | Modelo de referência | GPT-6 Luna (`gpt-6-luna`) |
 | Entrada sem cache, Standard | US$ 0,10 por milhão de tokens |
 | Saída faturável, Standard | US$ 0,50 por milhão de tokens |
-| Cotação didática | R$ 5,00 por US$ 1,00 |
+| Cotação dos exemplos reproduzíveis | Manual: R$ 5,00 por US$ 1,00 |
 
 As tarifas são as já registradas no código, com consulta em 23/10/2026 à
 [referência do modelo](https://developers.openai.com/api/docs/models/gpt-6-luna).
-Esta documentação não atualiza nem confirma preços comerciais atuais. A cotação é uma hipótese
-didática; **a consulta automática do dólar ainda não foi implementada**. Não há seleção de modelos.
+Esta documentação não atualiza nem confirma preços comerciais atuais. A taxa manual de R$ 5,00 é
+uma hipótese didática dos exemplos e testes, não uma cotação fixa usada como alternativa automática.
+Não há seleção de modelos.
+
+### Cotação automática ou manual
+
+Depois de obter cenários válidos, o terminal apresenta outro menu:
+
+- **1 — Consultar Banco Central:** usa a última cotação diária disponível do BCB.
+- **2 — Informar manualmente:** solicita reais por dólar, por exemplo `5.00`, com ponto decimal e
+  sem separadores de milhares. Esse modo não consulta a internet.
+
+A fonte automática é o **Banco Central do Brasil, SGS série 1, dólar americano de venda, diário**.
+O acesso a essa consulta é público e gratuito, sem chave de API. Fonte:
+[catálogo oficial do BCB](https://dadosabertos.bcb.gov.br/dataset/1-taxa-de-cambio---livre---dolar-americano-venda---diario).
+A data da observação pode ser anterior à execução, pois se usa a última cotação diária disponível;
+não é câmbio em tempo real nem necessariamente o câmbio efetivo de um pagamento.
+
+`consultar_cotacao_bcb()` usa `urllib.request` para uma única consulta HTTPS com `timeout=10`
+segundos, mantendo a verificação padrão do certificado. `json` interpreta a resposta e `datetime`
+valida a data. Esses módulos, assim como `decimal`, `urllib.error` e `http.client`, pertencem à
+biblioteca padrão; nenhuma dependência externa foi acrescentada para a consulta.
+
+A resposta deve conter uma lista com um registro, campos `data` e `valor` do tipo texto, data válida
+em DD/MM/AAAA e taxa finita e estritamente positiva. `converter_cotacao()` converte o texto
+diretamente para `Decimal`, sem passar por float, e reutiliza a validação numérica existente.
+A entrada manual remove espaços externos, rejeita campos vazios, texto inválido, vírgula decimal,
+separadores de milhares, zero, negativos, infinito e NaN; um erro repete somente a taxa.
+Opções inválidas repetem a escolha do menu.
+
+O retorno contém `brl_por_usd`, `origem` e `data_cotacao`. No modo automático, a data fica em ISO
+internamente e aparece em DD/MM/AAAA no terminal, acompanhada da origem. No manual, a origem é
+`manual`, `data_cotacao` é `None` e não se apresenta uma data de publicação do BCB.
+
+`formatar_cotacao_br()` mostra pelo menos quatro casas: uma taxa manual `5.00` aparece como
+`R$ 5,0000 por US$ 1,00`; `5.1234567890` aparece como `R$ 5,1234567890 por US$ 1,00`.
+A taxa mantém sua precisão como Decimal; somente os custos monetários são apresentados com duas
+casas. A taxa é referência para simulação e não inclui possíveis adicionais do meio de pagamento.
+
+Falhas esperadas de rede, HTTP, leitura, JSON ou validação geram `ErroCotacaoBCB`, com mensagem.
+O terminal oferece **1 para preencher manualmente ou 2 para cancelar**, sem repetir a requisição
+nem substituir a falha por cotação fixa. Cancelar, usar Ctrl+C ou encerrar a entrada interrompe o
+fluxo antes da exportação, com mensagem e código diferente de zero, preservando resultados
+anteriores. Importar o módulo não consulta a rede, não interage e não gera arquivos.
 
 ## Como executar
 
@@ -74,8 +119,11 @@ O menu oferece:
 - **2 — Preencher um único cenário pelo terminal:** não lê nem exige a existência do CSV.
 
 Para um exemplo manual, escolher `2` e responder, na ordem: `Cenário manual`, `100`, `40`, `0.60`,
-`0.25`, `500` e `300`. O resultado é 2.200 feedbacks, IA mensal de US$ 0,44 e R$ 2,20, e IA anual de
-US$ 5,28 e R$ 26,40. Ao terminar, o terminal informa o caminho do CSV salvo.
+`0.25`, `500` e `300`. No menu seguinte, escolher `2` para cotação manual e digitar `5.00`.
+Com essa taxa didática, o resultado é 2.200 feedbacks, IA mensal de US$ 0,44 e R$ 2,20 e IA anual de
+US$ 5,28 e R$ 26,40. Para reproduzir o CSV de exemplo, escolher `1` no menu de cenários, depois `2`
+no menu de cotação e informar `5.00`. Ao terminar, o terminal informa o caminho do CSV salvo.
+Escolher cotação automática pode alterar os valores em BRL; consumo e custos em USD são preservados.
 
 ### Entrada de cenários e regras de preenchimento
 
@@ -148,8 +196,8 @@ qualidade pedagógica. A regra agregada não mede quantos estudantes ativaram um
 
 O terminal identifica modelo, tarifas, cotação e limitações antes de apresentar uma única tabela.
 Os títulos são legíveis e as quatro colunas financeiras mostram o símbolo da moeda em cada valor.
-A tabela abaixo resume os resultados esperados do CSV de exemplo; as contagens não são formatadas
-como dinheiro, e a execução pode mostrar `.0` em contagens estimadas.
+A tabela abaixo resume os resultados do CSV de exemplo **com cotação manual de R$ 5,00 por USD**.
+As contagens não são formatadas como dinheiro, e a execução pode mostrar `.0` em contagens estimadas.
 
 | Cenário | Usuários ativos | Feedbacks/mês | Tokens entrada/mês | Tokens saída/mês | IA mensal (USD) | IA mensal (BRL) | IA anual (USD) | IA anual (BRL) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -198,6 +246,8 @@ O CSV tem cabeçalho e as mesmas nove informações da tabela final, nesta ordem
 
 **O formato de resultados mudou:** deixou de incluir infraestrutura e totais operacionais que
 somavam infraestrutura e IA. O CSV de entrada continua com suas sete colunas de hipóteses.
+Origem, data e valor da cotação não foram acrescentados às nove colunas de resultados: a origem e a
+data automática são apresentadas no terminal, não exportadas como metadados.
 
 A exportação usa UTF-8, vírgula entre campos, ponto decimal, cabeçalho e `index=False`, sem coluna
 adicional de índice. Recebe os valores completos, sem símbolos de moeda, separadores de milhares,
@@ -227,13 +277,15 @@ Firebase como alternativa em estudo; isso não implica contratação ou migraç�
 
 ## Testes e verificações
 
-`test_calculadora.py` contém **165 métodos de teste em 15 classes**, usando `unittest`:
+`test_calculadora.py` contém **188 métodos de teste em 17 classes**, usando `unittest`:
 
 - 111 métodos em 11 classes de cálculos e coordenadoras, incluindo infraestrutura e cenário completo.
 - 25 métodos para leitura e validação de CSV.
 - 4 métodos para a formatação monetária brasileira.
 - 7 métodos para entrada manual e suas validações.
-- 18 métodos de integração dos modos CSV e manual, tabelas, mensagens e exportação.
+- 9 métodos para consulta ao BCB com respostas simuladas e validação do retorno.
+- 8 métodos para escolha, entrada e apresentação da cotação.
+- 24 métodos de integração dos cenários, cotação, tabelas, mensagens e exportação.
 
 A suíte completa passou nesta atualização. Alguns métodos usam `subTest`; suas combinações não
 são métodos adicionais. Os testes persistentes simulam `input()` com `unittest.mock.patch` e usam
@@ -244,7 +296,12 @@ cálculo completo, nove campos exportados e preservação exata de Decimal.
 Também conferem os símbolos monetários da tabela sem alteração dos dados, precisão além da segunda
 casa e equivalência dos dois modos para as mesmas hipóteses. As verificações pontuais históricas,
 registradas em [PROMPTS.md](PROMPTS.md), não devem ser contadas como novos métodos automatizados.
-Esta revisão de documentação não acrescenta testes.
+Os testes cambiais simulam respostas da API, timeout, erros HTTP/rede e leitura, JSON inválido,
+estruturas e tipos incorretos, campos ausentes, datas e taxas inválidas. Também conferem modo manual
+sem rede, alternativa manual após falha, cancelamento sem exportação e uma consulta para múltiplos
+cenários. Com taxa simulada diferente, somente os custos em BRL mudam; o CSV mantém seus nove campos.
+A suíte não depende da internet nem da cotação do dia. Uma consulta real separada é verificação
+pontual, não teste automatizado. Esta revisão de documentação não acrescenta testes.
 
 Para executar a suíte com o ambiente existente:
 
@@ -254,9 +311,13 @@ Para executar a suíte com o ambiente existente:
 
 ## Próximos passos
 
-1. Pesquisar e definir a fonte e as regras para consulta de cotação; a decisão está pendente.
-2. Implementar essa consulta com opção manual, em incremento próprio e com testes.
-3. Consolidar documentação e validar a instalação para fechar a versão do MVP no terminal.
+A consulta BCB/SGS série 1 com alternativa manual está implementada e testada. Para fechar o MVP:
+
+1. Consolidar a documentação e registrar as dependências e instruções reproduzíveis de instalação.
+2. Validar instalação e execução em ambiente limpo, incluindo a suíte e os dois modos de cotação.
+3. Preparar e publicar a versão do MVP no terminal após essa validação.
+
+A validação em ambiente limpo e a publicação ainda não estão comprovadas como concluídas.
 
 Catálogo e seleção de modelos, comparação entre provedores, gráficos com Plotly, dashboard com
 Streamlit, retomada de infraestrutura e orçamento e análises avançadas ficam para depois.

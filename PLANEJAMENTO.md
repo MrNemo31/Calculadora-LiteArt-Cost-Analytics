@@ -1,13 +1,13 @@
 # Planejamento — LiteArt Cost Analytics
 
-Planejamento iniciado na Etapa 1 e revisado em 08/11/2026 conforme o código e os testes atuais.
+Planejamento iniciado na Etapa 1 e revisado em 14/11/2026 conforme o código e os testes atuais.
 As pesquisas mantêm suas datas históricas; esta revisão não atualiza tarifas. O MVP é a calculadora
 no terminal. Dashboard e análise completa dos custos de software são evoluções posteriores.
 
 ## 1. Pergunta principal
 
 Quanto custam os feedbacks de IA do LiteArt por mês e por ano, em USD e BRL, considerando as
-hipóteses de consumo, as tarifas do modelo de referência e a cotação configurada?
+hipóteses de consumo, as tarifas do modelo de referência e a cotação automática ou manual?
 
 ## 2. Escopo inicial, estado atual e próxima entrega
 
@@ -27,13 +27,15 @@ A calculadora simula despesas sem chamadas reais às APIs e sem validar qualidad
 - Leitura e validação compartilhada das seis hipóteses de consumo, com correção por campo.
 - CSV de entrada localizado a partir de `calculadora.py`, validado integralmente antes dos cálculos.
 - Cálculo de consumo com `calcular_consumo_cenario()` e de IA com `calcular_custo_ia_cenario()`.
-- Preços e cotação configurados no código, separados das hipóteses; não há consulta cambial automática.
+- Preços de IA no código, separados das hipóteses; cotação escolhida após validar os cenários.
+- Consulta da última cotação diária disponível do BCB/SGS série 1 ou entrada manual sem internet.
+- Uma única taxa por execução, com origem e data automática no terminal e preservação de Decimal.
 - Uma tabela com nove campos, na ordem dos cenários, sem detalhamento individual redundante.
 - Resumo de menor custo mensal de IA em BRL, maior e diferença somente com mais de um cenário.
 - Decimal nas quatro colunas financeiras; símbolos R$ e US$ e padrão brasileiro apenas na exibição.
 - Exportação completa para `resultados/cenarios.csv`, substituindo o arquivo anterior.
 - Erros de leitura e cancelamento antes de exportar, preservando resultados anteriores.
-- Importação do módulo sem interação, leitura de CSV, impressão ou exportação.
+- Importação do módulo sem interação, leitura de CSV, consulta à rede, impressão ou exportação.
 
 | Resultado didático de IA | 100 usuários | 500 usuários |
 | --- | ---: | ---: |
@@ -46,8 +48,10 @@ A calculadora simula despesas sem chamadas reais às APIs e sem validar qualidad
 | IA anual em BRL | R$ 26,40 | R$ 132,00 |
 
 O exemplo usa GPT-6 Luna, tarifas já configuradas de US$ 0,10/US$ 0,50 por milhão de tokens de
-entrada/saída e cotação didática de R$ 5,00 por USD. Não são tarifas revalidadas nesta revisão nem
-cotação atual. O anual considera 12 meses constantes. Os resultados não incluem o custo operacional
+entrada/saída e cotação didática de R$ 5,00 por USD, informada manualmente ou simulada nos testes.
+Não são tarifas revalidadas nesta revisão nem cotação atual. Essa taxa histórica não é substituída
+pela observação cambial do dia nem usada automaticamente quando a API falha.
+O anual considera 12 meses constantes. Os resultados não incluem o custo operacional
 completo da aplicação e não comprovam consumo real nem capacidade da infraestrutura.
 
 ### Recursos implementados fora do fluxo principal
@@ -61,9 +65,10 @@ apresentar como disponível.
 
 ### Próxima entrega e recursos ainda planejados
 
-O próximo passo é pesquisar e definir a consulta de cotação, com fonte ainda pendente. Depois,
-implementar consulta com opção manual e consolidar documentação e validação da instalação para
-fechar a versão do MVP. O roteiro da seção 10 detalha essa sequência.
+A fonte foi definida e a consulta BCB/SGS série 1 com opção manual está implementada e testada.
+Os próximos passos são consolidar documentação e dependências, validar a instalação em ambiente
+limpo e preparar a publicação da versão do MVP no terminal. A execução da suíte no ambiente atual
+não comprova instalação limpa nem publicação; essas entregas permanecem pendentes na seção 10.
 
 Catálogo e seleção de modelos, comparação de provedores, gráficos, dashboard, integração futura de
 infraestrutura e orçamento e análises avançadas não fazem parte dessa entrega.
@@ -102,7 +107,8 @@ inicial, ainda a validar.
 
 ## 5. Entradas e arquivos atuais
 
-O menu recebe somente a escolha do modo. O modo manual e o CSV informam nome e seis hipóteses:
+O primeiro menu escolhe a origem dos cenários. O modo manual e o CSV informam nome e seis hipóteses:
+Após a validação, outro menu escolhe a cotação automática ou manual, sem incluir câmbio no CSV.
 
 | Campo de entrada | Unidade e regra |
 | --- | --- |
@@ -124,8 +130,9 @@ sete colunas. Contém os cenários de 100 e 500 usuários, mas aceita outros reg
 A leitura começa com texto, valida colunas e registros e retorna `nome` e `hipoteses_consumo`.
 Os cenários seguem a ordem de entrada. O modo manual produz um cenário no mesmo formato, sem CSV.
 
-Preços do modelo e cotação ficam no código e não são perguntados no terminal. Não há associação de
-capacidade no fluxo atual. Hipóteses de capacidade e preços de infraestrutura pertencem ao escopo
+Os preços do modelo ficam no código. A cotação é consultada no BCB ou informada no terminal em
+BRL por USD, como Decimal, e aplicada a todos os cenários. Não há associação de capacidade no fluxo
+atual. Hipóteses de capacidade e preços de infraestrutura pertencem ao escopo
 mais amplo preservado para o futuro; as pesquisas da seção 6 não significam contratação ou cálculo
 ativo desses serviços no MVP.
 
@@ -143,6 +150,8 @@ O CSV de resultados tem nove colunas, nesta ordem: `cenario`, `usuarios_ativos`,
 e totais operacionais. Usa UTF-8, vírgula, ponto decimal, cabeçalho e ausência de índice.
 O destino é relativo a `calculadora.py`; a pasta é criada e o arquivo é substituído a cada execução
 concluída. Não há acumulação de linhas nem formatação monetária aplicada ao conteúdo exportado.
+A origem e a data da cotação são apresentadas no terminal, mas não compõem o CSV; nem a taxa foi
+acrescentada às nove colunas como metadado.
 
 CSV não preserva tipos Python: ao recuperar valores financeiros, ler como texto e converter
 diretamente para `Decimal`, sem float intermediário. Prever a mesma regra para o futuro catálogo.
@@ -417,6 +426,55 @@ Cloud. Não duplicar o custo de execução do mesmo serviço ao comparar compone
 - Nesta atualização, apenas o planejamento foi alterado. Nenhum valor do cenário, função ou teste
   foi modificado.
 
+### Cotação adotada no MVP — pesquisa documental de 14/11/2026
+
+**Decisão implementada:** Banco Central do Brasil, SGS série 1, dólar americano de venda, diário.
+Unidade utilizada: **BRL por USD**, ou reais por um dólar americano. Acesso público e gratuito,
+sem chave de API para esta consulta. Referências oficiais consultadas em 14/11/2026:
+
+- [Catálogo da série 1](https://dadosabertos.bcb.gov.br/dataset/1-taxa-de-cambio---livre---dolar-americano-venda---diario).
+- [Recurso JSON no catálogo](https://dadosabertos.bcb.gov.br/dataset/1-taxa-de-cambio---livre---dolar-americano-venda---diario/resource/4494fe1f-a3f9-4aba-a342-17dfea6f370a).
+- [Endpoint utilizado](https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados/ultimos/1?formato=json).
+
+A descrição adotada é **última cotação diária disponível do BCB**. Ela não significa câmbio em tempo
+real nem valor efetivo cobrado pelo meio de pagamento, que pode incluir adicionais.
+
+As três referências temporais têm significados diferentes:
+
+| Referência | Significado |
+| --- | --- |
+| Data da pesquisa documental: 14/11/2026 | Quando a fonte e suas características foram conferidas para este registro |
+| Data da observação cambial | Campo `data` recebido do BCB; identifica a observação diária e pode ser anterior à execução |
+| Momento da consulta | Quando a função acessa o endpoint durante a execução; não é a data da observação nem um horário armazenado no retorno |
+
+`consultar_cotacao_bcb()` faz uma única consulta com `urllib.request.urlopen(..., timeout=10)`,
+por HTTPS com verificação padrão do certificado. Utiliza `json`, `datetime`, `decimal`,
+`urllib.error` e `http.client`, todos da biblioteca padrão. Não interage, imprime nem altera arquivos.
+O resultado contém `brl_por_usd` como Decimal, `origem` e `data_cotacao` em ISO.
+
+A validação exige uma lista de um registro, campos `data` e `valor` do tipo texto, data válida em
+DD/MM/AAAA e taxa finita e positiva. O texto decimal é convertido diretamente para Decimal, sem
+float intermediário. As falhas esperadas de HTTP, rede, leitura, JSON ou validação são sinalizadas
+por `ErroCotacaoBCB`, preservando a causa, sem capturar indiscriminadamente todos os erros.
+
+`ler_cotacao_terminal()` oferece consulta ao BCB ou entrada manual depois de obter cenários válidos.
+A taxa digitada usa ponto decimal, sem separadores de milhares; texto inválido, campos vazios, zero,
+negativos, infinito e NaN repetem somente o campo. A validação numérica existente é reutilizada.
+No manual, a origem é `manual`, a data é `None` e não há requisição à internet.
+
+Se a consulta falhar, a interação oferece preenchimento manual ou cancelamento, sem nova tentativa
+automática e sem cotação substituta. Cancelar, Ctrl+C ou fim da entrada encerram antes da exportação,
+com mensagem e código diferente de zero, preservando resultados anteriores. Os cenários compartilham
+uma única taxa, e a importação do módulo não acessa a rede nem executa o fluxo.
+
+A apresentação informa a origem e, no automático, a data da observação em DD/MM/AAAA. A cotação usa
+pelo menos quatro casas decimais; casas adicionais da taxa manual são preservadas na identificação.
+Os custos continuam com duas casas no padrão brasileiro, sem arredondar os dados originais.
+O CSV mantém os nove campos e os valores financeiros completos, sem exportar origem ou data cambial.
+
+A cotação didática de R$ 5,00 permanece nos exemplos históricos e testes controlados. Uma taxa obtida
+em uma consulta real é somente uma observação datada, nunca um valor permanentemente atual.
+
 ## 7. Fórmulas
 
 As fórmulas de consumo e IA (1 a 8) sustentam o MVP atual. A conversão de IA para BRL é
@@ -564,16 +622,23 @@ cenário completo permanecem testados separadamente, mesmo fora da execução pr
 
 ### Testes existentes e verificações pontuais
 
-`test_calculadora.py` contém **165 métodos em 15 classes**, todos aprovados na execução desta revisão.
-São 111 métodos em 11 classes de cálculos e coordenadoras, 25 de leitura CSV, quatro de formatação,
-sete de leitura manual e 18 de integração. Subtests são combinações dentro desses métodos, sem
-ampliar essa contagem.
+`test_calculadora.py` contém **188 métodos em 17 classes**, todos aprovados na execução desta revisão.
+São 111 métodos em 11 classes de cálculos e coordenadoras, 25 de leitura CSV, quatro de formatação
+monetária, sete de leitura manual, nove de consulta BCB, oito de interação/apresentação cambial e
+24 de integração. Subtests são combinações dentro desses métodos, sem ampliar essa contagem.
 
 As integrações persistentes simulam digitação e usam arquivos temporários. Conferem ambos os modos,
 cenário único e múltiplos cenários, ordem, erros, cancelamento, execução de outra pasta, símbolos
 monetários, precisão e nove colunas exportadas. Também comprovam que o caminho principal não chama
 infraestrutura nem o cenário completo. Os testes específicos dessas funções foram preservados.
-A importação do módulo continua testada sem interação, leitura de CSV ou geração de resultados.
+A importação do módulo continua testada sem interação, rede, leitura de CSV ou geração de resultados.
+
+Os testes cambiais usam respostas simuladas e não dependem da internet ou da taxa do dia. Conferem
+timeout, HTTP/rede, leitura incompleta, JSON inválido, campos, tipos, datas e taxas inválidas, entrada
+manual sem rede, alternativa manual e cancelamento após falha. Comprovam uma única consulta para
+múltiplos cenários e mudança somente dos custos em BRL quando a taxa simulada muda. A taxa manual de
+R$ 5,00 preserva os resultados didáticos. Uma consulta real separada é conferência pontual, sem
+substituir os testes nem comprovar disponibilidade futura da API.
 
 Os roteiros pontuais históricos de DataFrames, filtros e saldos estão no [registro](PROMPTS.md).
 Não equivalem a novos testes persistentes. Esta atualização altera somente documentação e não
@@ -589,11 +654,13 @@ adiciona métodos de teste. Para repetir a suíte no ambiente existente:
 
 O resultado cobre somente IA. Não inclui infraestrutura, despesas operacionais completas,
 impostos, tarifas de pagamento, descontos de cache, processamento em lote, ferramentas adicionais,
-imagens, áudio ou novas tentativas. A cotação é didática e fixa na configuração; não é consultada
-automaticamente. Não há integração real com APIs de IA nem validação da qualidade pedagógica.
+imagens, áudio ou novas tentativas. A cotação pode ser automática pelo BCB ou manual; é referência de
+simulação, sem adicionais de pagamento necessariamente incluídos. Não há integração real com APIs
+de IA nem validação da qualidade pedagógica. A única integração de rede atual é a consulta cambial.
 
 Os tokens são hipóteses, não médias medidas. A projeção anual constante não simula crescimento ou
-mudanças de câmbio e tarifas. A fonte cambial ainda será definida, sem presumir uma integração.
+mudanças de câmbio e tarifas. A série diária não é cotação em tempo real; sua data pode ser anterior
+à execução e não comprova o câmbio que será aplicado em uma cobrança.
 
 ### Evoluções posteriores ao fechamento do MVP
 
@@ -630,39 +697,45 @@ bloqueia a simulação didática nem faz parte do próximo incremento.
 
 ## 10. Roteiro incremental para fechar o MVP
 
-CSV de entrada validado, preenchimento manual e exportação de resultados já estão implementados.
-As próximas etapas abaixo são planejamento, não funcionalidades concluídas. Cada incremento deverá
-preservar os contratos atuais, receber testes pertinentes e manter documentação coerente.
+### Etapas concluídas
 
-### 1. Pesquisar e definir a consulta de cotação
+- Leitura validada de cenários por CSV e preenchimento manual, integrados ao mesmo fluxo de IA.
+- Tabela final e exportação de nove campos com precisão financeira completa.
+- Adoção do BCB/SGS série 1 e consulta automática com timeout de 10 segundos.
+- Cotação manual sem rede, tratamento de falhas, cancelamento e testes cambiais simulados.
 
-- Pesquisar fontes e suas condições, documentação, disponibilidade e limites antes de escolher.
-- Definir o significado da taxa em BRL por USD, data de referência, atualização e tratamento de
-  indisponibilidade. Não confundir uma taxa publicada com a taxa efetivamente paga.
-- Definir como recuperar os valores com precisão e como apresentar a origem da cotação.
-- Manter explícita a decisão pendente: nenhuma fonte cambial foi escolhida ou integrada.
+A documentação desta etapa é atualizada nesta revisão. A suíte passou no ambiente atual, mas isso
+não equivale à validação em ambiente limpo ou à publicação de uma versão.
 
-Este é o próximo incremento de pesquisa e decisão. Não atualizar tarifas de IA nem presumir que
-pesquisar uma fonte já implementa a consulta.
+### 1. Consolidar documentação e dependências
 
-### 2. Implementar consulta com opção manual
+- Revisar execução, menus, formatos, exemplos de taxa manual, limitações e explicações para iniciantes.
+- Registrar as dependências e instruções reproduzíveis de preparo do ambiente, em tarefa própria.
+- Distinguir os módulos da biblioteca padrão da dependência externa Pandas; manter a consulta cambial
+  sem pacotes adicionais e documentar a necessidade de internet somente para a opção automática.
+- Conferir a consistência entre README, planejamento, registro de prompts e comportamento do código.
 
-- Após definir a fonte, implementar a consulta e permitir informar a cotação manualmente.
-- Validar número finito e positivo e preservar Decimal; evitar float intermediário para a taxa.
-- Apresentar falhas de consulta claramente e permitir a alternativa manual, sem substituição oculta.
-- Separar obtenção da taxa dos cálculos, para reutilização e testes sem depender da rede.
-- Conferir os dois modos de cenários e os valores estimados com cotações controladas nos testes.
+A atualização destes documentos não significa que a reprodução da instalação já foi validada.
 
-Essa etapa ainda não existe: hoje a cotação permanece fixa na configuração do código.
+### 2. Validar em ambiente limpo
 
-### 3. Consolidar documentação e validar a instalação
+- Preparar um ambiente isolado novo a partir das instruções, em etapa própria; não presumir que o
+  funcionamento na `.venv-win` atual já demonstra instalação reproduzível.
+- Executar a suíte completa, incluindo funções preservadas de infraestrutura e cálculo completo.
+- Conferir cenários CSV e manual, taxa automática e manual, mensagens, cancelamento e caminhos.
+- Verificar as nove colunas exportadas, Decimal e as convenções diferentes de entrada e apresentação.
+- Separar consulta real pontual de testes com respostas simuladas; a suíte deve continuar sem rede.
 
-- Documentar as dependências e o preparo do ambiente para reproduzir a instalação em outro computador.
-- Validar execução no ambiente isolado, menu, campos, mensagens, precisão e exportação de nove colunas.
-- Executar a suíte completa, incluindo infraestrutura e cálculo completo preservados.
-- Revisar exemplos, limitações e instruções de execução para fechar a versão da calculadora no terminal.
-- Manter explícitos o anual constante, a natureza estimada e a ausência de chamadas reais à IA.
+Esta validação permanece pendente, sem evidência de conclusão nesta revisão documental.
 
-Catálogo, modelos selecionáveis, gráficos, dashboard, infraestrutura e análises avançadas ficam
-para etapas posteriores, conforme a seção 9. O fechamento desta versão não depende de publicar um
-dashboard; o versionamento acompanha os incrementos do projeto.
+### 3. Preparar e publicar a versão do MVP no terminal
+
+- Após a validação, revisar o escopo entregue, limitações, instruções e resultados dos testes.
+- Definir a identificação da versão e preparar sua publicação, em tarefa própria.
+- Manter explícitos o anual constante, as estimativas de IA e a ausência de chamadas às APIs dos modelos.
+- Publicar a versão somente após concluir as verificações e obter a autorização correspondente.
+
+A publicação ainda não foi realizada nem comprovada nesta tarefa. Nenhum commit ou push faz parte
+desta revisão. Catálogo, seleção de modelos, infraestrutura, orçamento, gráficos, dashboard e
+análises avançadas permanecem posteriores, conforme a seção 9. O MVP é a calculadora no terminal;
+seu fechamento não depende de publicar um dashboard.

@@ -1296,3 +1296,71 @@ não cria novos testes automatizados. Os registros anteriores retratam os escopo
 
 **Marco deste registro:** documentação de 08/11/2026, com MVP de IA no terminal e consulta cambial
 pendente, sem integração real com APIs de IA nem validação de qualidade pedagógica.
+
+## 32. Consulta cambial pelo Banco Central e alternativa manual
+
+**Data:** 14/11/2026.
+
+**Etapa:** cotação automática ou manual integrada ao MVP de custos de IA no terminal.
+
+**Objetivo dos pedidos:** consultar o dólar de venda diário do BCB, preservar a opção manual e a
+precisão Decimal, sem depender da internet na suíte nem modificar o formato do CSV de resultados.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar uma função de consulta sem interação e outra para escolher a origem da cotação depois de
+validar os cenários. Usar BCB/SGS série 1, tratar falhas com alternativa manual ou cancelamento e
+preservar resultados anteriores. Mostrar origem e data automática, sem chamar a taxa de câmbio em
+tempo real. Simular API e digitação nos testes e atualizar somente a documentação nesta revisão,
+sem instalar pacotes, fazer commit ou push.
+
+**Participação e aprendizado:** as explicações abordaram requisição HTTP por HTTPS, JSON, timeout,
+conversão direta de texto para Decimal, datas ISO e separação entre consulta, interação e cálculo.
+Também distinguiram respostas simuladas de conferência real e precisão interna de apresentação.
+
+**Decisões registradas:**
+
+- Adotar o Banco Central, SGS série 1, dólar americano de venda, diário, com unidade BRL por USD;
+  consulta pública e gratuita, sem chave de API. A fonte oficial e o endpoint estão no planejamento.
+- Usar `consultar_cotacao_bcb()` com `urllib.request`, `json` e timeout de 10 segundos, mantendo a
+  verificação HTTPS padrão. Fazer uma única consulta, sem repetição automática ou taxa substituta.
+- Validar lista de um registro, campos textuais, data válida e taxa finita e positiva. Converter
+  diretamente para Decimal e retornar `brl_por_usd`, `origem` e `data_cotacao` em ISO.
+- Usar `ler_cotacao_terminal()` após obter cenários válidos, aplicando a mesma taxa a todos eles.
+- Permitir entrada manual sem rede, com ponto decimal, sem milhares e repetição do campo inválido;
+  rejeitar vazio, texto inválido, zero, negativos, infinito e NaN. Não atribuir data do BCB ao manual.
+- Tratar falhas esperadas com `ErroCotacaoBCB` e oferecer entrada manual ou cancelamento. Ctrl+C,
+  fim da entrada e cancelamento explícito encerram antes da exportação, preservando resultados.
+- Apresentar a última cotação diária disponível do BCB, com origem e data de referência brasileira,
+  que pode ser anterior à execução. A taxa não inclui necessariamente adicionais do pagamento.
+- Mostrar pelo menos quatro casas na cotação e preservar casas adicionais da entrada manual;
+  manter duas casas nos custos e precisão Decimal nos dados. Origem e data não são exportadas;
+  o CSV continua com nove colunas e valores financeiros completos.
+- Manter o MVP restrito a IA, sem chamadas reais às APIs dos modelos, infraestrutura ou orçamento
+  no caminho principal. Importar o módulo continua sem rede, leitura, interação ou exportação.
+
+**Contribuição para o projeto:** a consulta automática e a opção manual foram implementadas.
+Foram acrescentados 23 métodos persistentes: nove de consulta, oito de interação/apresentação
+cambial e seis de integração. Os testes anteriores foram adaptados às novas perguntas; o teste de
+importação também impede acesso à rede. A suíte completa passou nesta revisão com **188 métodos
+em 17 classes**, usando a `.venv-win` e `python -X utf8 -B -m unittest -q`. Subtests não ampliam
+essa contagem, e esta atualização documental não cria novos testes.
+
+Os testes simulam respostas e `input()`, cobrindo timeout, HTTP/rede, leitura incompleta, JSON e
+codificação inválidos, estrutura, campos, tipos, datas e taxas inválidas. Conferem modo manual sem
+rede, falha seguida de preenchimento manual, cancelamento sem exportação e uma única consulta
+para múltiplos cenários, usando arquivos temporários para resultados.
+
+A taxa manual de `Decimal("5.00")` preserva os exemplos didáticos. Com taxa simulada de
+`Decimal("6.2500")`, os custos mensais em BRL ficam R$ 2,75 e R$ 13,75 para 100 e 500 usuários;
+consumo e custos em USD permanecem iguais. A entrada manual com casas adicionais preserva tanto
+a identificação da taxa quanto a exportação financeira completa.
+
+Separadamente, na implementação foi realizada uma consulta real em 14/11/2026, que retornou
+`Decimal("5.6518")` para a observação de 13/11/2026. Essa conferência pontual não integra a suíte,
+não fixa uma cotação atual permanente e não comprova disponibilidade futura da API. A pesquisa
+documental de 14/11/2026 é distinta da data da observação e do momento de acesso ao endpoint.
+
+**Marco deste registro:** consulta automática e alternativa manual concluídas; documentação e
+roteiro alinhados. Consolidação de dependências, validação em ambiente limpo e publicação da versão
+do MVP permanecem etapas próprias, sem declaração de conclusão nesta revisão.
