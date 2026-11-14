@@ -1435,3 +1435,96 @@ clonagem ou nova instalação executada nesta atualização documental.
 Windows, sem comprovação de outro computador, sistema ou reinstalação do Python. A revisão final
 da documentação e a publicação da primeira versão do MVP no terminal permanecem pendentes.
 O projeto continua estimando somente IA, sem chamadas reais às APIs dos modelos.
+
+## 34. Revisão final e preparação local da primeira release
+
+**Data:** 14/11/2026.
+
+**Etapa:** revisão técnica do MVP e notas propostas para v0.1.0, sem publicação.
+
+**Objetivo dos pedidos:** conferir funcionamento, documentação, arquivos versionados e limites,
+preparando os materiais da primeira release sem alterar código, configurações ou o remoto.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Revisar entradas, validações, câmbio, custos exclusivamente de IA, Decimal, apresentação e CSV.
+Conferir instalação descrita no README, licença, Git e tags; executar testes e Markdownlint sem
+reinstalar dependências. Preparar RELEASE_NOTES e orientar a publicação posterior sobre o commit
+final, sem criar licença, commit, tag ou release nesta tarefa.
+
+**Participação e aprendizado:** as explicações distinguiram revisão técnica, aprovação dos materiais,
+commit final, tag e release. Também separaram a distribuição do programa de terminal da hospedagem
+de um dashboard e a situação do código dos termos próprios de dependências e dados de terceiros.
+
+**Decisões registradas:**
+
+- Revisar `main` no commit `3ebf7f745e6389fa239f7a4dc43057f6e07af11e`, sem mudanças pendentes ao iniciar.
+- Propor v0.1.0 após confirmar ausência de tags locais e remotas, sem criar ou substituir tags.
+- Criar `RELEASE_NOTES.md` como material local para revisão, com escopo, início de uso, ambiente,
+  verificações, limitações, evoluções futuras e sequência de publicação.
+- Corrigir descrições desatualizadas: requirements e CSV de exemplo já estão versionados.
+- Confirmar que `.venv`, `.venv-win` e resultados estão ignorados; a `.venv-win` usa o `.gitignore`
+  criado dentro do ambiente. Não alterar regras nem incluir ambientes ou resultados como anexos.
+- Registrar ausência de LICENSE e avaliação de MIT, sem adoção autorizada ou atribuição de titular.
+  A decisão fica pendente, sem ser tratada como impedimento técnico para publicar.
+
+**Contribuição para o projeto:** não foram encontrados defeitos funcionais nos fluxos verificados.
+Os **188 métodos em 17 classes passaram** na `.venv-win`, com `python -X utf8 -B -m unittest -q`.
+`pip check` retornou **No broken requirements found**. A verificação de Markdown incluiu os três
+registros documentais e as notas da versão. Não houve novos testes persistentes nem instalação;
+a validação limpa anterior foi preservada porque código e dependências não mudaram.
+
+As conferências de Git, documentação, licença e arquivos ignorados foram pontuais. Os ajustes
+foram somente documentais. O histórico anterior foi preservado, sem reescrever decisões passadas.
+A publicação futura deverá incorporar as notas e ajustes ainda sem commit, enviar o commit final
+ao GitHub e criar a tag/release sobre ele; o commit base revisado não contém estes novos materiais.
+
+**Marco deste registro:** revisão técnica final e materiais locais preparados. Aprovação dos
+materiais, revisão da situação de licença, commit final, push, tag e release continuam posteriores.
+O MVP permanece uma calculadora de IA no terminal, sem dashboard hospedado ou chamadas às APIs dos
+modelos. Nenhuma alteração remota foi realizada.
+
+## 35. Adoção explícita da licença MIT
+
+**Data:** 14/11/2026.
+
+**Etapa:** formalização da licença do código e alinhamento dos materiais da primeira versão.
+
+**Objetivo dos pedidos:** adotar a MIT com autorização explícita, preservar as alterações da revisão
+final e manter a primeira release como preparação, sem publicar.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar LICENSE com o texto padrão integral da MIT em inglês, ano atual e titular confirmado.
+Atualizar README, planejamento e notas da versão, retirando a escolha da licença das pendências.
+Conferir o texto e os links e executar Markdownlint, sem modificar código, testes, requisitos,
+configurações ou CSVs e sem commit, push, tag ou release.
+
+**Participação e aprendizado:** a decisão distinguiu os direitos de uso do código das condições
+próprias de dependências e dados de terceiros. A identificação do titular foi solicitada ao
+responsável, sem inferência a partir da conta do Windows, caminhos ou nomes no histórico.
+
+**Decisões registradas:**
+
+- Adotar MIT por escolha explícita e autorizada, com referência ao texto de Choose a License.
+- Criar LICENSE na raiz, mantendo integralmente as cláusulas em inglês, com ano de 2026.
+- Usar o titular confirmado: Natan Fernando.
+- Declarar MIT e vincular LICENSE no README e nas notas da versão; manter as permissões de uso,
+  modificação e distribuição, inclusive comercial, com preservação dos avisos exigidos.
+- Registrar a escolha como concluída no planejamento somente após finalizar o arquivo.
+- Preservar as licenças e condições próprias das dependências e fontes de dados.
+- Manter somente a revisão/aprovação dos materiais, o commit final, o envio e a criação da
+  tag/release como etapas posteriores, sem declarar publicação.
+
+**Contribuição para o projeto:** LICENSE foi finalizado e os quatro documentos foram alinhados.
+O texto foi conferido contra a referência, com ano e titular preenchidos, sem marcadores pendentes.
+A verificação de Markdown abrangeu os quatro documentos, sem aplicar formatação ao texto jurídico.
+O histórico anterior e as alterações documentais da revisão final foram preservados.
+
+Não houve alteração de código, testes ou dependências. A suíte de 188 métodos aprovada na revisão
+final não foi repetida, pois esta tarefa é documental. As conferências da licença e das referências
+são verificações pontuais, não novos testes automatizados.
+
+**Marco deste registro:** licença MIT concluída, com decisão registrada em 14/11/2026. O MVP continua
+focado em custos de IA no terminal, e a primeira versão permanece preparada para publicação futura.
+Nenhum commit, push, tag ou release foi realizado nesta tarefa.

@@ -71,7 +71,8 @@ A fonte foi definida e a consulta BCB/SGS série 1 com opção manual está impl
 A organização de dependências e a validação em ambiente virtual novo foram concluídas em
 14/11/2026, com instalação, suíte e execuções na cópia temporária. O alcance é o Windows e o
 interpretador registrados na seção 8; não é validação universal. A revisão final da documentação e
-a publicação da primeira versão do MVP no terminal permanecem pendentes na seção 10.
+a publicação da primeira versão do MVP no terminal são tratadas na seção 10: a revisão técnica
+foi concluída e as notas foram preparadas; aprovação dos materiais e publicação continuam pendentes.
 
 Catálogo e seleção de modelos, comparação de provedores, gráficos, dashboard, integração futura de
 infraestrutura e orçamento e análises avançadas não fazem parte dessa entrega.
@@ -696,8 +697,9 @@ automática continua exigindo rede, e sua conferência real anterior é separada
 A pasta temporária e seu ambiente foram removidos após a verificação do caminho. `.venv`,
 `.venv-win`, configurações, código, testes, CSV de exemplo e resultados originais foram preservados.
 A validação abrange um ambiente virtual novo neste Windows, não uma reinstalação do Python,
-outro computador ou outros sistemas. O arquivo de dependências ainda está pendente de versionamento
-nesta revisão; não se declara que já está disponível em uma versão publicada.
+outro computador ou outros sistemas. Na etapa de validação, o arquivo de dependências ainda não
+estava versionado; na revisão final ele já integra o commit local, junto do código e CSV de exemplo.
+Isso não significa que exista uma tag ou release publicada.
 
 ## 9. Limitações e melhorias posteriores
 
@@ -759,23 +761,37 @@ bloqueia a simulação didática nem faz parte do próximo incremento.
   versões, pip check, 188 testes e verificações dos fluxos e da exportação, conforme a seção 8.
 - Registro das instruções de instalação e das evidências nos documentos, nesta atualização.
 
-### 1. Concluir a revisão final da documentação
+### Revisão técnica final e preparação — concluídas em 14/11/2026
 
-- Conferir a coerência entre instruções, requisitos, código, testes, exemplos e limites comprovados.
-- Garantir que o conjunto a publicar inclua `requirements.txt` e os demais arquivos necessários.
-- Distinguir comandos de instalação e execução das conferências já realizadas; preservar os limites
-  de compatibilidade e a necessidade de internet para instalação e consulta automática do BCB.
-- Manter o escopo em IA, o anual constante e a ausência de chamadas reais às APIs dos modelos.
+A revisão conferiu o fluxo de IA, validações, câmbio, precisão, apresentação, nove colunas exportadas,
+instalação descrita no README e arquivos necessários versionados. Os 188 métodos passaram novamente
+na `.venv-win`; `pip check` não encontrou conflitos. A instalação limpa anterior não foi repetida,
+pois código e dependências permaneceram iguais. A verificação de Markdown abrange também as notas.
 
-A documentação foi atualizada com a validação, mas a revisão final de fechamento ainda está pendente.
-Não há nova funcionalidade obrigatória para concluir essa revisão.
+Branch revisada: `main`. Commit base da revisão:
+`3ebf7f745e6389fa239f7a4dc43057f6e07af11e`.
+Não havia mudanças pendentes ao iniciar esta preparação. Os ajustes documentais e as notas criados
+agora ainda precisam compor o commit final antes da publicação. Não foram encontradas tags locais
+ou remotas na consulta de 14/11/2026; a versão proposta é **v0.1.0**, sem criar ou substituir tag.
 
-### 2. Preparar e publicar a primeira versão do MVP no terminal
+[RELEASE_NOTES.md](RELEASE_NOTES.md) contém o texto proposto, as limitações e a sequência de publicação.
+O CSV de exemplo e requirements já estão versionados. Ambientes e resultados estão ignorados e não
+são anexos da release; a `.venv-win` usa o `.gitignore` criado dentro dela, sem mudança nas regras.
 
-- Após a revisão final, definir a identificação da versão e preparar os arquivos de publicação.
-- Incluir instruções e evidências já conferidas, sem declarar compatibilidade além da validada.
-- Realizar o versionamento e a publicação em tarefa própria; não confundir arquivos locais
-  pendentes de versionamento com uma tag ou release disponível no remoto.
+### Licença MIT — concluída em 14/11/2026
+
+A escolha da MIT foi explicitamente autorizada. O arquivo [LICENSE](LICENSE) contém o texto padrão
+integral em inglês, com ano de 2026 e titular confirmado pelo responsável pelo projeto.
+A licença permite uso, modificação e distribuição, inclusive comercial, mantendo os avisos exigidos.
+Dependências e fontes de dados conservam suas próprias licenças e condições, separadas desta decisão.
+A finalização da licença não significa que a primeira release tenha sido publicada.
+
+### Pendências para publicar
+
+- Revisar e aprovar os materiais finais da versão.
+- Incorporar os ajustes finais em um commit e enviá-lo ao GitHub, em tarefa própria.
+- Criar a tag v0.1.0 e a release sobre o commit final, confirmando que ele contém todos os materiais.
+- Distribuir o programa de terminal sem ambientes, resultados pessoais ou pacotes binários anexos.
 
 Publicação, tag e release permanecem pendentes. Esta revisão não faz commit ou push.
 Catálogo, seleção de modelos, infraestrutura, orçamento, gráficos, dashboard e análises avançadas

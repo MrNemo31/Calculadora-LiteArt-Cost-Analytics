@@ -105,11 +105,12 @@ o Python do MSYS2 não foi utilizado nessa validação.
 
 Usar uma cópia do projeto que contenha `calculadora.py`, `test_calculadora.py`,
 `dados/cenarios_exemplo.csv` e `requirements.txt`. A documentação acompanha esses arquivos.
-Nesta revisão, o `requirements.txt` recém-criado ainda está pendente de versionamento; uma cópia
-do remoto pode não incluí-lo até sua incorporação. A validação usou os arquivos locais atuais,
-incluindo esse arquivo, e não apenas o último commit.
+Código, testes, `requirements.txt` e CSV de exemplo estão versionados no repositório local.
+A validação em ambiente novo usou uma cópia dos arquivos locais; o registro correspondente descreve
+o estado daquela etapa. Antes de publicar uma versão, incorporar também os materiais finais e
+confirmar o commit escolhido no GitHub.
 
-Para obter o repositório com Git, quando os arquivos necessários estiverem disponíveis nele:
+Para obter o repositório com Git:
 
 ```powershell
 git clone https://github.com/MrNemo31/Calculadora-LiteArt-Cost-Analytics.git LiteArt-Cost-Analytics
@@ -397,17 +398,35 @@ Para executar a suíte com o ambiente existente:
 ## Próximos passos
 
 A consulta BCB/SGS série 1, o registro de dependências e a validação em ambiente virtual novo estão
-concluídos no alcance descrito. Para fechar a primeira versão do MVP no terminal:
+concluídos no alcance descrito.
 
-1. Concluir a revisão final da documentação e sua coerência com os arquivos que serão publicados.
-2. Preparar a identificação e a publicação da versão, incluindo os arquivos necessários à instalação.
+A revisão técnica final de 14/11/2026 conferiu a coerência entre código, requisitos, exemplos e
+instruções, com os 188 testes aprovados. As [notas propostas para v0.1.0](RELEASE_NOTES.md) estão
+preparadas para revisão, sem tag ou release publicada. A distribuição é do programa de terminal;
+não representa hospedagem de dashboard.
 
-A revisão final e a publicação permanecem pendentes. Esta atualização não cria commit, tag ou release
-nem realiza push.
+Antes de publicar a primeira versão:
+
+1. Revisar e aprovar os materiais finais da versão.
+2. Incorporar os ajustes em um commit final e enviá-lo ao GitHub.
+3. Criar a tag e a release sobre esse commit, conforme as orientações das notas.
+
+Essas ações de publicação continuam pendentes. Nenhum commit, tag, release ou push foi realizado
+nesta preparação. Ambientes e resultados gerados permanecem fora do versionamento: `.venv/` e
+`resultados/` pelas regras da raiz, e `.venv-win/` pelo `.gitignore` criado dentro desse ambiente.
 
 Catálogo e seleção de modelos, comparação entre provedores, gráficos com Plotly, dashboard com
 Streamlit, retomada de infraestrutura e orçamento e análises avançadas ficam para depois.
 Comparar custos não exige chamadas reais às APIs nem comprova equivalência pedagógica.
+
+## Licença
+
+Este projeto é disponibilizado sob a [licença MIT](LICENSE), escolhida e autorizada explicitamente
+em 14/11/2026. São permitidos uso, modificação e distribuição, inclusive comercial, preservando os
+avisos de direitos autorais e de licença exigidos pelo texto integral.
+
+Dependências e fontes de dados mantêm suas próprias licenças e condições. A licença do código do
+projeto não substitui nem amplia as permissões sobre esses materiais de terceiros.
 
 ## Documentação e aprendizado
 
