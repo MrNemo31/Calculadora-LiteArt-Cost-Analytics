@@ -1,0 +1,7 @@
+# Dependencia direta: tabelas e leitura/exportacao de CSV.
+pandas==3.1.0
+
+# Dependencias indiretas do conjunto validado no Windows.
+numpy==2.5.4
+python-dateutil==4.0.0
+tzdata==2026.6

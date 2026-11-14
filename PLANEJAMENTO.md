@@ -36,6 +36,8 @@ A calculadora simula despesas sem chamadas reais às APIs e sem validar qualidad
 - Exportação completa para `resultados/cenarios.csv`, substituindo o arquivo anterior.
 - Erros de leitura e cancelamento antes de exportar, preservando resultados anteriores.
 - Importação do módulo sem interação, leitura de CSV, consulta à rede, impressão ou exportação.
+- Dependências diretas e indiretas fixadas em `requirements.txt`, com instalação e suíte validadas
+  em ambiente virtual novo no Windows, no alcance registrado na seção 8.
 
 | Resultado didático de IA | 100 usuários | 500 usuários |
 | --- | ---: | ---: |
@@ -66,9 +68,10 @@ apresentar como disponível.
 ### Próxima entrega e recursos ainda planejados
 
 A fonte foi definida e a consulta BCB/SGS série 1 com opção manual está implementada e testada.
-Os próximos passos são consolidar documentação e dependências, validar a instalação em ambiente
-limpo e preparar a publicação da versão do MVP no terminal. A execução da suíte no ambiente atual
-não comprova instalação limpa nem publicação; essas entregas permanecem pendentes na seção 10.
+A organização de dependências e a validação em ambiente virtual novo foram concluídas em
+14/11/2026, com instalação, suíte e execuções na cópia temporária. O alcance é o Windows e o
+interpretador registrados na seção 8; não é validação universal. A revisão final da documentação e
+a publicação da primeira versão do MVP no terminal permanecem pendentes na seção 10.
 
 Catálogo e seleção de modelos, comparação de provedores, gráficos, dashboard, integração futura de
 infraestrutura e orçamento e análises avançadas não fazem parte dessa entrega.
@@ -622,7 +625,8 @@ cenário completo permanecem testados separadamente, mesmo fora da execução pr
 
 ### Testes existentes e verificações pontuais
 
-`test_calculadora.py` contém **188 métodos em 17 classes**, todos aprovados na execução desta revisão.
+`test_calculadora.py` contém **188 métodos em 17 classes**, todos aprovados na validação de
+14/11/2026 em ambiente virtual novo.
 São 111 métodos em 11 classes de cálculos e coordenadoras, 25 de leitura CSV, quatro de formatação
 monetária, sete de leitura manual, nove de consulta BCB, oito de interação/apresentação cambial e
 24 de integração. Subtests são combinações dentro desses métodos, sem ampliar essa contagem.
@@ -647,6 +651,53 @@ adiciona métodos de teste. Para repetir a suíte no ambiente existente:
 ```powershell
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest -q
 ```
+
+### Dependências e validação em ambiente limpo — 14/11/2026
+
+**Concluídas:** organização de `requirements.txt` e validação em uma cópia temporária do projeto.
+O ambiente validado usou Python convencional **3.14.10 x64**, compilação MSC para Windows,
+plataforma `win-amd64`, em **Windows 11, build 26300**. O interpretador base foi identificado pela
+`.venv-win` existente, sem usar MSYS2, alterar PATH ou modificar o Python global.
+
+O único pacote externo importado diretamente pelo código e pelos testes é Pandas. O arquivo fixa
+`pandas==3.1.0`, `numpy==2.5.4`, `python-dateutil==4.0.0` e `tzdata==2026.6`, conforme os metadados
+instalados e testados. Os três últimos são dependências indiretas necessárias nesse conjunto.
+Biblioteca padrão, pip e ferramentas opcionais não entram no arquivo. As versões fixadas auxiliam
+a reprodução desse ambiente, mas não equivalem a um lock completo nem garantem outros sistemas.
+
+Foram copiados os arquivos locais atuais, inclusive os ainda sem commit: código, testes, CSV de
+exemplo e requirements. Não foram copiados ambientes virtuais, `.git`, caches, credenciais ou
+resultados gerados. Um ambiente novo foi criado com `python -m venv`, usando explicitamente o
+interpretador base convencional; confirmou-se `include-system-site-packages = false`, pacotes do
+usuário desabilitados e ausência inicial de pacotes da aplicação.
+
+A instalação usou somente o Python novo e `python -m pip install -r requirements.txt`, sem
+atualizar os ambientes existentes ou instalar pacotes avulsos para contornar o arquivo. As versões
+instaladas corresponderam às quatro versões fixadas e vieram de wheels, sem compilação.
+`python -m pip check` retornou **No broken requirements found**. A suíte completa da cópia passou
+com **188 métodos**, usando `python -X utf8 -B -m unittest -q`, sem API real nos testes.
+
+As conferências pontuais da cópia verificaram:
+
+- CSV de 100 e 500 usuários e entrada manual equivalente a 100 usuários, com taxa manual de R$ 5,00,
+  reproduzindo os custos de IA da seção 2.
+- Apresentação brasileira, nove colunas exportadas, nomes acentuados e reexecução sem duplicar linhas.
+- Precisão financeira além da segunda casa, recuperando `2.254320987160` diretamente como Decimal
+  a partir do CSV, com uma taxa manual de mais casas.
+- Caminhos independentes da pasta atual; execuções iniciadas de outra pasta, com conexões e DNS
+  bloqueados, e modo manual funcionando mesmo sem o CSV disponível na cópia.
+- Importação sem interação, rede, leitura de CSV ou exportação, preservando resultados existentes.
+
+Essas conferências não acrescentaram métodos de teste ao repositório. A instalação precisou de
+acesso ao PyPI: uma falha inicial de resolução de rede foi superada ao permitir o acesso, sem
+alterar os requisitos. Isso não demonstra dependência de internet no modo manual. A consulta cambial
+automática continua exigindo rede, e sua conferência real anterior é separada desta validação.
+
+A pasta temporária e seu ambiente foram removidos após a verificação do caminho. `.venv`,
+`.venv-win`, configurações, código, testes, CSV de exemplo e resultados originais foram preservados.
+A validação abrange um ambiente virtual novo neste Windows, não uma reinstalação do Python,
+outro computador ou outros sistemas. O arquivo de dependências ainda está pendente de versionamento
+nesta revisão; não se declara que já está disponível em uma versão publicada.
 
 ## 9. Limitações e melhorias posteriores
 
@@ -703,39 +754,30 @@ bloqueia a simulação didática nem faz parte do próximo incremento.
 - Tabela final e exportação de nove campos com precisão financeira completa.
 - Adoção do BCB/SGS série 1 e consulta automática com timeout de 10 segundos.
 - Cotação manual sem rede, tratamento de falhas, cancelamento e testes cambiais simulados.
+- Organização das dependências diretas e indiretas em `requirements.txt`, concluída em 14/11/2026.
+- Validação em ambiente virtual novo na cópia temporária, em 14/11/2026: instalação, isolamento,
+  versões, pip check, 188 testes e verificações dos fluxos e da exportação, conforme a seção 8.
+- Registro das instruções de instalação e das evidências nos documentos, nesta atualização.
 
-A documentação desta etapa é atualizada nesta revisão. A suíte passou no ambiente atual, mas isso
-não equivale à validação em ambiente limpo ou à publicação de uma versão.
+### 1. Concluir a revisão final da documentação
 
-### 1. Consolidar documentação e dependências
+- Conferir a coerência entre instruções, requisitos, código, testes, exemplos e limites comprovados.
+- Garantir que o conjunto a publicar inclua `requirements.txt` e os demais arquivos necessários.
+- Distinguir comandos de instalação e execução das conferências já realizadas; preservar os limites
+  de compatibilidade e a necessidade de internet para instalação e consulta automática do BCB.
+- Manter o escopo em IA, o anual constante e a ausência de chamadas reais às APIs dos modelos.
 
-- Revisar execução, menus, formatos, exemplos de taxa manual, limitações e explicações para iniciantes.
-- Registrar as dependências e instruções reproduzíveis de preparo do ambiente, em tarefa própria.
-- Distinguir os módulos da biblioteca padrão da dependência externa Pandas; manter a consulta cambial
-  sem pacotes adicionais e documentar a necessidade de internet somente para a opção automática.
-- Conferir a consistência entre README, planejamento, registro de prompts e comportamento do código.
+A documentação foi atualizada com a validação, mas a revisão final de fechamento ainda está pendente.
+Não há nova funcionalidade obrigatória para concluir essa revisão.
 
-A atualização destes documentos não significa que a reprodução da instalação já foi validada.
+### 2. Preparar e publicar a primeira versão do MVP no terminal
 
-### 2. Validar em ambiente limpo
+- Após a revisão final, definir a identificação da versão e preparar os arquivos de publicação.
+- Incluir instruções e evidências já conferidas, sem declarar compatibilidade além da validada.
+- Realizar o versionamento e a publicação em tarefa própria; não confundir arquivos locais
+  pendentes de versionamento com uma tag ou release disponível no remoto.
 
-- Preparar um ambiente isolado novo a partir das instruções, em etapa própria; não presumir que o
-  funcionamento na `.venv-win` atual já demonstra instalação reproduzível.
-- Executar a suíte completa, incluindo funções preservadas de infraestrutura e cálculo completo.
-- Conferir cenários CSV e manual, taxa automática e manual, mensagens, cancelamento e caminhos.
-- Verificar as nove colunas exportadas, Decimal e as convenções diferentes de entrada e apresentação.
-- Separar consulta real pontual de testes com respostas simuladas; a suíte deve continuar sem rede.
-
-Esta validação permanece pendente, sem evidência de conclusão nesta revisão documental.
-
-### 3. Preparar e publicar a versão do MVP no terminal
-
-- Após a validação, revisar o escopo entregue, limitações, instruções e resultados dos testes.
-- Definir a identificação da versão e preparar sua publicação, em tarefa própria.
-- Manter explícitos o anual constante, as estimativas de IA e a ausência de chamadas às APIs dos modelos.
-- Publicar a versão somente após concluir as verificações e obter a autorização correspondente.
-
-A publicação ainda não foi realizada nem comprovada nesta tarefa. Nenhum commit ou push faz parte
-desta revisão. Catálogo, seleção de modelos, infraestrutura, orçamento, gráficos, dashboard e
-análises avançadas permanecem posteriores, conforme a seção 9. O MVP é a calculadora no terminal;
-seu fechamento não depende de publicar um dashboard.
+Publicação, tag e release permanecem pendentes. Esta revisão não faz commit ou push.
+Catálogo, seleção de modelos, infraestrutura, orçamento, gráficos, dashboard e análises avançadas
+continuam posteriores, conforme a seção 9. O MVP é a calculadora no terminal; seu fechamento não
+depende de publicar um dashboard ou acrescentar funcionalidades a esse escopo.

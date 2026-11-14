@@ -1364,3 +1364,74 @@ documental de 14/11/2026 é distinta da data da observação e do momento de ace
 **Marco deste registro:** consulta automática e alternativa manual concluídas; documentação e
 roteiro alinhados. Consolidação de dependências, validação em ambiente limpo e publicação da versão
 do MVP permanecem etapas próprias, sem declaração de conclusão nesta revisão.
+
+## 33. Dependências fixadas e validação do MVP em ambiente novo
+
+**Data:** 14/11/2026.
+
+**Etapa:** preparo reproduzível do ambiente e registro da validação do MVP de custos de IA.
+
+**Objetivo dos pedidos:** organizar somente as dependências necessárias, validar a instalação em
+ambiente isolado novo e documentar os resultados, preservando os ambientes e arquivos existentes.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Conferir imports e metadados, criar requirements com versões exatas do conjunto já testado e copiar
+os arquivos atuais para uma pasta temporária exclusiva. Criar um ambiente novo com o Python base
+convencional, instalar pelo requirements, verificar isolamento, dependências, testes, execuções e
+exportação. Depois, atualizar somente README, planejamento e este registro com as evidências,
+sem alterar código, testes ou requisitos nesta revisão e sem commit, tag, release ou push.
+
+**Participação e aprendizado:** as explicações distinguiram dependências diretas, indiretas e
+biblioteca padrão; interpretador base e ambiente virtual; instalação que pode precisar de internet
+e execução com cotação manual sem rede. As versões fixadas descrevem o conjunto validado, sem
+constituir um lock completo ou garantia universal de reprodução.
+
+**Decisões registradas:**
+
+- Criar `requirements.txt` em UTF-8, após confirmar que não havia arquivo de dependências existente.
+- Registrar Pandas `3.1.0` como dependência direta; NumPy `2.5.4`, python-dateutil `4.0.0` e
+  tzdata `2026.6` como indiretas, com base nos metadados da `.venv-win`, sem atualizar seus pacotes.
+- Não incluir pip, módulos da biblioteca padrão, ferramentas opcionais ou pacotes sem relação.
+- Usar Python convencional `3.14.10` x64, plataforma `win-amd64`, no Windows 11, build 26300;
+  confirmar o executável base da instalação `Python314`, sem usar MSYS2.
+- Copiar somente código, testes, CSV de exemplo e requirements atuais, incluindo arquivos ainda
+  sem commit, sem copiar ambientes, `.git`, caches, credenciais ou resultados anteriores.
+- Criar um ambiente isolado na pasta temporária, sem pacotes globais ou do usuário, e instalar
+  somente com seu próprio Python e `python -m pip install -r requirements.txt`.
+- Preservar `.venv`, `.venv-win`, Python global, configurações, PATH e políticas do PowerShell.
+- Limpar somente a pasta temporária desta tarefa, depois de conferir seu caminho.
+
+**Contribuição para o projeto:** organização de dependências e validação concluídas em 14/11/2026.
+A instalação usou wheels, sem compilação, com as quatro versões iguais ao requirements.
+`python -m pip check` retornou **No broken requirements found** e a suíte da cópia passou com
+**188 métodos em 17 classes**, usando `python -X utf8 -B -m unittest -q`. A primeira instalação
+falhou por resolução de rede do PyPI; a repetição autorizada com acesso permitido funcionou,
+sem mudar requisitos nem instalar pacotes avulsos para contornar o arquivo.
+
+As verificações pontuais executaram CSV de 100 e 500 usuários e um cenário manual de 100 usuários
+com cotação `Decimal("5.00")`, a partir de outra pasta, com conexões e DNS bloqueados. Confirmaram:
+
+- 100 usuários: IA mensal US$ 0,44/R$ 2,20 e anual US$ 5,28/R$ 26,40.
+- 500 usuários: IA mensal US$ 2,20/R$ 11,00 e anual US$ 26,40/R$ 132,00.
+- Apresentação brasileira, nove colunas exportadas, acentos e reexecução sem duplicar linhas.
+- Modo manual mesmo sem o CSV disponível e importação sem interação, rede, leitura ou exportação.
+- Precisão além da segunda casa, recuperando `2.254320987160` do texto diretamente como Decimal,
+  com taxa manual de mais casas, sem passar por float.
+
+Essas conferências não acrescentaram testes automatizados persistentes; a contagem continua em
+188 métodos, sem contar subtests como métodos adicionais. A suíte usa respostas simuladas do BCB,
+sem depender da internet ou da cotação do dia. A consulta real registrada na etapa anterior é uma
+conferência distinta, não uma nova consulta realizada nesta validação.
+
+A pasta temporária foi removida. A conferência dos conteúdos confirmou a preservação de código,
+testes, CSV de exemplo, resultados, documentos e configurações originais durante a validação;
+os ambientes existentes também foram preservados. O único arquivo criado naquela tarefa foi
+requirements. Esta revisão posterior modifica somente os três documentos e mantém esse arquivo.
+As instruções de clonagem e preparo do README orientam futuras instalações; não representam uma
+clonagem ou nova instalação executada nesta atualização documental.
+
+**Marco deste registro:** dependências e validação concluídas em ambiente virtual novo neste
+Windows, sem comprovação de outro computador, sistema ou reinstalação do Python. A revisão final
+da documentação e a publicação da primeira versão do MVP no terminal permanecem pendentes.
+O projeto continua estimando somente IA, sem chamadas reais às APIs dos modelos.

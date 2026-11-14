@@ -94,24 +94,108 @@ nem substituir a falha por cotação fixa. Cancelar, usar Ctrl+C ou encerrar a e
 fluxo antes da exportação, com mensagem e código diferente de zero, preservando resultados
 anteriores. Importar o módulo não consulta a rede, não interage e não gera arquivos.
 
-## Como executar
+## Instalação e execução no Windows
 
-Pré-requisitos: Python convencional para Windows e Pandas disponíveis na `.venv-win` já preparada.
-Pandas é importado também ao usar as funções nos testes; `decimal`, `pathlib` e `unittest` pertencem
-à biblioteca padrão. A `.venv` anterior, baseada em MSYS2, permanece separada.
+O conjunto foi validado em **14/11/2026**, com **Python convencional 3.14.10 x64** e
+**Windows 11, build 26300**. A validação não abrange outras versões de Python, outros sistemas ou
+outro computador. É necessário ter o Python convencional instalado antes de criar o ambiente;
+o Python do MSYS2 não foi utilizado nessa validação.
 
-No PowerShell:
+### Obter os arquivos
+
+Usar uma cópia do projeto que contenha `calculadora.py`, `test_calculadora.py`,
+`dados/cenarios_exemplo.csv` e `requirements.txt`. A documentação acompanha esses arquivos.
+Nesta revisão, o `requirements.txt` recém-criado ainda está pendente de versionamento; uma cópia
+do remoto pode não incluí-lo até sua incorporação. A validação usou os arquivos locais atuais,
+incluindo esse arquivo, e não apenas o último commit.
+
+Para obter o repositório com Git, quando os arquivos necessários estiverem disponíveis nele:
 
 ```powershell
-Set-Location -LiteralPath 'D:\Natan\LiteArt Cost Analytics'
-& '.\.venv-win\Scripts\python.exe' -B -c "import pandas as pd; print(pd.__version__)"
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B calculadora.py
+git clone https://github.com/MrNemo31/Calculadora-LiteArt-Cost-Analytics.git LiteArt-Cost-Analytics
+Set-Location -LiteralPath '.\LiteArt-Cost-Analytics'
 ```
 
-Os comandos usam diretamente o interpretador do projeto, sem ativar o ambiente ou alterar o PATH.
-Não instalam nem atualizam pacotes. `-X utf8` mantém os acentos na saída e `-B` evita gerar bytecode.
-No VS Code, usar **Python: Select Interpreter** e selecionar
-`D:\Natan\LiteArt Cost Analytics\.venv-win\Scripts\python.exe`.
+Como alternativa, copiar os arquivos atuais para uma pasta própria e abrir o PowerShell nela.
+Não é necessário copiar `.venv`, `.venv-win`, `.git`, caches, credenciais ou resultados gerados.
+Os passos abaixo pressupõem a pasta do projeto aberta e a presença de `requirements.txt`.
+
+### Preparar o ambiente e executar
+
+Os comandos de criação destinam-se a uma pasta sem `.venv-win`. Preservar ambientes existentes;
+para repetir o preparo com isolamento, usar outra cópia do projeto ou um nome de ambiente novo.
+Informar o caminho completo do `python.exe` convencional quando solicitado. O primeiro comando de
+inspeção mostra versão, plataforma e localização para conferir essa escolha; a plataforma validada
+é `win-amd64`.
+
+```powershell
+$pythonBase = Read-Host 'Caminho completo do python.exe convencional (Python 3.14.10 x64)'
+& $pythonBase -X utf8 -B -c "import sys, sysconfig; print(sys.executable); print(sys.version); print(sysconfig.get_platform())"
+& $pythonBase -X utf8 -B -m venv .venv-win
+$pythonProjeto = (Resolve-Path -LiteralPath '.\.venv-win\Scripts\python.exe').Path
+& $pythonProjeto -X utf8 -B -m pip install -r requirements.txt
+& $pythonProjeto -X utf8 -B -m pip check
+& $pythonProjeto -X utf8 -B -m unittest -q
+& $pythonProjeto -X utf8 -B calculadora.py
+```
+
+`venv` cria um ambiente isolado; `python -m pip` instala com o interpretador explicitamente escolhido.
+`pip check` confere conflitos e dependências ausentes, mas não substitui os testes. Conferir o
+resultado de cada comando antes de continuar. Não é necessário ativar o ambiente, alterar PATH ou
+mudar a política de execução do PowerShell. `-X utf8` mantém os acentos na saída e `-B` evita bytecode.
+No VS Code, selecionar o executável desse ambiente em **Python: Select Interpreter**, sem exigir
+alterações automáticas de configuração. Os ambientes de desenvolvimento anteriores, `.venv`
+baseada em MSYS2 e `.venv-win` convencional, foram preservados durante a validação.
+
+### Dependências e versões fixadas
+
+[requirements.txt](requirements.txt) registra o conjunto externo já instalado e testado:
+
+| Pacote | Versão fixada | Relação com o projeto |
+| --- | --- | --- |
+| `pandas` | `3.1.0` | Direta: importado no código e nos testes para tabelas, CSV e comparação de DataFrames |
+| `numpy` | `2.5.4` | Indireta: suporte numérico exigido pelo Pandas |
+| `python-dateutil` | `4.0.0` | Indireta: tratamento de datas exigido pelo Pandas |
+| `tzdata` | `2026.6` | Indireta: dados de fusos horários exigidos nesse conjunto no Windows |
+
+As versões foram obtidas dos metadados da `.venv-win`, sem atualizar esse ambiente. Os testes usam
+`pandas.testing` e `unittest`, sem exigir pytest ou outras ferramentas opcionais. Módulos como
+`decimal`, `pathlib`, `urllib`, `json` e `unittest` já pertencem ao Python e não entram no arquivo.
+Pip também não é uma dependência da aplicação.
+
+Fixar versões diretas e indiretas reduz variações do conjunto instalado, mas o arquivo não é um
+lock completo nem garantia universal de reprodução. Ele não fixa o Python, o sistema, os artefatos
+com hashes ou sua disponibilidade futura. O alcance comprovado é o ambiente descrito acima.
+
+A instalação dos pacotes e a obtenção do projeto podem precisar de internet. A consulta automática
+do BCB também usa internet; após a instalação, cenários manuais ou CSV com cotação manual funcionam
+sem rede. A suíte simula o BCB e não depende da cotação do dia.
+
+### Evidências da validação em ambiente novo
+
+Em 14/11/2026, código, testes, CSV de exemplo e requirements foram copiados para uma pasta temporária
+exclusiva. Um ambiente novo foi criado com o interpretador base convencional, sem pacotes globais
+ou do usuário. A instalação por `pip install -r requirements.txt` usou wheels, sem compilação,
+e as quatro versões instaladas corresponderam ao arquivo. `pip check` não encontrou conflitos;
+os **188 métodos de teste em 17 classes passaram** nessa cópia.
+
+Foram conferidos o fluxo CSV e um cenário manual equivalente a 100 usuários, com taxa manual
+`Decimal("5.00")`, apresentação brasileira e os resultados didáticos da tabela abaixo. As execuções
+a partir de outra pasta localizaram os arquivos corretamente. Conexões e DNS foram bloqueados
+nessas conferências de execução; o modo manual funcionou mesmo sem o CSV disponível na cópia.
+
+As verificações pontuais também confirmaram nove colunas exportadas, acentos, substituição sem
+duplicar linhas e precisão além da segunda casa: `2.254320987160` foi recuperado do texto diretamente
+como Decimal com uma taxa manual de mais casas. Importar o módulo não iniciou interação, rede,
+leitura de CSV ou exportação nem modificou os resultados existentes.
+
+A primeira tentativa de instalação falhou por resolução de rede do PyPI; a repetição com acesso
+permitido concluiu a instalação. Isso foi uma limitação de rede, não uma falha do projeto ou
+necessidade de internet para executar o modo manual. A pasta temporária foi removida após conferir
+seu caminho. Arquivos e resultados originais e os dois ambientes de desenvolvimento foram preservados.
+Não foram acrescentados testes persistentes nessa validação.
+
+### Escolher os cenários e a cotação
 
 O menu oferece:
 
@@ -287,7 +371,8 @@ Firebase como alternativa em estudo; isso não implica contratação ou migraç�
 - 8 métodos para escolha, entrada e apresentação da cotação.
 - 24 métodos de integração dos cenários, cotação, tabelas, mensagens e exportação.
 
-A suíte completa passou nesta atualização. Alguns métodos usam `subTest`; suas combinações não
+A suíte completa passou na validação em ambiente novo de 14/11/2026. Alguns métodos usam
+`subTest`; suas combinações não
 são métodos adicionais. Os testes persistentes simulam `input()` com `unittest.mock.patch` e usam
 arquivos temporários nas integrações. Conferem erros e cancelamento sem sobrescrita, execução de
 outra pasta, ordem de múltiplos cenários, cenário único, ausência de chamadas à infraestrutura e ao
@@ -311,13 +396,14 @@ Para executar a suíte com o ambiente existente:
 
 ## Próximos passos
 
-A consulta BCB/SGS série 1 com alternativa manual está implementada e testada. Para fechar o MVP:
+A consulta BCB/SGS série 1, o registro de dependências e a validação em ambiente virtual novo estão
+concluídos no alcance descrito. Para fechar a primeira versão do MVP no terminal:
 
-1. Consolidar a documentação e registrar as dependências e instruções reproduzíveis de instalação.
-2. Validar instalação e execução em ambiente limpo, incluindo a suíte e os dois modos de cotação.
-3. Preparar e publicar a versão do MVP no terminal após essa validação.
+1. Concluir a revisão final da documentação e sua coerência com os arquivos que serão publicados.
+2. Preparar a identificação e a publicação da versão, incluindo os arquivos necessários à instalação.
 
-A validação em ambiente limpo e a publicação ainda não estão comprovadas como concluídas.
+A revisão final e a publicação permanecem pendentes. Esta atualização não cria commit, tag ou release
+nem realiza push.
 
 Catálogo e seleção de modelos, comparação entre provedores, gráficos com Plotly, dashboard com
 Streamlit, retomada de infraestrutura e orçamento e análises avançadas ficam para depois.
