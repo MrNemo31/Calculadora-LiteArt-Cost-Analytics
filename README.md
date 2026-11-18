@@ -395,25 +395,41 @@ Para executar a suíte com o ambiente existente:
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest -q
 ```
 
+## Estudo de caso planejado
+
+Está planejado um estudo de caso para o **Google Data Analytics Professional Certificate**, usando
+esta calculadora como ferramenta para analisar estimativas de custos de IA, sem dados reais de
+utilização dos estudantes. O público será o responsável pelo planejamento do LiteArt, para apoiar
+o orçamento de IA e identificar hipóteses que precisam ser medidas antes do lançamento.
+
+**Pergunta principal:** como a quantidade de usuários, a política de feedback nos acertos e o
+consumo de tokens afetam o custo mensal estimado de IA do LiteArt?
+
+O desenho reúne **nove cenários principais**, cruzando escalas de usuários e políticas de feedback,
+e **quatro variações de sensibilidade**, que alteram uma hipótese de tokens por vez em relação a
+C05. Matriz, premissas, dados necessários, indicadores, etapas e critérios de conclusão estão em
+[ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md), sem duplicação dos detalhes neste README.
+
+A **v0.1.0 permanece o MVP publicado** e será a referência de cálculo; o planejamento do estudo não
+representa uma nova versão da calculadora. A análise, os gráficos e o relatório ainda não foram
+executados. O estudo não está concluído, aprovado pelo curso ou validado pelo Google.
+
 ## Próximos passos
 
 A consulta BCB/SGS série 1, o registro de dependências e a validação em ambiente virtual novo estão
 concluídos no alcance descrito.
 
 A revisão técnica final de 14/11/2026 conferiu a coerência entre código, requisitos, exemplos e
-instruções, com os 188 testes aprovados. As [notas propostas para v0.1.0](RELEASE_NOTES.md) estão
-preparadas para revisão, sem tag ou release publicada. A distribuição é do programa de terminal;
+instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de terminal; as
+[notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
-Antes de publicar a primeira versão:
+O próximo passo do estudo é revisar e confirmar a matriz. Depois, revalidar o modelo, suas tarifas
+e condições e definir a cotação fixa. Somente então preparar os dados e executar a análise,
+preservando a tag v0.1.0 como referência histórica.
 
-1. Revisar e aprovar os materiais finais da versão.
-2. Incorporar os ajustes em um commit final e enviá-lo ao GitHub.
-3. Criar a tag e a release sobre esse commit, conforme as orientações das notas.
-
-Essas ações de publicação continuam pendentes. Nenhum commit, tag, release ou push foi realizado
-nesta preparação. Ambientes e resultados gerados permanecem fora do versionamento: `.venv/` e
-`resultados/` pelas regras da raiz, e `.venv-win/` pelo `.gitignore` criado dentro desse ambiente.
+Ambientes e resultados gerados permanecem fora do versionamento: `.venv/` e `resultados/` pelas
+regras da raiz, e `.venv-win/` pelo `.gitignore` criado dentro desse ambiente.
 
 Catálogo e seleção de modelos, comparação entre provedores, gráficos com Plotly, dashboard com
 Streamlit, retomada de infraestrutura e orçamento e análises avançadas ficam para depois.

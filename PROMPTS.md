@@ -1528,3 +1528,57 @@ são verificações pontuais, não novos testes automatizados.
 **Marco deste registro:** licença MIT concluída, com decisão registrada em 14/11/2026. O MVP continua
 focado em custos de IA no terminal, e a primeira versão permanece preparada para publicação futura.
 Nenhum commit, push, tag ou release foi realizado nesta tarefa.
+
+## 36. Planejamento do estudo de caso e divulgação no README
+
+**Data:** 18/11/2026.
+
+**Etapa:** planejamento do estudo de caso do Google Data Analytics Professional Certificate.
+
+**Objetivo dos pedidos:** definir pergunta, cenários, dados e etapas de uma análise de estimativas
+com a calculadora, mantendo clara a diferença entre planejamento e trabalho executado.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar ESTUDO_DE_CASO.md com contexto, premissas, 13 cenários, proveniência, indicadores, etapas,
+limitações e critérios de conclusão. Depois, apresentar brevemente esse planejamento no README,
+com link relativo, e consolidar o registro dos pedidos, sem executar análise ou alterar o MVP.
+
+**Participação e aprendizado:** o planejamento distinguiu hipóteses, tarifas pesquisadas, câmbio e
+resultados derivados; definiu unidade de análise, referências e denominadores e separou comparação
+de políticas da sensibilidade de tokens. Nenhum resultado foi produzido para o estudo.
+
+**Decisões registradas:**
+
+- Usar a calculadora v0.1.0 publicada como ferramenta e referência histórica, sem modificar sua tag
+  ou apresentar o estudo como nova versão do MVP.
+- Perguntar como usuários, política de feedback nos acertos e consumo de tokens afetam o custo
+  mensal estimado de IA, sem dados reais de utilização dos estudantes.
+- Planejar C01 a C09 cruzando 100, 500 e 1000 usuários com proporções de acertos com feedback
+  0, 0.25 e 1, mantendo as demais hipóteses constantes.
+- Usar C05 como referência de sensibilidade e variar somente uma entrada de tokens em C10 a C13.
+- Separar tarifas e condições a revalidar, câmbio fixo a definir, hipóteses e resultados futuros,
+  sem tratar preços históricos como atuais nem inventar fontes, datas de coleta ou custos.
+- Organizar as etapas Perguntar, Preparar, Processar, Analisar, Compartilhar e Agir. Planejar dois
+  gráficos e relatório, ainda não executados, e registrar apoio de IA conforme a atividade.
+- Excluir infraestrutura, receitas, comparação de modelos e dashboard. Preservar Decimal nos
+  cálculos monetários e arredondar somente a apresentação, quando a análise for realizada.
+- Não tratar cenários como amostra estatística nem custo menor como comprovação de qualidade
+  pedagógica equivalente, conclusão do estudo, aprovação do curso ou validação pelo Google.
+
+**Contribuição para o projeto:** ESTUDO_DE_CASO.md foi criado na etapa documental anterior.
+A conferência pontual confirmou 13 combinações distintas: nove principais e quatro de sensibilidade,
+com C05 correto e uma única entrada de tokens alterada em cada variação. A verificação de Markdown
+passou nessa criação, sem executar análise ou testes do MVP.
+
+Nesta atualização, somente README e este registro foram alterados. O README apresenta pergunta,
+desenho e situação do estudo, com link relativo para o planejamento, sem reproduzir a matriz.
+As descrições antigas de preparação da primeira release foram ajustadas à v0.1.0 publicada informada
+no pedido, preservando o escopo de IA no terminal. ESTUDO_DE_CASO.md e os demais arquivos foram
+preservados, assim como os registros históricos anteriores. As verificações são documentais e
+pontuais; nenhum teste automatizado persistente foi acrescentado ou repetido.
+
+**Marco deste registro:** planejamento documentado, sem análise, gráficos ou relatório executados.
+Os próximos passos são revisar e confirmar a matriz, revalidar modelo, tarifas e condições e definir
+a cotação fixa; somente depois preparar os dados e executar a análise. Nenhum commit ou push faz
+parte desta atualização.
