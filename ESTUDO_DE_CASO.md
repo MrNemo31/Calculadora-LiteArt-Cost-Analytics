@@ -34,8 +34,9 @@ custo mensal estimado de IA do LiteArt?
 
 ## 3. Escopo e premissas
 
-- Utilizar um único modelo de referência. O MVP registra GPT-6 Luna (`gpt-6-luna`); identificador,
-  disponibilidade, tarifas e condições deverão ser revalidados antes de executar a análise.
+- Utilizar um único modelo de referência: GPT-6 Luna (`gpt-6-luna`), OpenAI, API direta,
+  Standard para texto. Identificador, tarifas e condições foram conferidos documentalmente em
+  2026-11-18, conforme a seção 5; isso não comprova acesso pela conta ou execução real do modelo.
 - Gerar feedback em todas as respostas erradas.
 - Usar a mesma estimativa de tokens por feedback para acertos e erros.
 - Considerar uma chamada por feedback, sem novas tentativas ou geração duplicada.
@@ -88,40 +89,124 @@ C10 a C13 alteram uma entrada por vez em relação a C05. Usuários, respostas, 
 política permanecem iguais. Os valores de tokens não são médias medidas, limites garantidos ou
 evidência de qualidade equivalente entre as variações.
 
-## 5. Dados necessários e proveniência
+## 5. Dados necessários, condições fixas e proveniência
 
-Antes da execução, organizar quatro tipos de informação, sem misturá-los:
+### 5.1. Revalidação documental — 2026-11-18
 
-- **Tarifas pesquisadas:** provedor, modelo e identificador confirmado, disponibilidade, preços de
-  entrada e saída, moeda, unidade de cobrança, condições aplicáveis, URL oficial e data da consulta.
-  Revalidação e valores a adotar: **pendentes**. As tarifas registradas na release são históricas
-  e não serão consideradas automaticamente atuais.
-- **Câmbio:** taxa em BRL por USD, fonte, data de referência e momento da consulta. Fonte e valor a
-  fixar para este estudo: **pendentes de definição e registro**. Se a fonte escolhida for BCB/SGS
-  série 1, registrar a data da observação separadamente do momento do acesso; não tratar a taxa
-  diária como câmbio em tempo real ou como valor efetivo do pagamento.
-- **Hipóteses:** campos e unidades da matriz, justificativas dos níveis escolhidos e natureza
-  didática. A matriz está proposta; sua confirmação e o registro das justificativas são pendentes.
-  Os valores servem para explorar alternativas, sem terem sido coletados de estudantes.
-- **Resultados derivados:** feedbacks, tokens e custos calculados, com identificação do cenário,
-  versão da ferramenta e vínculo às tarifas e à cotação utilizadas. Ainda não foram produzidos
-  para este estudo.
+**Data desta atualização documental:** 2026-11-18. **Data da pesquisa de modelo e tarifas:**
+2026-11-18. A revalidação documental e a definição das condições fixas estão concluídas nos pontos
+confirmados abaixo. Preparação dos dados, execução dos cenários, análise e conclusões continuam
+pendentes; não houve chamadas pagas, solicitação de credenciais ou teste de acesso à conta.
 
-A cotação será fixada para o estudo e reutilizada em todas as execuções, permitindo reproduzir os
-resultados sem misturar variação cambial com mudanças de escala, política ou tokens. A opção manual
-do MVP permitirá reaplicar a taxa documentada, sem consultar uma taxa diferente para cada cenário.
+| Condição fixa do estudo | Valor ou definição | Moeda, unidade ou recorte |
+| --- | --- | --- |
+| Provedor e acesso considerados | OpenAI, API direta | Sem intermediação de outro provedor |
+| Modelo de referência | GPT-6 Luna | Identificador `gpt-6-luna` |
+| Modalidade | Standard, texto | Contexto curto; entrada sem cache |
+| Tarifa de entrada | `Decimal("0.10")` | USD por milhão de tokens de entrada sem cache |
+| Tarifa de saída faturável | `Decimal("0.50")` | USD por milhão de tokens de saída faturáveis |
+| Data da pesquisa de tarifas | 2026-11-18 | Conferência documental nas fontes oficiais |
+| Cotação fixa | `Decimal("5.8102")` | BRL por USD |
+| Fonte cambial | Banco Central do Brasil, SGS série 1 | Dólar americano de venda, diário |
+| Data de referência cambial | 2026-11-18 | Data da observação recebida do BCB |
+| Data da consulta cambial | 2026-11-18 | Data do acesso; horário não registrado |
 
-Datas da pesquisa, data de referência cambial e momento de consulta têm significados diferentes.
-Não preencher informações ainda não pesquisadas com datas presumidas. Nenhum preço, fonte nova,
-data de coleta ou resultado foi pesquisado ou inventado nesta etapa documental.
+As condições propostas foram mantidas: não foi identificada divergência material no identificador,
+nas tarifas Standard de contexto curto ou na observação cambial conferida. Esses registros são
+válidos como recorte histórico desta pesquisa, sem afirmar preços ou disponibilidade permanentes.
 
-Na preparação futura, os 13 cenários deverão ser organizados em uma entrada própria do estudo,
-preservando o CSV de exemplo do MVP. O identificador C01 a C13 deverá acompanhar cada nome e cada
-resultado, permitindo associar entradas e saídas. Não criar ou alterar arquivos de dados nesta etapa.
+### 5.2. Fontes oficiais conferidas e alcance da confirmação
+
+- **Modelo:** [página do GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna).
+  Confirma o identificador, texto como entrada e saída, unidade por milhão, tarifas e condições
+  de contexto e processamento. Sua presença no catálogo é disponibilidade documentada, não
+  comprovação de habilitação, limites, saldo ou acesso na conta responsável pelo estudo.
+- **Tarifas:** [página geral de preços](https://developers.openai.com/api/docs/pricing), conferida
+  também em sua [versão Markdown](https://developers.openai.com/api/docs/pricing.md).
+  A seção `Standard pricing data`, nas colunas de entrada e saída de contexto curto, registra
+  os valores adotados. A página reúne várias tabelas: valores de Batch, Flex, Fast, contexto longo
+  ou cache não foram interpretados como tarifas Standard de contexto curto.
+- **Ciclo de vida:** [depreciações](https://developers.openai.com/api/docs/deprecations).
+  Na consulta não foi identificado anúncio de retirada do próprio `gpt-6-luna` como modelo afetado;
+  ele também aparece como substituto recomendado de outros modelos. Isso não é teste de acesso
+  nem garantia de disponibilidade futura.
+- **Tokens faturáveis:** [guia de raciocínio](https://developers.openai.com/api/docs/guides/reasoning).
+  A documentação informa que tokens internos de raciocínio podem ser cobrados como saída, mesmo
+  sem aparecer no texto entregue. Sua contabilização deverá seguir o total faturável, sem duplicação.
+- **Definição cambial:** [catálogo BCB/SGS série 1](https://dadosabertos.bcb.gov.br/dataset/1-taxa-de-cambio---livre---dolar-americano-venda---diario).
+  Identifica dólar americano de venda diário; a unidade usada no estudo é reais por dólar.
+- **Observação cambial:** [endpoint últimos/1 em JSON](https://api.bcb.gov.br/dados/serie/bcdata.sgs.1/dados/ultimos/1?formato=json).
+  A resposta observada em 2026-11-18 foi fornecida para o registro e coincidiu com a consulta
+  desta atualização. A evidência preservada é:
+
+```json
+[{"data":"18/11/2026","valor":"5.8102"}]
+```
+
+O endpoint é dinâmico. Uma consulta posterior pode retornar outra data ou outro valor e **não deve
+atualizar automaticamente a cotação fixa escolhida para este estudo**. A data da pesquisa de
+preços, a data desta atualização, a data da observação cambial e a data de acesso são campos
+conceitualmente diferentes, embora coincidam aqui em 2026-11-18. Nenhum horário foi presumido.
+A cotação é referência de simulação, não câmbio em tempo real nem garantia do valor de um pagamento.
+
+### 5.3. Condições e exclusões do cálculo planejado
+
+Manter um modelo permite isolar os efeitos de usuários, política de feedback e tokens. As mesmas
+tarifas e `Decimal("5.8102")` BRL por USD ficarão constantes nos 13 cenários, inclusive na análise
+de sensibilidade. A projeção anual, se apresentada, será o mensal multiplicado por 12 sob essas
+mesmas condições, sem simular crescimento, alterações tarifárias ou variação cambial.
+
+A hipótese é de **requisições curtas, dentro da faixa padrão de preço**: até 272000 tokens de
+entrada por requisição completa, conforme o limite de contexto curto indicado para a cobrança.
+Acima desse patamar, a página do modelo descreve outras condições de preço; elas estão fora deste
+recorte. A entrada por chamada deve incluir instruções, conteúdo e demais componentes enviados.
+**Tokens por chamada não são os totais mensais**: somar consumo de várias requisições ao longo do
+mês não transforma cada requisição curta em uma requisição de contexto longo.
+
+As entradas de 250, 500 ou 1000 tokens por feedback são orçamentos didáticos da matriz, não
+contagens medidas de prompts reais ou garantias de enquadramento de uma futura requisição.
+Os tokens de saída de 150, 300 ou 600 representam **todo o consumo de saída faturável**, incluindo
+componentes internos não visíveis quando existirem. Não representam apenas o texto visível e não
+deverão receber uma segunda soma dos mesmos tokens de raciocínio já incluídos nesse total.
+
+Nenhuma configuração de modo ou esforço de raciocínio foi testada ou atribuída aos cenários.
+Standard identifica o recorte de processamento e preços; não comprova uma configuração de
+raciocínio adequada, geração dentro do orçamento de tokens ou qualidade pedagógica equivalente.
+Uma futura medição real deverá registrar configuração e consumo faturável, antes de substituir
+as hipóteses. A presença no catálogo não elimina essa necessidade.
+
+Ficam fora do cálculo:
+
+- Descontos por entrada em cache e operações de leitura, gravação ou manutenção de cache.
+- Batch, Flex, Fast e outros modos acelerados ou modalidades com preços diferentes.
+- Descontos de processamento em segundo plano e adicionais de processamento regional.
+- Ferramentas, serviços adicionais, tributos e tarifas ou adicionais do meio de pagamento.
+- Infraestrutura e demais despesas que não sejam os tokens de IA definidos para o estudo.
+
+Esse recorte não é uma estimativa de fatura completa. A cotação didática de **R$ 5,00** permanece
+nos exemplos históricos e testes do MVP; **não é a cotação deste estudo**. Não serão alterados os
+valores da release ou sua tag. Nas futuras execuções, a opção manual permitirá reaplicar 5.8102,
+sem consultar uma nova taxa para cada cenário.
+
+### 5.4. Registros a preparar antes da análise
+
+Manter separados, com vínculo pelos identificadores dos cenários:
+
+- **Tarifas pesquisadas:** condições e referências confirmadas acima, com provedor, modelo, moeda,
+  unidade, modalidade e data. A pesquisa atual não substitui as datas das pesquisas históricas.
+- **Câmbio:** valor fixo, fonte, data da observação e data da consulta acima, sem horário inventado.
+- **Hipóteses:** os 13 cenários já revisados, suas unidades, justificativas e natureza didática.
+  A revisão de coerência da matriz não é validação empírica do comportamento dos estudantes.
+- **Resultados derivados:** consumos e custos a calcular posteriormente, identificados por cenário
+  e versão da ferramenta. Ainda não foram produzidos para este estudo.
+
+Na próxima etapa, preparar uma entrada própria com os 13 cenários, preservando o CSV de exemplo
+do MVP, e um registro separado das condições fixas. Não criar ou alterar arquivos de dados nesta
+atualização. Os identificadores C01 a C13 deverão acompanhar cada nome e resultado.
 
 O CSV de resultados da v0.1.0 contém nove colunas e não exporta modelo, tarifas, cotação, origem ou
-data como metadados. Esses registros deverão acompanhar os resultados em um artefato do estudo,
-sem presumir que já estão armazenados pelo programa ou modificar o formato histórico da release.
+data como metadados. Essas informações deverão acompanhar os resultados no registro do estudo,
+sem presumir que já são armazenadas pelo programa ou modificar o formato histórico da release.
 
 ## 6. Unidade de análise e indicadores
 
@@ -186,8 +271,9 @@ aplicável**, com o motivo registrado. Não substituir esse caso por zero ou uma
 ## 7. Etapas da análise planejada
 
 1. **Perguntar:** confirmar pergunta, decisão, público e limites; revisar a matriz antes de iniciar.
-2. **Preparar:** revalidar modelo e tarifas, definir e documentar a cotação fixa e organizar as
-   hipóteses e suas justificativas, sem tratar registros históricos como pesquisa atual.
+2. **Preparar:** organizar os dados dos cenários, suas justificativas e os registros das condições
+   fixas. A revalidação documental de modelo, tarifas e câmbio está registrada na seção 5; ela não
+   equivale a testes da API ou medição real de consumo.
 3. **Processar:** validar estrutura, campos, tipos, unidades, números finitos e intervalos; conferir
    usuários inteiros, duplicidades, identificadores e cobertura das 13 combinações. As entradas
    monetárias deverão ser convertidas de texto diretamente para Decimal, sem passagem por float.
@@ -248,10 +334,17 @@ o estudo tenha sido aprovado pelo curso.
 
 ## 10. Próximo passo
 
-1. Revisar e confirmar a matriz de 13 cenários e suas justificativas.
-2. Depois, revalidar o modelo, disponibilidade, tarifas e condições e definir a cotação fixa.
-3. Somente então preparar os dados e executar a análise e a conferência manual planejada.
+1. Preparar os dados dos 13 cenários revisados e um registro das condições fixas da seção 5,
+   incluindo fontes, datas, unidades e justificativas, sem alterar o CSV de exemplo ou o MVP.
+2. Validar estrutura, identificadores e cobertura da matriz nos dados preparados, preservando
+   Decimal nas condições e nos futuros cálculos monetários.
+3. Somente então executar a análise e a conferência manual previstas, registrando divergências,
+   antes de produzir gráficos, relatório ou recomendações.
 4. Manter a v0.1.0 publicada como referência histórica, sem mover, substituir ou modificar sua tag.
 
-Esta preparação não executa a análise, não pesquisa novos preços, não gera CSV ou gráficos e não
-altera o código do MVP. As próximas etapas dependerão das definições e verificações acima.
+**Concluído nesta etapa:** revalidação documental do modelo e das tarifas propostas e definição
+da cotação histórica fixa, nos limites confirmados na seção 5. Acesso na conta, configuração de
+raciocínio, consumo real e qualidade pedagógica não foram comprovados.
+
+Esta atualização não prepara CSVs, não executa os 13 cenários, não produz resultados ou gráficos
+e não altera o código do MVP. As próximas atividades continuam sendo etapas próprias do estudo.

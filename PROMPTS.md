@@ -1582,3 +1582,68 @@ pontuais; nenhum teste automatizado persistente foi acrescentado ou repetido.
 Os próximos passos são revisar e confirmar a matriz, revalidar modelo, tarifas e condições e definir
 a cotação fixa; somente depois preparar os dados e executar a análise. Nenhum commit ou push faz
 parte desta atualização.
+
+## 37. Condições fixas de modelo, tarifas e câmbio do estudo de caso
+
+**Data:** 18/11/2026.
+
+**Etapa:** registro da revalidação documental e definição das condições fixas, antes da análise.
+
+**Objetivo dos pedidos:** documentar modelo, tarifas e cotação constantes para comparar os 13
+cenários de forma reproduzível, sem misturar mudanças de preço ou câmbio com as hipóteses variadas.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Conferir as fontes oficiais e registrar em ESTUDO_DE_CASO.md as condições propostas, distinguindo
+Standard de outras modalidades, disponibilidade no catálogo de acesso à conta e cotação histórica
+de uma consulta dinâmica. Depois, atualizar somente README e este registro com as condições já
+documentadas, sem nova pesquisa de preços ou câmbio, geração de CSVs ou execução dos cenários.
+
+**Participação e aprendizado:** as explicações distinguiram pesquisa documental, acesso à API e
+medição real; tokens por requisição e totais mensais; dados de entrada, custos em USD e conversão
+para BRL. A escolha de um modelo e condições constantes permite isolar os efeitos das hipóteses.
+
+**Decisões registradas:**
+
+- Fixar OpenAI, API direta, GPT-6 Luna (`gpt-6-luna`), Standard para texto e contexto curto.
+- Registrar entrada sem cache de `Decimal("0.10")` USD por milhão de tokens e saída faturável de
+  `Decimal("0.50")` USD por milhão. Data da pesquisa: **2026-11-18**.
+- Fixar `Decimal("5.8102")` BRL por USD, Banco Central, SGS série 1, dólar americano de venda diário.
+  Data da observação: **2026-11-18**; data da consulta: **2026-11-18**. Nenhum horário foi inventado.
+- Preservar a evidência cambial observada: data 18/11/2026 e valor textual `5.8102`.
+  O endpoint últimos/1 é dinâmico; consultas futuras não atualizarão automaticamente a taxa do estudo.
+- Manter os mesmos preços e a mesma cotação nos 13 cenários, inclusive na sensibilidade de tokens.
+  Na execução futura, reaplicar a taxa pela opção manual, sem mudar o menu ou os cálculos do MVP.
+- Preservar R$ 5,00 como cotação didática dos exemplos históricos do MVP, distinta da taxa do estudo.
+- Considerar todo o consumo de saída faturável, incluindo componentes não visíveis quando existirem,
+  sem dupla contagem. Os tokens continuam sendo hipóteses didáticas, não medições ou garantias.
+- Manter os limites documentados: requisições curtas; sem cache, Batch/Flex, modos acelerados,
+  adicionais regionais, ferramentas, tributos ou adicionais do meio de pagamento. O anual, se
+  apresentado, pressupõe 12 meses sob condições constantes.
+
+**Contribuição para o projeto:** ESTUDO_DE_CASO.md recebeu, na etapa anterior, o registro das
+condições e das fontes oficiais conferidas em 2026-11-18: página do modelo, preços e sua tabela
+Standard de contexto curto, depreciações, guia de raciocínio, catálogo BCB e endpoint cambial.
+Não foi identificada divergência material nas condições propostas. A presença no catálogo foi
+tratada como disponibilidade documentada, sem comprovação de habilitação, saldo, limites ou acesso
+pela conta responsável. Não houve chamada paga, solicitação de credenciais ou teste do modelo.
+
+A consulta pública ao BCB naquela etapa coincidiu com a evidência informada para 18/11/2026.
+Isso é uma observação cambial de referência, não acesso às APIs dos modelos nem teste automatizado.
+As tarifas e o câmbio são históricos e fixos para este recorte, sem validade permanente presumida.
+A revalidação documental não comprova qualidade pedagógica, configuração de raciocínio testada ou
+consumo real de tokens.
+
+Nesta atualização, somente README e este registro foram alterados. Os valores e as datas foram
+conferidos contra ESTUDO_DE_CASO.md, sem nova consulta de preços ou câmbio. O README resume a matriz
+revisada e as condições, mantém o link relativo e distingue o estudo do MVP publicado v0.1.0,
+que continua oferecendo consulta ao BCB ou cotação manual. O histórico anterior foi preservado.
+As conferências foram documentais e pontuais; os testes do MVP não foram repetidos e nenhum teste
+persistente foi acrescentado. As alterações pendentes do estudo foram preservadas.
+
+**Marco deste registro:** matriz revisada e condições fixas documentadas. Preparação dos dados e
+resultados dos 13 cenários, análise, gráficos, relatório e recomendações continuam pendentes.
+O próximo passo será preparar os dados dos cenários e os registros das condições fixas; validar
+estrutura, identificadores e cobertura antes de executar a análise e a conferência manual.
+Nenhum código, CSV, dependência ou configuração foi alterado; a tag v0.1.0 permanece intacta.
+Não houve commit ou push.

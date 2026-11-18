@@ -405,14 +405,35 @@ o orçamento de IA e identificar hipóteses que precisam ser medidas antes do la
 **Pergunta principal:** como a quantidade de usuários, a política de feedback nos acertos e o
 consumo de tokens afetam o custo mensal estimado de IA do LiteArt?
 
-O desenho reúne **nove cenários principais**, cruzando escalas de usuários e políticas de feedback,
-e **quatro variações de sensibilidade**, que alteram uma hipótese de tokens por vez em relação a
-C05. Matriz, premissas, dados necessários, indicadores, etapas e critérios de conclusão estão em
-[ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md), sem duplicação dos detalhes neste README.
+A matriz foi revisada: **nove cenários principais** cruzam escalas de usuários e políticas de
+feedback, e **quatro variações de sensibilidade** alteram uma hipótese de tokens por vez em relação
+a C05. As condições fixas de cálculo foram documentadas em **2026-11-18**:
 
-A **v0.1.0 permanece o MVP publicado** e será a referência de cálculo; o planejamento do estudo não
-representa uma nova versão da calculadora. A análise, os gráficos e o relatório ainda não foram
-executados. O estudo não está concluído, aprovado pelo curso ou validado pelo Google.
+- **Modelo:** OpenAI, API direta, GPT-6 Luna (`gpt-6-luna`), Standard para texto, contexto curto.
+- **Tarifas:** entrada sem cache de `Decimal("0.10")` USD por milhão de tokens e saída faturável de
+  `Decimal("0.50")` USD por milhão. Data da pesquisa documental: **2026-11-18**.
+- **Cotação fixa:** `Decimal("5.8102")` BRL por USD, Banco Central, SGS série 1, dólar americano de
+  venda diário. Data da observação cambial: **2026-11-18**; data da consulta: **2026-11-18**, sem
+  horário registrado.
+
+Essas tarifas e a cotação serão mantidas nos 13 cenários para permitir comparações reproduzíveis.
+São referências históricas dessa pesquisa, sem afirmar preços, câmbio ou disponibilidade
+permanentemente atuais. As fontes, modalidades, exclusões e evidência cambial estão em
+[ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md), junto da matriz, indicadores e etapas.
+
+O MVP continua permitindo consultar o BCB ou informar uma taxa manual. Para este estudo, a opção
+manual permitirá reaplicar **5.8102**, sem atualizar o câmbio automaticamente durante a análise.
+A cotação didática de R$ 5,00 dos exemplos e testes do MVP permanece histórica e não será usada
+como taxa deste estudo. Essa definição documental não modifica o funcionamento da calculadora.
+
+A definição documental está concluída, mas **os dados e os resultados dos 13 cenários ainda não
+foram produzidos**. A análise, os gráficos e o relatório continuam pendentes. A pesquisa confirma
+condições documentadas, sem comprovar acesso pela conta da API, consumo real de tokens, configuração
+de raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado
+pelo curso ou validado pelo Google.
+
+A **v0.1.0 permanece o MVP publicado** e será a referência de cálculo. O planejamento do estudo não
+representa uma nova versão da calculadora, e sua tag será preservada.
 
 ## Próximos passos
 
@@ -424,9 +445,10 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 [notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
-O próximo passo do estudo é revisar e confirmar a matriz. Depois, revalidar o modelo, suas tarifas
-e condições e definir a cotação fixa. Somente então preparar os dados e executar a análise,
-preservando a tag v0.1.0 como referência histórica.
+O próximo passo do estudo é preparar os dados dos 13 cenários e os registros das condições fixas,
+incluindo fontes, datas, unidades e justificativas. Depois, validar estrutura, identificadores e
+cobertura da matriz antes de executar a análise e a conferência manual previstas. A tag v0.1.0
+permanece preservada como referência histórica.
 
 Ambientes e resultados gerados permanecem fora do versionamento: `.venv/` e `resultados/` pelas
 regras da raiz, e `.venv-win/` pelo `.gitignore` criado dentro desse ambiente.
