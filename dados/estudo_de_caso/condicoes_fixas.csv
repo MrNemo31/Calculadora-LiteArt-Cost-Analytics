@@ -1,0 +1,2 @@
+provedor,modelo,modalidade,preco_entrada_por_milhao_usd,preco_saida_por_milhao_usd,brl_por_usd,fonte_modelo,fonte_precos,data_consulta_precos,fonte_cambio,data_referencia_cambio,data_consulta_cambio
+OpenAI,gpt-6-luna,Standard,0.10,0.50,5.8102,https://developers.openai.com/api/docs/models/gpt-6-luna,https://developers.openai.com/api/docs/pricing,2026-11-18,https://dadosabertos.bcb.gov.br/dataset/1-taxa-de-cambio---livre---dolar-americano-venda---diario,2026-11-18,2026-11-18

@@ -1,0 +1,14 @@
+id_cenario,cenario,usuarios_ativos,respostas_por_usuario,taxa_acerto,proporcao_acertos_com_feedback,tokens_entrada,tokens_saida
+C01,100 usuários - feedback somente nos erros,100,40,0.60,0,500,300
+C02,100 usuários - erros e 25 por cento dos acertos,100,40,0.60,0.25,500,300
+C03,100 usuários - feedback em todas as respostas,100,40,0.60,1,500,300
+C04,500 usuários - feedback somente nos erros,500,40,0.60,0,500,300
+C05,500 usuários - erros e 25 por cento dos acertos - referência,500,40,0.60,0.25,500,300
+C06,500 usuários - feedback em todas as respostas,500,40,0.60,1,500,300
+C07,1000 usuários - feedback somente nos erros,1000,40,0.60,0,500,300
+C08,1000 usuários - erros e 25 por cento dos acertos,1000,40,0.60,0.25,500,300
+C09,1000 usuários - feedback em todas as respostas,1000,40,0.60,1,500,300
+C10,500 usuários - sensibilidade de entrada com 250 tokens,500,40,0.60,0.25,250,300
+C11,500 usuários - sensibilidade de entrada com 1000 tokens,500,40,0.60,0.25,1000,300
+C12,500 usuários - sensibilidade de saída com 150 tokens,500,40,0.60,0.25,500,150
+C13,500 usuários - sensibilidade de saída com 600 tokens,500,40,0.60,0.25,500,600

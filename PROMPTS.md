@@ -1647,3 +1647,136 @@ O próximo passo será preparar os dados dos cenários e os registros das condi�
 estrutura, identificadores e cobertura antes de executar a análise e a conferência manual.
 Nenhum código, CSV, dependência ou configuração foi alterado; a tag v0.1.0 permanece intacta.
 Não houve commit ou push.
+
+## 38. Preparação dos CSVs de entrada do estudo de caso
+
+**Data:** 18/11/2026.
+
+**Etapa:** preparação e conferência pontual dos dados, antes da validação de leitura e da análise.
+
+**Objetivo dos pedidos:** transformar a matriz revisada e as condições fixas em arquivos de entrada
+separados, preservando o funcionamento do MVP e as referências históricas do estudo.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar dados/estudo_de_caso/cenarios.csv e condicoes_fixas.csv com os campos e valores definidos,
+conferir estrutura e conteúdo e atualizar somente ESTUDO_DE_CASO.md naquela etapa. Depois,
+registrar a preparação no README e neste histórico, sem alterar os CSVs, executar cenários,
+consultar novos preços ou câmbio, mudar o MVP ou repetir os testes de código.
+
+**Participação e aprendizado:** as explicações distinguiram hipóteses dos cenários, condições
+pesquisadas compartilhadas e resultados calculados. Também esclareceram que CSV armazena texto,
+que os campos financeiros devem ser convertidos diretamente para Decimal e que uma coluna
+adicional exige preparação de leitura sem modificar o importador da versão publicada.
+
+**Decisões registradas:**
+
+- Criar `dados/estudo_de_caso/cenarios.csv` com oito colunas e 13 registros, ordenados de C01 a C13,
+  incluindo `id_cenario`, nomes descritivos únicos e as seis hipóteses da matriz revisada.
+- Criar `dados/estudo_de_caso/condicoes_fixas.csv` com 12 colunas e uma linha de modelo, modalidade,
+  tarifas, câmbio, fontes e datas, aplicável aos 13 cenários.
+- Manter OpenAI, `gpt-6-luna`, Standard, entrada `0.10` e saída `0.50` USD por milhão de tokens e
+  câmbio fixo `5.8102` BRL por USD. Pesquisa, referência e consulta cambial continuam em 2026-11-18.
+- Usar UTF-8 sem BOM, vírgula, ponto decimal, cabeçalho e ausência de índice; não incluir símbolos,
+  sinais de porcentagem ou separadores de milhares nas representações numéricas.
+- Registrar em `fonte_cambio` o catálogo oficial BCB/SGS série 1, mantendo no estudo a evidência
+  histórica do endpoint dinâmico. Não atribuir horário ou atualizar a cotação automaticamente.
+- Distinguir os CSVs do estudo da entrada `dados/cenarios_exemplo.csv` e da saída
+  `resultados/cenarios.csv` do MVP. Nenhum dos arquivos do estudo é lido automaticamente pelo menu.
+- Explicar que `id_cenario` é adicional às sete colunas aceitas pelo importador atual, que rejeita
+  colunas inesperadas. Não apresentar o CSV de cenários do estudo como diretamente compatível.
+- Preservar todos os identificadores na futura leitura e manter preços e câmbio como texto até
+  convertê-los diretamente para Decimal, sem float intermediário.
+
+**Contribuição para o projeto:** os dois CSVs foram criados e ESTUDO_DE_CASO.md foi atualizado na
+etapa anterior. A conferência pontual na `.venv-win` confirmou cabeçalhos e ordem, 13 registros de
+cenários e uma linha de condições, UTF-8, acentos, campos obrigatórios e ausência de índice.
+Confirmou 13 identificadores e nomes únicos, 13 combinações distintas, cobertura das nove
+combinações principais e C05 correto. Cada variação C10 a C13 altera somente uma hipótese numérica.
+
+Também foram conferidos usuários inteiros não negativos, médias finitas não negativas e taxas
+entre 0 e 1. Os valores financeiros das condições foram lidos como texto e reconstruídos como
+Decimal, confirmando positividade e correspondência exata com as referências. Fontes e datas
+coincidiram com o estudo, sem divergências ou nova pesquisa. Os dois arquivos não estão ignorados
+pelo Git e podem ser versionados.
+
+Essas verificações foram pontuais, sem criação de testes automatizados persistentes ou repetição
+da suíte do MVP. Não foram calculados feedbacks, tokens mensais ou custos. A preparação das entradas
+não representa análise concluída, medição real de uso ou validação de qualidade pedagógica.
+
+Nesta atualização, somente README e este registro foram alterados. O README inclui links relativos
+para os dois CSVs, preserva o link do estudo e esclarece formato, responsabilidades e compatibilidade.
+O histórico anterior, os CSVs, ESTUDO_DE_CASO.md, demais arquivos e alterações pendentes foram
+preservados, assim como a tag v0.1.0. Não houve nova consulta de preços ou câmbio.
+
+**Marco deste registro:** preparação e conferência pontual concluídas. O próximo passo será validar
+a leitura e analisar os arquivos preparados, preservando identificadores, unidades, condições fixas
+e Decimal nos cálculos monetários. Resultados, gráficos, relatório e conclusões ainda não foram
+produzidos. Nenhum commit ou push foi realizado nesta atualização.
+
+## 39. Rotina reproduzível de validação e cálculo do estudo de caso
+
+**Data:** 18/11/2026.
+
+**Etapa:** validação e cálculo dos arquivos preparados, antes das comparações e da interpretação.
+
+**Objetivo dos pedidos:** tornar reproduzível o cálculo dos 13 cenários com as condições fixas,
+preservando integralmente o MVP publicado, seus testes e as entradas do estudo.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar analise_estudo.py e test_analise_estudo.py, separar leitura/validação, cálculo e apresentação/
+exportação, reutilizar as funções do MVP e conferir precisão e erros com arquivos temporários.
+Depois, atualizar somente README.md, ESTUDO_DE_CASO.md e este histórico para registrar o estado
+confirmado, sem repetir testes ou cálculos nesta etapa documental.
+
+**Participação e aprendizado:** as explicações distinguiram texto de CSV, tipos numéricos,
+validação e cálculo. As hipóteses respeitam os tipos aceitos pelo MVP; tarifas e câmbio passam
+diretamente de texto para Decimal. Formatar dinheiro no terminal não substitui os dados por textos
+nem limita a precisão exportada. As conferências por fórmula não são evidências sobre estudantes.
+
+**Decisões registradas:**
+
+- Implementar a rotina em arquivo separado, com funções pequenas, caminhos relativos à pasta do
+  script, caminhos configuráveis nas funções e importação sem interação, leitura, rede ou exportação.
+- Validar os esquemas próprios do estudo, campos obrigatórios, identificadores únicos C01 a C13,
+  13 combinações distintas, números finitos não negativos, usuários inteiros e taxas entre 0 e 1.
+- Exigir uma linha de condições fixas, tarifas e câmbio em Decimal finito e positivo e datas ISO
+  válidas, mantendo as fontes e os metadados. Não atualizar referências pela internet.
+- Reutilizar `converter_hipotese_consumo()`, as validações numéricas, `calcular_consumo_cenario()`,
+  `calcular_custo_ia_cenario()` e a auxiliar `formatar_moeda_br()` sem modificar o MVP.
+- Aplicar entrada `0.10` e saída `0.50` USD por milhão e câmbio `5.8102` BRL por USD a todos os
+  cenários, conforme os arquivos e as referências de 2026-11-18, sem constantes comerciais substitutas.
+- Exibir tabela curta e exportar `resultados/estudo_de_caso/resultados_cenarios.csv` com 13 linhas
+  e 35 colunas: identificação, hipóteses, consumos, custos e condições com fontes e datas.
+- Exportar valores completos em UTF-8, com vírgula, ponto decimal, cabeçalho e sem índice; manter
+  símbolos e duas casas somente na apresentação. Validar e calcular tudo antes da gravação.
+
+**Contribuição para o projeto:** os dois arquivos Python foram criados na implementação anterior.
+Os 30 novos métodos em uma classe cobrem leitura, validações, datas, precisão, reaproveitamento,
+importação sem efeitos, caminhos, reexecução e falhas sem sobrescrever resultados anteriores.
+A execução conjunta em 18/11/2026 aprovou **218 métodos em 18 classes**: 188 do MVP e 30 do estudo.
+Casos de `subTest` não aumentam a contagem de métodos; os testes antigos não foram alterados.
+
+Os testes conferiram fórmulas independentes em Decimal para os 13 registros e verificaram C02
+com 2200 feedbacks, 1100000 tokens de entrada, 660000 de saída e IA mensal de USD 0.44; C05 com
+11000 feedbacks, 5500000 tokens de entrada, 3300000 de saída e USD 2.20. A conversão exata por
+5.8102 produziu BRL 2.556488 e BRL 12.78244, respectivamente, sem arredondamento de exibição.
+Também conferiram feedbacks constantes na sensibilidade e consumo/custo não decrescente com
+mais feedback nos acertos dentro de cada escala. São verificações das fórmulas e hipóteses.
+
+Separadamente, a execução real dos CSVs e a releitura do resultado confirmaram C01 a C13 na ordem,
+35 colunas, condições e datas coerentes com o documento e valores financeiros reconstruídos de
+texto para Decimal, sem float. Essas conferências foram pontuais, sem métodos de teste adicionais.
+O CSV gerado está ignorado pela regra de resultados do Git. Não houve consultas a APIs ou instalação.
+
+Nesta atualização, README recebeu instruções e o estado atual; ESTUDO_DE_CASO.md recebeu o fluxo,
+validações, esquema, evidências e andamento das etapas. Somente esses documentos e este registro
+foram editados, preservando o histórico, as entradas, os resultados e demais alterações pendentes.
+Os testes e cálculos não foram repetidos nesta atualização exclusivamente documental.
+
+**Marco deste registro:** validação, cálculo e exportação concluídos. O próximo passo é comparar
+políticas dentro de cada escala e avaliar a sensibilidade dos tokens contra C05. Interpretação,
+gráficos, relatório e recomendações permanecem pendentes. Os cenários não são dados observados,
+o estudo não está concluído ou aprovado pelo curso e a rotina não representa nova release.
+A v0.1.0 publicada e sua tag foram preservadas. Não houve commit ou push.

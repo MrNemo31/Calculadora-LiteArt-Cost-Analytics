@@ -372,9 +372,11 @@ Firebase como alternativa em estudo; isso não implica contratação ou migraç�
 - 8 métodos para escolha, entrada e apresentação da cotação.
 - 24 métodos de integração dos cenários, cotação, tabelas, mensagens e exportação.
 
-A suíte completa passou na validação em ambiente novo de 14/11/2026. Alguns métodos usam
-`subTest`; suas combinações não
-são métodos adicionais. Os testes persistentes simulam `input()` com `unittest.mock.patch` e usam
+Esses 188 métodos passaram na validação em ambiente novo de 14/11/2026. A rotina do estudo
+acrescentou **30 métodos em uma classe** em [test_analise_estudo.py](test_analise_estudo.py),
+sem alterar os testes do MVP. Em 18/11/2026, a execução conjunta passou com **218 métodos em
+18 classes**. Alguns métodos usam `subTest`; suas combinações não são métodos adicionais.
+Os testes persistentes simulam `input()` com `unittest.mock.patch` e usam
 arquivos temporários nas integrações. Conferem erros e cancelamento sem sobrescrita, execução de
 outra pasta, ordem de múltiplos cenários, cenário único, ausência de chamadas à infraestrutura e ao
 cálculo completo, nove campos exportados e preservação exata de Decimal.
@@ -389,16 +391,23 @@ cenários. Com taxa simulada diferente, somente os custos em BRL mudam; o CSV ma
 A suíte não depende da internet nem da cotação do dia. Uma consulta real separada é verificação
 pontual, não teste automatizado. Esta revisão de documentação não acrescenta testes.
 
+Os testes do estudo cobrem esquema, campos obrigatórios, identificadores e combinações únicos,
+conversões numéricas, taxas, datas e condições fixas. Também conferem fórmulas independentes,
+Decimal, precisão da exportação, preservação das entradas e dos resultados anteriores diante de
+falhas, importação sem efeitos, execução de outra pasta e reexecução sem duplicar linhas.
+As conferências pontuais do CSV real complementam esses testes, sem aumentar sua contagem.
+Nesta atualização documental, a suíte não foi repetida; os resultados acima são da implementação.
+
 Para executar a suíte com o ambiente existente:
 
 ```powershell
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest -q
 ```
 
-## Estudo de caso planejado
+## Estudo de caso
 
-Está planejado um estudo de caso para o **Google Data Analytics Professional Certificate**, usando
-esta calculadora como ferramenta para analisar estimativas de custos de IA, sem dados reais de
+O estudo de caso para o **Google Data Analytics Professional Certificate** utiliza as funções da
+calculadora para analisar estimativas de custos de IA, sem dados reais de
 utilização dos estudantes. O público será o responsável pelo planejamento do LiteArt, para apoiar
 o orçamento de IA e identificar hipóteses que precisam ser medidas antes do lançamento.
 
@@ -421,19 +430,63 @@ São referências históricas dessa pesquisa, sem afirmar preços, câmbio ou di
 permanentemente atuais. As fontes, modalidades, exclusões e evidência cambial estão em
 [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md), junto da matriz, indicadores e etapas.
 
-O MVP continua permitindo consultar o BCB ou informar uma taxa manual. Para este estudo, a opção
-manual permitirá reaplicar **5.8102**, sem atualizar o câmbio automaticamente durante a análise.
+O MVP continua permitindo consultar o BCB ou informar uma taxa manual. A rotina separada do estudo
+lê **5.8102** de `condicoes_fixas.csv`, sem interação ou atualização automática do câmbio.
 A cotação didática de R$ 5,00 dos exemplos e testes do MVP permanece histórica e não será usada
 como taxa deste estudo. Essa definição documental não modifica o funcionamento da calculadora.
 
-A definição documental está concluída, mas **os dados e os resultados dos 13 cenários ainda não
-foram produzidos**. A análise, os gráficos e o relatório continuam pendentes. A pesquisa confirma
-condições documentadas, sem comprovar acesso pela conta da API, consumo real de tokens, configuração
-de raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado
-pelo curso ou validado pelo Google.
+A definição documental e a **preparação e conferência pontual dos dados de entrada estão
+concluídas**. Os arquivos do estudo são:
 
-A **v0.1.0 permanece o MVP publicado** e será a referência de cálculo. O planejamento do estudo não
-representa uma nova versão da calculadora, e sua tag será preservada.
+- [cenarios.csv](dados/estudo_de_caso/cenarios.csv): 13 cenários hipotéticos, ordenados de C01 a C13,
+  com oito colunas para identificação, nome e seis hipóteses de consumo.
+- [condicoes_fixas.csv](dados/estudo_de_caso/condicoes_fixas.csv): uma linha com 12 colunas, contendo
+  modelo, modalidade, tarifas, câmbio, fontes e datas, aplicável a todos os cenários.
+
+Os dois CSVs usam UTF-8 sem BOM, vírgula entre campos, ponto decimal, cabeçalho e ausência de índice,
+sem símbolos monetários, percentuais ou separadores de milhares nos números. CSV não preserva tipos
+Python: a rotina lê os campos financeiros como texto e os converte diretamente para `Decimal`,
+sem passar por float ou aplicar arredondamento de exibição aos dados.
+
+Essas entradas pertencem ao estudo. O arquivo `dados/cenarios_exemplo.csv` continua sendo a entrada
+de cenários do menu CSV do MVP, enquanto `resultados/cenarios.csv` contém resultados gerados pela
+calculadora. O `cenarios.csv` do estudo inclui `id_cenario` além das sete colunas aceitas por
+`ler_cenarios_csv()`, que rejeita colunas inesperadas. Por isso, **não é diretamente compatível com
+o importador atual**. O MVP não lê automaticamente nenhum dos dois arquivos do estudo.
+A leitura específica está implementada em [analise_estudo.py](analise_estudo.py), separada do menu
+e do código do MVP. Ela valida os dois CSVs, adapta as hipóteses às funções reutilizáveis, calcula
+consumos e custos sob as condições fixas e exporta somente após concluir todos os registros.
+Não consulta a rede. Importar o módulo não lê arquivos, imprime ou exporta resultados.
+
+Com o terminal na raiz do projeto, executar o cálculo, os testes do estudo ou toda a suíte:
+
+```powershell
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_analise_estudo -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -v
+```
+
+A saída é `resultados/estudo_de_caso/resultados_cenarios.csv`, relativa à pasta do script,
+independentemente da pasta atual do terminal. São **13 linhas e 35 colunas**: identificador e nome,
+seis hipóteses, sete consumos, oito custos e os 12 campos das condições com fontes e datas.
+A pasta é criada automaticamente e cada execução substitui o arquivo, sem acumular linhas.
+Erros de entrada encerram com mensagem e código diferente de zero, preservando resultados anteriores.
+O resultado fica ignorado pelo Git, junto dos demais arquivos de `resultados/`.
+
+Tarifas, câmbio e custos permanecem `Decimal`. O terminal exibe uma tabela curta com identificador,
+usuários, feedbacks e custos mensais, usando `US$` e `R$`, vírgula decimal e duas casas somente na
+apresentação. O CSV usa UTF-8, vírgula entre campos, ponto decimal, cabeçalho e ausência de índice,
+com valores completos. Na releitura, converter os campos financeiros de texto diretamente para
+Decimal. O esquema e as conferências estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md).
+
+**Os 13 cenários foram calculados e conferidos em 18/11/2026.** Comparações analíticas entre
+políticas e variações de tokens, gráficos, relatório e recomendações continuam pendentes.
+As conferências não comprovam acesso pela conta da API, consumo real de tokens, configuração de
+raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado pelo
+curso ou validado pelo Google.
+
+A **v0.1.0 permanece o MVP publicado**, com sua tag preservada. A rotina do estudo reutiliza suas
+funções e não representa automaticamente uma nova release da calculadora.
 
 ## Próximos passos
 
@@ -445,10 +498,10 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 [notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
-O próximo passo do estudo é preparar os dados dos 13 cenários e os registros das condições fixas,
-incluindo fontes, datas, unidades e justificativas. Depois, validar estrutura, identificadores e
-cobertura da matriz antes de executar a análise e a conferência manual previstas. A tag v0.1.0
-permanece preservada como referência histórica.
+O próximo passo do estudo é comparar políticas dentro de cada escala e avaliar a sensibilidade
+dos tokens em relação a C05, usando os resultados já calculados. Depois, produzir os gráficos,
+relatório e recomendações condicionais. As verificações por fórmulas não são evidências empíricas.
+A tag v0.1.0 permanece preservada como referência histórica.
 
 Ambientes e resultados gerados permanecem fora do versionamento: `.venv/` e `resultados/` pelas
 regras da raiz, e `.venv-win/` pelo `.gitignore` criado dentro desse ambiente.
