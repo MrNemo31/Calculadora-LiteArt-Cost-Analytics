@@ -416,8 +416,10 @@ nove barras, três séries, ordens, associação por ID, valores e textos monet�
 preservação dos dados, importação sem efeitos e HTML offline. Os 18 novos cobrem quatro barras
 horizontais, sinais e referência C05, percentuais não aplicáveis, condições e tokens compatíveis,
 preservação de Decimal e integração que constrói ambas as figuras antes de gravar os HTMLs.
-Esses testes estruturais não comprovam legibilidade visual; a inspeção no navegador está pendente.
-Nesta atualização documental, a suíte não foi repetida; os resultados acima são da implementação.
+Esses testes estruturais não comprovam legibilidade visual. A revisão separada no Chrome ocorreu
+em 19/11/2026, no alcance descrito abaixo. Após um ajuste de posição de texto, os 36 testes dos
+gráficos passaram novamente, sem alteração dos testes; a suíte completa não foi repetida nessa
+revisão. Nenhum teste foi executado nesta atualização documental.
 
 Para executar a suíte com o ambiente existente:
 
@@ -513,8 +515,8 @@ Decimal. O esquema e as conferências estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CA
 **Os 13 cenários foram calculados e conferidos em 18/11/2026; as comparações de políticas e tokens
 já estão implementadas e exportadas.** A atualização documental de 19/11/2026 registra esse avanço
 sem atualizar as condições fixas. Os dois gráficos foram implementados e gerados em 19/11/2026,
-conforme abaixo; inspeção visual, indicadores restantes, síntese final, relatório e recomendações
-continuam pendentes.
+conforme abaixo. A revisão visual foi concluída no Chrome nas dimensões informadas; indicadores
+restantes, síntese final, relatório e recomendações continuam pendentes.
 As conferências não comprovam acesso pela conta da API, consumo real de tokens, configuração de
 raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado pelo
 curso ou validado pelo Google.
@@ -556,9 +558,14 @@ cálculos ou exportações financeiras. Rótulos e hover são preparados dos Dec
 brasileira. A geometria das barras é aproximada. Os CSVs permanecem intactos e os HTMLs ficam fora
 do Git em `resultados/`.
 
-Os dois HTMLs foram gerados e suas estruturas conferidas. **As renderizações não foram
-inspecionadas visualmente**; legibilidade, margens e eventuais sobreposições ainda precisam de
-revisão manual no navegador. Exportação em imagem e dashboard não foram implementados.
+Os dois HTMLs passaram por **revisão visual no Chrome em 19/11/2026**, em janelas de **1440×900**
+e **800×800**, com rede desativada. Foram conferidos valores, rótulos, hover, legenda, zoom e
+restauração dos eixos. Uma sobreposição entre título e referência no segundo gráfico foi corrigida;
+os HTMLs foram regenerados e revistos. As instruções de abertura manual permanecem as mesmas.
+
+A revisão não cobre telas menores, dispositivos móveis ou outros navegadores. As evidências e o
+alcance estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md). Exportação em imagem e dashboard não foram
+implementados.
 
 A **v0.1.0 permanece o MVP publicado**, com sua tag preservada. A rotina do estudo reutiliza suas
 funções e não representa automaticamente uma nova release da calculadora.
@@ -574,8 +581,9 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 não representa hospedagem de dashboard.
 
 O próximo passo do estudo é elaborar a síntese interpretativa dos resultados e das comparações
-já calculadas, revisar visualmente os dois HTMLs, avaliar os indicadores ainda não incorporados,
-preparar o relatório e formular recomendações condicionais.
+já calculadas, avaliar os indicadores ainda não incorporados, preparar o relatório e formular
+recomendações condicionais. A revisão dos HTMLs em outros tamanhos ou navegadores depende de
+uma conferência própria, sem ampliar automaticamente o alcance já comprovado.
 As relações verificadas pelas fórmulas não são evidências empíricas sobre estudantes.
 A tag v0.1.0 permanece preservada como referência histórica.
 

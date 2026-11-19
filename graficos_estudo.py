@@ -342,7 +342,7 @@ def criar_figura_sensibilidade(dados):
         legend={"orientation": "h", "y": -0.20, "x": 0},
         annotations=[{"text": f"Referência C05: R$ {custo_base}/mês · hipóteses, tarifas e câmbio fixos"
                       "<br>Estimativas; sem comprovação de qualidade pedagógica equivalente.",
-                      "xref": "paper", "yref": "paper", "x": 0, "y": 1.22, "xanchor": "left",
+                      "xref": "paper", "yref": "paper", "x": 0, "y": 1.16, "xanchor": "left",
                       "showarrow": False, "align": "left", "font": {"size": 13}}],
     )
     return figura

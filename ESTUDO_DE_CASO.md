@@ -4,7 +4,8 @@
 
 **Atualização documental:** 19/11/2026. Preparação, validação, cálculo dos 13 cenários e comparações
 de políticas e tokens concluídos e conferidos. Os dois gráficos foram implementados e gerados como
-HTML, com revisão visual pendente. Indicadores restantes, síntese interpretativa final, relatório
+HTML; a revisão visual foi concluída no alcance da seção 5.10. Indicadores restantes,
+síntese interpretativa final, relatório
 e recomendações continuam pendentes. As condições fixas permanecem datadas de 18/11/2026;
 esta atualização documental não é nova pesquisa de preços, consulta cambial ou execução da suíte.
 O estudo se destina ao Google Data Analytics Professional Certificate, sem aprovação formal do
@@ -420,7 +421,7 @@ Zeros finais adicionais no CSV preservam a representação de Decimal, sem alter
 A validação e o cálculo estão concluídos. As comparações monetárias e percentuais foram
 implementadas posteriormente, conforme a seção 5.7. Participações e custo por usuário não foram
 incorporados como indicadores à rotina. Os gráficos estão registrados nas seções 5.8 e 5.9;
-sua inspeção visual, síntese final e recomendações permanecem pendentes.
+a revisão visual está registrada na seção 5.10; síntese final e recomendações permanecem pendentes.
 
 ### 5.7. Políticas de feedback e sensibilidade dos tokens
 
@@ -611,10 +612,10 @@ três séries, alturas aproximadas correspondentes aos valores financeiros e tex
 Decimal. O arquivo foi conferido como HTML completo com Plotly incorporado, e os hashes confirmaram
 preservação dos CSVs e arquivos protegidos. Essas conferências não acrescentaram testes persistentes.
 
-**Inspeção visual pendente:** o HTML não foi inspecionado renderizado no navegador. Os testes e a
-conferência estrutural não comprovam legibilidade, ausência de sobreposições, margens ou disposição
-da legenda em diferentes telas. Essa revisão manual ainda deve ocorrer antes da entrega do estudo.
-O gráfico representa estimativas sob hipóteses, sem comprovar uso real ou qualidade pedagógica.
+Na etapa inicial, houve somente conferência estrutural, que não comprovava legibilidade ou
+renderização. A revisão visual posterior está registrada na seção 5.10, com dimensões e navegador
+identificados. O gráfico representa estimativas sob hipóteses, sem comprovar uso real ou qualidade
+pedagógica; a revisão visual não muda esses limites.
 
 ### 5.9. Segundo gráfico: sensibilidade dos tokens — 2026-11-19
 
@@ -725,10 +726,86 @@ conferidos como HTML completo com Plotly incorporado. A comparação de hashes c
 preservação dos CSVs e demais arquivos protegidos. Isso é execução e conferência estrutural,
 sem novos testes persistentes ou recálculo dos custos.
 
-**Inspeção visual dos dois HTMLs pendente:** não houve conferência da renderização no navegador.
-Os testes estruturais não comprovam legibilidade, margens ou ausência de sobreposições. Indicadores
-restantes, interpretação final, relatório e recomendações continuam pendentes, sem dados reais de
-uso dos estudantes ou comprovação de qualidade pedagógica equivalente.
+Na implementação dos gráficos, a validação foi estrutural, sem observação da renderização.
+A inspeção visual posterior e a correção estão na seção 5.10. Indicadores restantes, interpretação
+final, relatório e recomendações continuam pendentes, sem dados reais de uso dos estudantes ou
+comprovação de qualidade pedagógica equivalente.
+
+### 5.10. Revisão visual dos dois gráficos — 2026-11-19
+
+**Data efetiva da revisão:** 19/11/2026. **Data desta atualização documental:** 19/11/2026.
+As datas coincidem, mas são atividades distintas: esta atualização registra a revisão anterior
+sem abrir novamente o navegador, executar testes ou regenerar arquivos. As condições históricas
+de modelo, tarifas e câmbio permanecem com referência de 18/11/2026.
+
+#### Evidências e alcance da revisão visual
+
+O relatório da revisão está disponível nesta conversa, acompanhado de capturas e registros JSON
+de renderização, hover, legenda, zoom e requisições. As evidências ficaram fora do repositório e
+não foram copiadas para ele. Foram utilizados os HTMLs reais em Chrome instalado, com perfil
+temporário separado do pessoal, sem instalação de pacotes, navegadores ou ferramentas adicionais.
+O navegador foi encerrado e o perfil temporário exclusivo removido após a revisão.
+
+Os dois gráficos foram observados em áreas de visualização de **1440×900** e **800×800 pixels**.
+O acesso à rede das páginas estava desativado. As capturas continham as figuras efetivamente
+renderizadas; leitura do HTML ou screenshot vazio não foi usada como prova de renderização.
+
+| Gráfico e arquivo em `resultados/estudo_de_caso/` | Aspectos conferidos visualmente |
+| --- | --- |
+| Escala e política — `custo_mensal_por_escala_politica.html` | Nove barras agrupadas, escalas 100/500/1.000 e três políticas na ordem definida, sem C10 a C13 ou soma de alternativas; eixo de custo em BRL a partir de zero, rótulos, título, legenda, cores/padrões, margens e identificação das hipóteses, tarifas e câmbio fixos |
+| Sensibilidade — `sensibilidade_tokens.html` | Quatro barras C10 a C13 de cima para baixo, referência C05, percentuais -12,5%, +25%, -37,5% e +75%; eixo linear simétrico e linha em zero, reduções à esquerda e aumentos à direita, identificação dos tokens alterados e custo de referência, sinais, rótulos e unidades |
+
+Após a correção descrita abaixo, títulos, referências, legendas, rótulos e acentos estavam legíveis,
+sem cortes ou sobreposições observados nas duas dimensões verificadas. A janela menor reduziu a
+área útil das barras, especialmente no gráfico horizontal, mas as informações permaneceram
+legíveis. Isso não certifica responsividade em qualquer largura ou dispositivo.
+
+#### Interações, dados e uso offline
+
+- **Inspeção visual e interação:** o hover foi acionado em todas as nove barras do primeiro
+  gráfico e nas quatro do segundo, nas duas dimensões. No primeiro, foram observados identificador,
+  usuários, política, feedbacks e custo mensal. No segundo, cenário/referência, campo alterado,
+  tokens antes/depois, custos, diferença em BRL e percentual estavam disponíveis no hover.
+- **Legenda:** ocultar e restaurar uma série funcionou nos dois gráficos, nas duas dimensões,
+  sem trocar a associação dos cenários. A ocultação muda a visão, não os dados dos CSVs.
+- **Zoom e restauração:** em 1440×900, o arraste alterou os intervalos dos eixos nos dois gráficos;
+  o duplo clique restaurou os intervalos iniciais. Não se atribui esse teste a dispositivos táteis.
+- **Conferência de dados:** os valores e textos dos hovers foram comparados aos CSVs de origem,
+  incluindo os quatro percentuais e a referência C05. A leitura das evidências complementou a
+  observação visual, sem recalcular custos ou medir consumo real. Tokens alterados e variação do
+  custo estavam identificados separadamente; não foram tratados como percentuais equivalentes.
+- **Offline observado:** as figuras renderizaram com rede desativada nas páginas, sem falhas de
+  recursos ou erros de JavaScript observados. Os registros de requisição da revisão continham
+  somente o carregamento dos arquivos locais. Isso comprova o uso offline dos HTMLs revisados,
+  sem confundir referências externas existentes no código incorporado com recursos requisitados.
+
+#### Defeito encontrado e correção mínima
+
+No gráfico de sensibilidade, o texto da referência se sobrepunha ao título, tanto na janela ampla
+quanto na menor. O problema foi confirmado nas capturas anteriores à correção.
+
+A única alteração de código foi a posição vertical da anotação em `criar_figura_sensibilidade()`:
+`y` passou de `1.22` para `1.16`, em coordenadas relativas à área do gráfico. Não houve redesenho,
+alteração de eixos, dados, fórmulas ou percentuais. O primeiro gráfico não exigiu correção visual.
+Os dois HTMLs foram regenerados pelo comando existente e revistos nas duas dimensões. Na nova
+renderização, o texto da referência ficou abaixo do título, sem a sobreposição identificada.
+
+Após esse ajuste, os **36 métodos de teste dos gráficos passaram**. Não foram acrescentados ou
+alterados testes. A suíte completa de 271 métodos não foi repetida nessa revisão; seu resultado
+anterior continua sendo o da implementação do segundo gráfico. Nesta atualização documental,
+nem os 36 métodos nem a suíte completa foram executados.
+
+As verificações visuais e de interação são distintas dos testes estruturais da figura e da
+conferência dos valores. Nenhuma delas comprova comportamento dos estudantes ou qualidade
+pedagógica. As comparações de hashes confirmaram a preservação dos CSVs e demais arquivos
+protegidos; Decimal permanece nos dados, com float restrito à cópia de coordenadas já existente.
+
+**Revisão concluída no alcance confirmado:** Chrome, 1440×900 e 800×800, HTMLs locais offline,
+hover e legenda em ambos os tamanhos e zoom/restauração na janela ampla. Telas menores, outros
+navegadores, dispositivos móveis, toque ou outros modos de acesso não foram testados. Não há
+validação universal de legibilidade, acessibilidade ou responsividade. As instruções de abertura
+manual dos HTMLs permanecem válidas. Indicadores restantes, interpretação, recomendações e relatório
+final continuam como próximas etapas; o MVP v0.1.0 e sua tag permanecem preservados.
 
 ## 6. Unidade de análise e indicadores
 
@@ -826,8 +903,9 @@ um percentual. A seção 5.7 distingue esse caso testado dos arquivos atuais com
    dos componentes em C05 foi conferida pontualmente; a síntese interpretativa final permanece
    pendente. Verificações aritméticas não comprovam comportamento real ou qualidade pedagógica.
 5. **Compartilhar — parcialmente implementado:** dois gráficos gerados em HTML offline: custo
-   mensal por escala/política e sensibilidade dos tokens contra C05, conforme 5.8 e 5.9. A inspeção
-   visual de ambos, a síntese interpretativa final e o relatório permanecem pendentes.
+   mensal por escala/política e sensibilidade dos tokens contra C05, conforme 5.8 e 5.9. A revisão
+   visual está concluída no alcance da seção 5.10. Síntese interpretativa final e relatório
+   permanecem pendentes.
 6. **Agir — pendente:** apresentar recomendações condicionais às hipóteses e plano de medição real
    antes do lançamento, incluindo uso, política de feedback, tokens faturáveis e avaliação pedagógica.
 
@@ -862,7 +940,8 @@ Situação dos entregáveis:
 - Comparações de políticas e tokens calculadas, conferidas e exportadas, conforme 5.7 e 6.
   Síntese interpretativa final e recomendações ainda não produzidas.
 - Dois gráficos implementados e gerados: custo mensal por escala/política e sensibilidade contra C05.
-  Revisão visual dos dois HTMLs pendente, sem dashboard ou exportação em imagem neste escopo.
+  Revisão visual concluída no alcance da seção 5.10, sem dashboard ou exportação em imagem
+  neste escopo. Outros tamanhos e navegadores não foram validados.
 - Relatório curto com pergunta, preparação, resultados, recomendações condicionais e limitações,
   ainda não produzido.
 - Registro transparente do apoio de IA, a preparar para a entrega conforme as orientações da
@@ -889,16 +968,18 @@ o estudo tenha sido aprovado pelo curso.
 1. Elaborar a síntese interpretativa dos custos e das comparações já calculadas, mantendo claros
    referências, denominadores, sinais e limites das hipóteses. Não apresentar relações aritméticas
    como descobertas sobre estudantes ou qualidade pedagógica.
-2. Revisar manualmente a renderização dos dois HTMLs e preparar o relatório, distinguindo resultados
-   simulados de dados observados. Participações gerais e custo por usuário continuam pendentes;
-   não devem ser tratados como indicadores já incorporados à rotina.
+2. Avaliar os indicadores restantes e preparar o relatório, distinguindo resultados simulados de
+   dados observados. Participações gerais e custo por usuário continuam pendentes; não devem ser
+   tratados como indicadores já incorporados à rotina. Outros tamanhos de tela ou navegadores
+   exigem revisão própria, sem ampliar o alcance visual já confirmado.
 3. Formular recomendações condicionais e um plano de medição real, sem inferir aprendizagem pelo custo.
 4. Manter a v0.1.0 publicada como referência histórica, sem mover, substituir ou modificar sua tag.
    A rotina separada do estudo não representa automaticamente uma nova release.
 
 **Concluído:** preparação, validação, cálculo e exportação dos 13 cenários; seis comparações de
 políticas e quatro de sensibilidade, com as conferências descritas nas seções 5.6 e 5.7. Primeiro
-gráfico implementado e gerado conforme 5.8 e segundo conforme 5.9, sem inspeção visual concluída.
+gráfico implementado e gerado conforme 5.8 e segundo conforme 5.9, com revisão visual concluída
+no alcance e nas dimensões da seção 5.10.
 Pesquisa documental e cotação histórica fixa permanecem preservadas. Não foram comprovados acesso
 à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Indicadores restantes,
 síntese final, relatório e recomendações continuam pendentes.

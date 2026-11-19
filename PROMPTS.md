@@ -1981,3 +1981,64 @@ hipóteses e condições fixas, sem comprovar uso dos estudantes ou qualidade pe
 Somente os três documentos autorizados foram atualizados nesta etapa; código, testes, CSVs, HTMLs,
 requirements, configurações e demais alterações pendentes foram preservados. O estudo permanece
 separado do MVP v0.1.0 publicado, cuja tag não foi alterada. Não houve commit ou push.
+
+## 43. Revisão visual dos dois gráficos do estudo
+
+**Data desta atualização documental:** 19/11/2026.
+
+**Data efetiva da revisão registrada:** 19/11/2026. A revisão e esta atualização são etapas
+separadas, embora na mesma data; as condições fixas continuam com referência de 18/11/2026.
+
+**Etapa:** registro da inspeção visual e de interação, com uma correção mínima de apresentação.
+
+**Objetivo dos pedidos:** observar os dois HTMLs reais, comparar sua apresentação com os CSVs e
+conferir legibilidade e interações, sem tratar testes estruturais como prova de renderização.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Abrir os gráficos em navegador disponível, revisar janelas ampla e menor, testar hover e legenda,
+conferir eixos, rótulos, valores e funcionamento offline. Corrigir somente defeitos concretos,
+preservando dados e MVP. Depois, atualizar apenas README, ESTUDO_DE_CASO.md e este histórico,
+com base no relatório e nas evidências, sem executar novamente testes ou gerar arquivos.
+
+**Participação e aprendizado:** a revisão distinguiu observação visual, conferência dos valores,
+testes estruturais e acesso efetivamente necessário à rede. A presença de referências externas no
+código incorporado não foi interpretada como dependência de rede sem observar as requisições.
+A legibilidade em duas dimensões não comprova funcionamento em todos os dispositivos.
+
+**Revisão realizada:** os dois HTMLs foram renderizados no Chrome instalado, com perfil temporário
+separado e rede desativada nas páginas, em 1440×900 e 800×800 pixels. Não foram instaladas ferramentas.
+O primeiro apresentou nove barras agrupadas, escalas e políticas na ordem prevista, custo em BRL
+partindo de zero e exclusão de C10 a C13. O segundo mostrou quatro barras C10 a C13, referência C05,
+linha em zero e percentuais -12,5%, +25%, -37,5% e +75%, com reduções à esquerda e aumentos à direita.
+
+Hover em todas as barras e ocultação/restauração pela legenda foram testados nas duas dimensões.
+Zoom por arraste e restauração por duplo clique foram conferidos na janela ampla dos dois gráficos.
+Valores, identificadores e textos dos hovers corresponderam aos CSVs. Não foram observadas falhas
+de recursos ou erros de JavaScript; os registros da revisão continham somente arquivos locais,
+confirmando a renderização offline. Capturas e registros JSON ficaram fora do repositório.
+
+**Problema e correção:** a referência do segundo gráfico se sobrepunha ao título nas duas janelas.
+Em `criar_figura_sensibilidade()`, apenas a posição vertical da anotação mudou de `1.22` para `1.16`.
+Não houve redesenho ou alteração de dados, eixos, fórmulas, identificadores ou conversões financeiras.
+Os HTMLs foram regenerados e revistos; o texto ficou abaixo do título sem a sobreposição encontrada.
+O primeiro gráfico não exigiu correção. A revisão não cobre telas menores ou outros navegadores.
+
+**Testes e evidências:** após o ajuste de código, os 36 métodos dos gráficos passaram. Não foram
+criados ou modificados testes. A suíte completa de 271 métodos não foi repetida durante a revisão;
+seu resultado anterior permanece o da implementação do segundo gráfico. As capturas e os registros
+de interação comprovam renderização e ações reais; a comparação dos hovers com os CSVs é uma
+conferência de dados. São evidências distintas, sem comprovação de uso real ou qualidade pedagógica.
+Os dados financeiros continuam Decimal e float permanece restrito à visualização. O navegador
+temporário foi encerrado e seu perfil exclusivo removido; as evidências foram preservadas.
+
+Nesta atualização, as evidências, o relatório da conversa e o diff de código foram conferidos.
+Somente README.md, ESTUDO_DE_CASO.md e este histórico foram editados. Não houve nova execução de
+testes, abertura do navegador, instalação ou regeneração de HTML. Código, testes, entradas,
+resultados, capturas, dependências e demais alterações pendentes foram preservados.
+
+**Marco deste registro:** revisão visual concluída no alcance comprovado: Chrome, 1440×900 e
+800×800, com interações e uso offline descritos. Não foram testados dispositivos móveis, toque ou
+outras condições. Indicadores restantes, interpretação, recomendações e relatório final continuam
+pendentes. O estudo permanece separado do MVP v0.1.0 publicado, cuja tag não foi alterada.
+Não houve commit nem push.
