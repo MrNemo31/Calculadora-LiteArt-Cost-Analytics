@@ -3,9 +3,10 @@
 **Data do planejamento:** 18/11/2026.
 
 **Atualização documental:** 19/11/2026. Preparação, validação, cálculo dos 13 cenários e comparações
-de políticas e tokens concluídos e conferidos. Gráficos, síntese interpretativa final, relatório e
-recomendações continuam pendentes. As condições fixas permanecem datadas de 18/11/2026; esta data
-documental não é uma nova pesquisa de preços, consulta cambial ou execução da suíte.
+de políticas e tokens concluídos e conferidos. Os dois gráficos foram implementados e gerados como
+HTML, com revisão visual pendente. Indicadores restantes, síntese interpretativa final, relatório
+e recomendações continuam pendentes. As condições fixas permanecem datadas de 18/11/2026;
+esta atualização documental não é nova pesquisa de preços, consulta cambial ou execução da suíte.
 O estudo se destina ao Google Data Analytics Professional Certificate, sem aprovação formal do
 curso ou validação pelo Google. As orientações da atividade, inclusive sobre apoio de IA, deverão
 ser conferidas antes da entrega.
@@ -418,7 +419,8 @@ Zeros finais adicionais no CSV preservam a representação de Decimal, sem alter
 
 A validação e o cálculo estão concluídos. As comparações monetárias e percentuais foram
 implementadas posteriormente, conforme a seção 5.7. Participações e custo por usuário não foram
-incorporados como indicadores à rotina. Gráficos, síntese final e recomendações permanecem pendentes.
+incorporados como indicadores à rotina. Os gráficos estão registrados nas seções 5.8 e 5.9;
+sua inspeção visual, síntese final e recomendações permanecem pendentes.
 
 ### 5.7. Políticas de feedback e sensibilidade dos tokens
 
@@ -486,9 +488,11 @@ não é o caso das referências de custo positivo nos arquivos atuais do estudo.
 #### Evidências e alcance
 
 O arquivo de testes contém **17 métodos adicionais**, totalizando **47 métodos do estudo** e
-**235 no conjunto com os 188 do MVP**, em 18 classes. A contagem foi conferida nos arquivos atuais.
-A aprovação dos 235 na execução anterior foi informada no pedido desta atualização; não há log
-adicional dessa execução nos arquivos consultados. Não foi repetida a suíte em 19/11/2026.
+**235 no conjunto com os 188 do MVP**, em 18 classes nessa etapa. A contagem de 47 neste arquivo
+permanece; os 18 métodos do arquivo do gráfico ampliaram o total conforme a seção 5.8.
+A aprovação dos 235 foi informada no pedido do registro das comparações; não havia log adicional
+nos arquivos então consultados. A suíte não foi repetida naquela revisão documental. Na implementação
+posterior do gráfico, os 253 métodos do conjunto ampliado passaram, conforme a seção 5.8.
 
 Os novos testes cobrem os resultados e fórmulas independentes das comparações, referências,
 identificadores ausentes/duplicados, colunas inválidas, hipóteses e condições incompatíveis,
@@ -502,6 +506,229 @@ Os componentes de custo de C05 também foram conferidos nos resultados exportado
 nova execução de `analise_estudo.py`, da suíte ou dos cenários, nem cria novos testes persistentes.
 As relações conferidas decorrem das hipóteses e fórmulas, sem comprovar comportamento dos
 estudantes, aprendizagem ou qualidade pedagógica equivalente. Não houve chamadas reais a APIs.
+
+### 5.8. Primeiro gráfico Plotly — 2026-11-19
+
+**Implementado e gerado em 19/11/2026:** [graficos_estudo.py](graficos_estudo.py), separado da rotina
+de cálculo e do MVP. O primeiro gráfico apresenta custo mensal estimado de IA por escala e
+política, usando somente C01 a C09. Esta evolução do estudo não publica uma nova versão nem altera
+a tag v0.1.0. Fontes, tarifas, câmbio e referências de 18/11/2026 permanecem preservados.
+
+#### Leitura, validação e seleção
+
+`ler_resultados_grafico()` lê `resultados/estudo_de_caso/resultados_cenarios.csv` como texto,
+reutilizando `ler_csv_texto()` com o esquema real de 35 colunas na ordem documentada. Não executa
+a análise se o arquivo estiver ausente: informa como gerar os resultados com `analise_estudo.py`.
+
+`validar_dados_grafico()` confere colunas necessárias e únicas, identificadores sem duplicidade e
+presença de C01 a C09. Seleciona explicitamente esses nove IDs e os ordena, independentemente da
+ordem ou dos índices recebidos. C10 a C13 ficam excluídos das barras, sem soma de cenários.
+
+Nos registros selecionados, exige campos preenchidos, usuários inteiros e correspondência exata
+entre ID e hipóteses da matriz principal: 100, 500 ou 1000 usuários; 40 respostas por usuário;
+taxa de acerto 0.60; proporções 0, 0.25 e 1; 500 tokens de entrada e 300 de saída por feedback.
+Campos numéricos são reconstruídos como Decimal finitos e não negativos, exceto usuários, que
+usam `int`. Tarifas e câmbio devem ser positivos. As datas devem ser ISO válidas e os 12 campos
+de condições comerciais e referências devem ser iguais entre os nove cenários.
+
+A leitura financeira usa diretamente `Decimal(texto)`, sem float intermediário. `criar_figura()`
+valida novamente os dados recebidos e retorna a figura, sem gravar arquivos ou abrir navegador.
+Importar o módulo também não lê CSVs, pergunta, imprime, consulta rede ou exporta.
+
+#### Eixos, séries e apresentação
+
+O título é **Custo mensal estimado de IA por escala e política de feedback**. Plotly Express cria
+nove barras com `barmode="group"`, organizadas em três séries:
+
+1. Somente nos erros.
+2. Erros + 25% dos acertos.
+3. Todas as respostas.
+
+O eixo X é categórico, na ordem **100, 500 e 1.000 usuários**; esses níveis são escalas alternativas,
+não meses sucessivos ou previsão de crescimento. O eixo Y mostra o **custo mensal estimado de IA
+em BRL**, começando em zero. As barras ficam lado a lado, pois os cenários são alternativas e seus
+custos não devem ser empilhados ou somados como uma despesa única.
+
+Cores distintas e padrões ajudam a distinguir as políticas. Os textos sobre as barras e no hover
+usam `R$`, vírgula decimal e duas casas. O hover inclui identificador, usuários, política e feedbacks
+mensais; contagens não recebem formatação monetária. A anotação identifica cenários hipotéticos,
+modelo, modalidade, tarifas por milhão e cotação fixa, extraídos dos dados sem nova consulta.
+
+A figura é construída a partir de uma cópia: somente `custo_grafico_br`, usada nas alturas,
+converte os custos para `float`. Os dados financeiros originais continuam Decimal, e os textos
+monetários são preparados diretamente deles com `formatar_moeda_br()`. A geometria tem aproximação
+de ponto flutuante, sem promessa de precisão decimal exata. Os números gráficos não são usados
+em cálculos financeiros ou exportações de resultados; o CSV de entrada não é modificado ou regravado.
+
+#### Reprodução e HTML offline
+
+Com o terminal na raiz e a `.venv-win` existente, executar nesta ordem:
+
+```powershell
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B graficos_estudo.py
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_graficos_estudo -q
+```
+
+`executar_grafico()` coordena leitura, criação e exportação, aceitando caminhos para testes.
+A integração posterior do segundo gráfico está descrita na seção 5.9; o comando acima gera ambos.
+`exportar_html()` cria a pasta quando necessário e grava
+`resultados/estudo_de_caso/custo_mensal_por_escala_politica.html`, relativo à pasta do script.
+Usa `write_html(full_html=True, include_plotlyjs=True, auto_open=False)`: o arquivo é completo,
+incorpora a biblioteca Plotly e permite visualização offline sem CDN. O terminal informa o caminho;
+para visualizar, localizar o HTML no Explorador de Arquivos e abri-lo manualmente no navegador.
+
+Erros de entrada ou validação interrompem o fluxo antes da gravação, preservando um HTML anterior.
+O arquivo gerado está ignorado pela regra `/resultados/` do Git. O segundo gráfico foi
+acrescentado conforme a seção 5.9. Não há exportação PNG/JPEG, dashboard ou execução automática
+da análise pelo script do gráfico.
+
+#### Dependências e evidências
+
+Em 19/11/2026, Plotly não estava instalado. Foram adicionados somente **plotly 7.1.0**, dependência
+direta, e **narwhals 2.29.0** e **packaging 26.3**, exigidos por ele. As versões efetivamente
+instaladas foram registradas em `requirements.txt`, preservando suas entradas e os pacotes
+anteriores. `pip check` retornou `No broken requirements found.` Não houve instalação de Kaleido,
+Dash, navegadores ou outros componentes opcionais. A instalação limpa do conjunto ampliado não
+foi repetida; a validação histórica do MVP permanece com seu alcance original.
+
+Na primeira etapa, [test_graficos_estudo.py](test_graficos_estudo.py) acrescentou **18 métodos em
+uma classe**. A ampliação posterior está na seção 5.9. Os primeiros testes usam
+`unittest`, dados controlados e arquivos temporários. Cobrem leitura e preservação exata de Decimal,
+nove barras e três séries, ordens das escalas e políticas, cores e padrões distintos, alturas
+aproximadas e textos monetários. Também conferem exclusão de C10 a C13, independência da ordem e
+do índice, identificadores ausentes ou duplicados, campos/custos inválidos e condições ou hipóteses
+incompatíveis. Verificam a preservação da entrada e do HTML anterior em falhas, criação sem
+navegador ou gravação, importação sem efeitos e HTML completo com Plotly incorporado.
+
+**Execução da implementação em 19/11/2026:** os 18 métodos novos passaram isoladamente e a suíte
+completa aprovou **253 métodos em 19 classes**: 188 do MVP, 47 da análise e 18 do gráfico.
+Casos de `subTest` não contam como métodos adicionais. Essa execução é anterior a esta atualização
+documental; a suíte não foi repetida para editar os documentos.
+
+Depois dos testes, o HTML real foi gerado. A conferência pontual da figura confirmou nove barras,
+três séries, alturas aproximadas correspondentes aos valores financeiros e textos preparados dos
+Decimal. O arquivo foi conferido como HTML completo com Plotly incorporado, e os hashes confirmaram
+preservação dos CSVs e arquivos protegidos. Essas conferências não acrescentaram testes persistentes.
+
+**Inspeção visual pendente:** o HTML não foi inspecionado renderizado no navegador. Os testes e a
+conferência estrutural não comprovam legibilidade, ausência de sobreposições, margens ou disposição
+da legenda em diferentes telas. Essa revisão manual ainda deve ocorrer antes da entrega do estudo.
+O gráfico representa estimativas sob hipóteses, sem comprovar uso real ou qualidade pedagógica.
+
+### 5.9. Segundo gráfico: sensibilidade dos tokens — 2026-11-19
+
+**Implementado e gerado em 19/11/2026:** o módulo `graficos_estudo.py` passou a produzir também
+**Sensibilidade do custo mensal de IA em relação a C05**. Reutiliza a exportação existente, sem
+recalcular custos, consultar preços ou câmbio, alterar a análise ou o MVP v0.1.0. Não foram
+instalados ou atualizados pacotes nessa implementação.
+
+#### Leitura e validação da sensibilidade
+
+`ler_sensibilidade_grafico()` lê `resultados/estudo_de_caso/sensibilidade_tokens.csv` em UTF-8 com
+ou sem BOM, inicialmente como texto, com vírgula entre campos. Confere o cabeçalho real de 24
+colunas na ordem da seção 5.7, a quantidade de campos e a presença de registros; remove espaços
+externos. Se o arquivo estiver ausente, orienta a executar `analise_estudo.py`, sem chamá-lo.
+
+`validar_sensibilidade_grafico()` exige exatamente C10, C11, C12 e C13, sem duplicidades, ordenados
+por identificador independentemente das linhas ou índices recebidos. Todos devem referenciar C05.
+A validação confere campos obrigatórios, usuários inteiros não negativos, datas ISO válidas e
+campos numéricos finitos. Valores financeiros, tokens e percentuais são reconstruídos diretamente
+como Decimal; a diferença em BRL e o percentual podem ser negativos, pois representam reduções.
+
+Os quatro registros devem ter as mesmas condições comerciais e referências, quantidade de
+usuários, custo mensal de C05 e tokens da referência. Tarifas, câmbio e custo de referência devem
+ser positivos para o gráfico. C10/C11 devem indicar `tokens_entrada` como campo alterado e manter
+saída igual à referência; C12/C13 devem indicar `tokens_saida` e manter entrada. O token previsto
+deve realmente mudar. Essas verificações não atualizam as condições históricas nem recalculam custos.
+
+**Percentual não aplicável:** um campo vazio, ou `None` nos dados recebidos pela função, não vira
+zero. A rotina explica que falta base válida para representar as quatro comparações e interrompe
+a geração, sem barras fictícias ou sobrescrita dos HTMLs anteriores. Custo de referência zero
+também impede o gráfico. O CSV de análise permanece preservado, incluindo seus campos vazios;
+não se altera o tratamento financeiro descrito na seção 5.7.
+
+#### Figura, referência e precisão
+
+`criar_figura_sensibilidade()` recebe os dados, valida uma cópia e retorna a figura sem gravar ou
+abrir navegador. Há quatro barras horizontais, de cima para baixo:
+
+1. C10 — Entrada: 500 → 250 tokens.
+2. C11 — Entrada: 500 → 1.000 tokens.
+3. C12 — Saída: 300 → 150 tokens.
+4. C13 — Saída: 300 → 600 tokens.
+
+Os rótulos são construídos com os tokens dos dados validados. O eixo horizontal é a **variação
+percentual do custo mensal total de IA contra C05**, em escala linear simétrica, com linha em
+zero. Reduções ficam à esquerda; aumentos, à direita. Cores, sinais e posição distinguem os
+sentidos. Percentuais recebem sinal e vírgula decimal, como `-12,5%` e `+25,0%`.
+Os dados já são percentuais: `Decimal("25")` é 25%, sem nova multiplicação por 100 na apresentação.
+
+O denominador é sempre o custo mensal de C05, conforme a fórmula da seção 6. Os resultados
+conferidos são **C10: -12,5%; C11: +25%; C12: -37,5%; C13: +75%**. Variação de tokens não equivale
+à variação do custo total de IA: reduzir pela metade a entrada em C10 reduz o custo em 12,5%,
+enquanto reduzir pela metade a saída em C12 reduz em 37,5%. Sob essas tarifas, entrada e saída
+participam do custo de C05 em 25% e 75%, respectivamente, conforme a conferência já registrada.
+Isso não demonstra consumo medido ou qualidade pedagógica equivalente.
+
+A anotação identifica C05 e seu custo mensal, obtido dos dados: internamente `12.7824400` BRL,
+apresentado como R$ 12,78. O hover inclui identificador do cenário e da referência, campo alterado,
+tokens de entrada e saída antes/depois, custos mensais da referência e do cenário, diferença em
+BRL e variação percentual. Valores monetários usam a auxiliar brasileira existente; tokens são
+quantidades e não recebem símbolo monetário. A figura explicita hipóteses, tarifas e câmbio fixos.
+
+Os dados originais e percentuais continuam Decimal. Só `variacao_grafica`, numa cópia de
+visualização, converte os percentuais para float para definir coordenadas aproximadas. Textos
+monetários e percentuais são preparados diretamente dos Decimal, sem novos cálculos financeiros
+com valores gráficos ou alteração do contexto Decimal global. Nenhum CSV é regravado.
+
+#### Comando integrado e exportação
+
+Com o terminal na raiz do projeto, o comando existente gera os dois gráficos a partir dos CSVs:
+
+```powershell
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B graficos_estudo.py
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_graficos_estudo -q
+```
+
+O primeiro comando prepara os resultados quando necessário; o script dos gráficos não executa
+a análise automaticamente. `executar_grafico()` aceita caminhos temporários para ambas as entradas
+e saídas. Ele valida e constrói **as duas figuras antes da primeira gravação**, preservando o
+primeiro gráfico e a importação sem leitura, impressão, interação ou exportação.
+
+A nova saída é `resultados/estudo_de_caso/sensibilidade_tokens.html`; a primeira continua sendo
+`resultados/estudo_de_caso/custo_mensal_por_escala_politica.html`. Os caminhos padrão partem da pasta
+do script. Ambos usam `full_html=True`, `include_plotlyjs=True` e `auto_open=False`, com Plotly
+incorporado para visualização offline. O terminal informa os caminhos: localizar cada HTML no
+Explorador de Arquivos e abri-lo manualmente no navegador. Ambos ficam ignorados pelo Git.
+
+#### Testes, execução real e revisão visual
+
+Foram acrescentados **18 métodos em uma segunda classe** de `test_graficos_estudo.py`, preservando
+os 18 testes do primeiro gráfico e adaptando seus dados temporários para a integração. Os novos
+conferem quatro barras, orientação, linha em zero, ordem, referência, sinais, textos monetários e
+percentuais, associação por identificador e rótulos obtidos dos dados. Cobrem campos/IDs inválidos,
+condições ou referências divergentes, percentual não aplicável, valores não finitos, negativos
+válidos e preservação da entrada, dos Decimal e do contexto. Também verificam HTML offline,
+preservação de ambos os HTMLs diante de erro no segundo e construção de ambas as figuras antes
+de gravar, sem alterar a figura original. A importação sem efeitos permanece coberta pelos testes.
+
+Na implementação de 19/11/2026, **36 métodos dos gráficos passaram** e a suíte completa aprovou
+**271 métodos em 20 classes**: 188 do MVP, 47 da análise e 36 dos gráficos. Combinações de `subTest`
+não são métodos adicionais. Essa execução anterior está registrada nesta sessão; não foi repetida
+para esta atualização documental.
+
+Após a suíte, os dois HTMLs reais foram gerados pelo comando integrado. A conferência pontual da
+sensibilidade confirmou as quatro coordenadas e textos esperados; ambos os arquivos foram
+conferidos como HTML completo com Plotly incorporado. A comparação de hashes confirmou a
+preservação dos CSVs e demais arquivos protegidos. Isso é execução e conferência estrutural,
+sem novos testes persistentes ou recálculo dos custos.
+
+**Inspeção visual dos dois HTMLs pendente:** não houve conferência da renderização no navegador.
+Os testes estruturais não comprovam legibilidade, margens ou ausência de sobreposições. Indicadores
+restantes, interpretação final, relatório e recomendações continuam pendentes, sem dados reais de
+uso dos estudantes ou comprovação de qualidade pedagógica equivalente.
 
 ## 6. Unidade de análise e indicadores
 
@@ -598,9 +825,9 @@ um percentual. A seção 5.7 distingue esse caso testado dos arquivos atuais com
    de tokens contra C05, com diferenças, percentuais e denominadores documentados. A participação
    dos componentes em C05 foi conferida pontualmente; a síntese interpretativa final permanece
    pendente. Verificações aritméticas não comprovam comportamento real ou qualidade pedagógica.
-5. **Compartilhar — pendente:** produzir síntese interpretativa, relatório e dois gráficos:
-   - Custo mensal por escala e política, com moeda e referência identificadas.
-   - Variação do custo em relação a C05 na análise de tokens, identificando o fator alterado.
+5. **Compartilhar — parcialmente implementado:** dois gráficos gerados em HTML offline: custo
+   mensal por escala/política e sensibilidade dos tokens contra C05, conforme 5.8 e 5.9. A inspeção
+   visual de ambos, a síntese interpretativa final e o relatório permanecem pendentes.
 6. **Agir — pendente:** apresentar recomendações condicionais às hipóteses e plano de medição real
    antes do lançamento, incluindo uso, política de feedback, tokens faturáveis e avaliação pedagógica.
 
@@ -634,7 +861,8 @@ Situação dos entregáveis:
   implementados em `analise_estudo.py`; exportação dos 13 resultados concluída, conforme 5.6.
 - Comparações de políticas e tokens calculadas, conferidas e exportadas, conforme 5.7 e 6.
   Síntese interpretativa final e recomendações ainda não produzidas.
-- Dois gráficos conforme a etapa Compartilhar, ainda não produzidos, sem dashboard neste escopo.
+- Dois gráficos implementados e gerados: custo mensal por escala/política e sensibilidade contra C05.
+  Revisão visual dos dois HTMLs pendente, sem dashboard ou exportação em imagem neste escopo.
 - Relatório curto com pergunta, preparação, resultados, recomendações condicionais e limitações,
   ainda não produzido.
 - Registro transparente do apoio de IA, a preparar para a entrega conforme as orientações da
@@ -661,17 +889,19 @@ o estudo tenha sido aprovado pelo curso.
 1. Elaborar a síntese interpretativa dos custos e das comparações já calculadas, mantendo claros
    referências, denominadores, sinais e limites das hipóteses. Não apresentar relações aritméticas
    como descobertas sobre estudantes ou qualidade pedagógica.
-2. Preparar os dois gráficos previstos e o relatório, distinguindo resultados simulados de dados
-   observados. Participações gerais e custo por usuário não devem ser tratados como já implementados.
+2. Revisar manualmente a renderização dos dois HTMLs e preparar o relatório, distinguindo resultados
+   simulados de dados observados. Participações gerais e custo por usuário continuam pendentes;
+   não devem ser tratados como indicadores já incorporados à rotina.
 3. Formular recomendações condicionais e um plano de medição real, sem inferir aprendizagem pelo custo.
 4. Manter a v0.1.0 publicada como referência histórica, sem mover, substituir ou modificar sua tag.
    A rotina separada do estudo não representa automaticamente uma nova release.
 
 **Concluído:** preparação, validação, cálculo e exportação dos 13 cenários; seis comparações de
-políticas e quatro de sensibilidade, com as conferências descritas nas seções 5.6 e 5.7.
+políticas e quatro de sensibilidade, com as conferências descritas nas seções 5.6 e 5.7. Primeiro
+gráfico implementado e gerado conforme 5.8 e segundo conforme 5.9, sem inspeção visual concluída.
 Pesquisa documental e cotação histórica fixa permanecem preservadas. Não foram comprovados acesso
-à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Gráficos, síntese final,
-relatório e recomendações continuam pendentes.
+à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Indicadores restantes,
+síntese final, relatório e recomendações continuam pendentes.
 
 Esta atualização documental de 19/11/2026 não repete os cálculos ou os testes anteriores e não
 altera código, entradas ou resultados existentes. O funcionamento do MVP permanece preservado.

@@ -158,8 +158,15 @@ baseada em MSYS2 e `.venv-win` convencional, foram preservados durante a valida�
 | `numpy` | `2.5.4` | Indireta: suporte numérico exigido pelo Pandas |
 | `python-dateutil` | `4.0.0` | Indireta: tratamento de datas exigido pelo Pandas |
 | `tzdata` | `2026.6` | Indireta: dados de fusos horários exigidos nesse conjunto no Windows |
+| `plotly` | `7.1.0` | Direta: primeiro gráfico interativo do estudo, exportado como HTML offline |
+| `narwhals` | `2.29.0` | Indireta: compatibilidade entre estruturas de dados exigida pelo Plotly |
+| `packaging` | `26.3` | Indireta: suporte a versões e pacotes exigido pelo Plotly |
 
-As versões foram obtidas dos metadados da `.venv-win`, sem atualizar esse ambiente. Os testes usam
+As versões foram obtidas dos metadados da `.venv-win`. Em 19/11/2026 foram acrescentados somente
+Plotly e suas dependências Narwhals e Packaging, preservando as versões dos pacotes anteriores.
+`pip check` não encontrou dependências ausentes ou conflitantes. Não foram instalados Kaleido,
+navegadores, Dash ou ferramentas opcionais. A validação em ambiente limpo de 14/11/2026 refere-se
+ao conjunto original do MVP; essa instalação limpa não foi repetida com Plotly. Os testes usam
 `pandas.testing` e `unittest`, sem exigir pytest ou outras ferramentas opcionais. Módulos como
 `decimal`, `pathlib`, `urllib`, `json` e `unittest` já pertencem ao Python e não entram no arquivo.
 Pip também não é uma dependência da aplicação.
@@ -375,10 +382,12 @@ Firebase como alternativa em estudo; isso não implica contratação ou migraç�
 Esses 188 métodos passaram na validação em ambiente novo de 14/11/2026. A rotina do estudo
 acrescentou inicialmente 30 métodos e depois **17 métodos para as comparações**, totalizando
 **47 métodos em uma classe** em [test_analise_estudo.py](test_analise_estudo.py), sem alterar os
-testes do MVP. São **235 métodos em 18 classes** no conjunto atual. Em 18/11/2026 passaram os
-218 métodos da primeira rotina; a aprovação dos 235 na execução posterior foi informada no pedido
-desta atualização, sem log de execução adicional nos arquivos consultados. A suíte não foi
-repetida em 19/11/2026. Casos de `subTest` não são métodos adicionais.
+testes do MVP. Os gráficos possuem **36 métodos em duas classes** em
+[test_graficos_estudo.py](test_graficos_estudo.py): 18 do primeiro e 18 acrescentados para o segundo.
+O conjunto atual possui **271 métodos em 20 classes**: 188 do MVP, 47 da análise e 36 dos gráficos.
+Todos passaram em 19/11/2026 na implementação do segundo gráfico, conforme a execução registrada
+nesta sessão. A suíte não foi repetida nesta atualização documental. Casos de `subTest` não são
+métodos adicionais.
 Os testes persistentes simulam `input()` com `unittest.mock.patch` e usam
 arquivos temporários nas integrações. Conferem erros e cancelamento sem sobrescrita, execução de
 outra pasta, ordem de múltiplos cenários, cenário único, ausência de chamadas à infraestrutura e ao
@@ -402,6 +411,12 @@ Os 17 métodos adicionais cobrem referências e fórmulas das comparações, ide
 de ordem/índice, condições compatíveis, preservação da tabela, percentuais com referência zero,
 precisão do contexto Decimal e exportação das três tabelas. As conferências pontuais dos CSVs
 existentes complementam esses testes, sem aumentar sua contagem.
+Os 36 testes dos gráficos usam dados controlados e arquivos temporários. Os primeiros conferem
+nove barras, três séries, ordens, associação por ID, valores e textos monetários, entrada inválida,
+preservação dos dados, importação sem efeitos e HTML offline. Os 18 novos cobrem quatro barras
+horizontais, sinais e referência C05, percentuais não aplicáveis, condições e tokens compatíveis,
+preservação de Decimal e integração que constrói ambas as figuras antes de gravar os HTMLs.
+Esses testes estruturais não comprovam legibilidade visual; a inspeção no navegador está pendente.
 Nesta atualização documental, a suíte não foi repetida; os resultados acima são da implementação.
 
 Para executar a suíte com o ambiente existente:
@@ -497,11 +512,53 @@ Decimal. O esquema e as conferências estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CA
 
 **Os 13 cenários foram calculados e conferidos em 18/11/2026; as comparações de políticas e tokens
 já estão implementadas e exportadas.** A atualização documental de 19/11/2026 registra esse avanço
-sem atribuir à implementação uma nova data ou atualizar as condições fixas. Gráficos, síntese final,
-relatório e recomendações continuam pendentes.
+sem atualizar as condições fixas. Os dois gráficos foram implementados e gerados em 19/11/2026,
+conforme abaixo; inspeção visual, indicadores restantes, síntese final, relatório e recomendações
+continuam pendentes.
 As conferências não comprovam acesso pela conta da API, consumo real de tokens, configuração de
 raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado pelo
 curso ou validado pelo Google.
+
+### Gráficos do estudo
+
+[graficos_estudo.py](graficos_estudo.py) gera o **custo mensal estimado de IA por escala e política
+de feedback**, usando C01 a C09. São nove barras agrupadas: escalas de 100, 500 e 1.000 usuários e
+políticas “Somente nos erros”, “Erros + 25% dos acertos” e “Todas as respostas”. Os cenários são
+alternativas lado a lado, sem somar custos. C10 a C13 não entram nesse gráfico.
+
+O segundo gráfico mostra a **sensibilidade do custo mensal de IA aos tokens**, comparando C10 a
+C13 com C05. São quatro barras horizontais: negativas indicam redução de custo; positivas, aumento.
+A linha em zero e o eixo percentual usam C05 como denominador, mantendo condições fixas.
+Os detalhes das comparações estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md).
+
+Com o terminal na raiz, gerar os CSVs e depois os dois gráficos pelo comando existente:
+
+```powershell
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B graficos_estudo.py
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_graficos_estudo -q
+```
+
+O comando `graficos_estudo.py` gera ambos os arquivos, relativos à pasta do script:
+
+- `resultados/estudo_de_caso/custo_mensal_por_escala_politica.html`: escala e política, C01 a C09.
+- `resultados/estudo_de_caso/sensibilidade_tokens.html`: variações de tokens, C10 a C13 contra C05.
+
+Para visualizar, localizar cada HTML no Explorador de Arquivos e abri-lo manualmente no navegador.
+Ambos incorporam Plotly e funcionam offline, sem carregar a biblioteca de CDN ou abrir o navegador
+automaticamente. Se um CSV estiver ausente, a rotina orienta como gerá-lo, sem executar a análise.
+As duas entradas e figuras são validadas antes de gravar; dados inválidos ou percentual não
+aplicável interrompem a geração e preservam os HTMLs anteriores, sem criar barras fictícias.
+
+Os campos financeiros e percentuais são reconstruídos de texto diretamente para Decimal.
+Somente a coluna de coordenadas de uma cópia de cada visualização usa `float`; ela não alimenta
+cálculos ou exportações financeiras. Rótulos e hover são preparados dos Decimal, com formatação
+brasileira. A geometria das barras é aproximada. Os CSVs permanecem intactos e os HTMLs ficam fora
+do Git em `resultados/`.
+
+Os dois HTMLs foram gerados e suas estruturas conferidas. **As renderizações não foram
+inspecionadas visualmente**; legibilidade, margens e eventuais sobreposições ainda precisam de
+revisão manual no navegador. Exportação em imagem e dashboard não foram implementados.
 
 A **v0.1.0 permanece o MVP publicado**, com sua tag preservada. A rotina do estudo reutiliza suas
 funções e não representa automaticamente uma nova release da calculadora.
@@ -517,15 +574,17 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 não representa hospedagem de dashboard.
 
 O próximo passo do estudo é elaborar a síntese interpretativa dos resultados e das comparações
-já calculadas, preparar os gráficos e o relatório e formular recomendações condicionais.
+já calculadas, revisar visualmente os dois HTMLs, avaliar os indicadores ainda não incorporados,
+preparar o relatório e formular recomendações condicionais.
 As relações verificadas pelas fórmulas não são evidências empíricas sobre estudantes.
 A tag v0.1.0 permanece preservada como referência histórica.
 
 Ambientes e resultados gerados permanecem fora do versionamento: `.venv/` e `resultados/` pelas
 regras da raiz, e `.venv-win/` pelo `.gitignore` criado dentro desse ambiente.
 
-Catálogo e seleção de modelos, comparação entre provedores, gráficos com Plotly, dashboard com
-Streamlit, retomada de infraestrutura e orçamento e análises avançadas ficam para depois.
+Catálogo e seleção de modelos, comparação entre provedores, demais gráficos e exportação em
+imagem, dashboard com Streamlit, retomada de infraestrutura e orçamento e análises avançadas
+ficam para depois. Os dois gráficos Plotly do estudo estão implementados, conforme descrito acima.
 Comparar custos não exige chamadas reais às APIs nem comprova equivalência pedagógica.
 
 ## Licença
