@@ -2,8 +2,10 @@
 
 **Data do planejamento:** 18/11/2026.
 
-**Atualização:** 18/11/2026. Preparação dos dados, validação e cálculo dos 13 cenários concluídos.
-Comparações analíticas, interpretação, gráficos, relatório e recomendações continuam pendentes.
+**Atualização documental:** 19/11/2026. Preparação, validação, cálculo dos 13 cenários e comparações
+de políticas e tokens concluídos e conferidos. Gráficos, síntese interpretativa final, relatório e
+recomendações continuam pendentes. As condições fixas permanecem datadas de 18/11/2026; esta data
+documental não é uma nova pesquisa de preços, consulta cambial ou execução da suíte.
 O estudo se destina ao Google Data Analytics Professional Certificate, sem aprovação formal do
 curso ou validação pelo Google. As orientações da atividade, inclusive sobre apoio de IA, deverão
 ser conferidas antes da entrega.
@@ -95,12 +97,12 @@ evidência de qualidade equivalente entre as variações.
 
 ### 5.1. Revalidação documental — 2026-11-18
 
-**Data desta atualização documental:** 2026-11-18. **Data da pesquisa de modelo e tarifas:**
+**Data do registro das condições fixas:** 2026-11-18. **Data da pesquisa de modelo e tarifas:**
 2026-11-18. A revalidação documental e a definição das condições fixas estão concluídas nos pontos
 confirmados abaixo. Os CSVs de entrada foram preparados e conferidos pontualmente em 2026-11-18,
-conforme a seção 5.5. A validação e o cálculo foram concluídos na etapa da seção 5.6; comparações,
-interpretação e conclusões continuam pendentes. Não houve chamadas pagas, solicitação de
-credenciais ou teste de acesso à conta.
+conforme a seção 5.5. A validação e o cálculo foram concluídos na etapa da seção 5.6; as comparações
+estão registradas na seção 5.7. Síntese final e recomendações permanecem pendentes. Não houve
+chamadas pagas, solicitação de credenciais ou teste de acesso à conta.
 
 | Condição fixa do estudo | Valor ou definição | Moeda, unidade ou recorte |
 | --- | --- | --- |
@@ -339,8 +341,9 @@ protege a importação: importar o módulo não lê CSVs, pergunta, imprime, con
 - `apresentar_resultados()`: mostra identificador, usuários, feedbacks e custos mensais em USD e
   BRL. Reutiliza `formatar_moeda_br()` em formatadores de `to_string()`, sem modificar a tabela.
 - `exportar_resultados()` e `executar_estudo()`: coordenam a gravação e o fluxo completo.
-  Todos os registros são validados e calculados antes de escrever. `main()` trata falhas esperadas
-  de entrada com mensagem e saída diferente de zero, sem sobrescrever resultados anteriores.
+  Todos os registros são validados, calculados e comparados antes de escrever os três CSVs.
+  `main()` trata falhas esperadas de entrada com mensagem e saída diferente de zero, sem
+  sobrescrever resultados anteriores em erros de validação ou de comparabilidade.
 
 As mensagens de validação identificam arquivo e, quando aplicável, registro e campo. Não há
 retorno parcial ou descarte silencioso de registros inválidos. As funções de cálculo do MVP,
@@ -394,8 +397,9 @@ Os valores abaixo são resultados das fórmulas sob as hipóteses fixas, não de
 A conversão usou os valores exatos em USD multiplicados por `Decimal("5.8102")`.
 Zeros finais adicionais no CSV preservam a representação de Decimal, sem alterar esses valores.
 
-- **Testes automatizados persistentes:** [test_analise_estudo.py](test_analise_estudo.py) contém
-  30 métodos em uma classe, usando `unittest`, arquivos temporários e simulações. Cobrem as
+- **Testes automatizados da primeira etapa:** [test_analise_estudo.py](test_analise_estudo.py)
+  recebeu inicialmente 30 métodos em uma classe, usando `unittest`, arquivos temporários e
+  simulações. Os 17 métodos posteriores estão descritos na seção 5.7. Os primeiros cobrem as
   validações, importação sem efeitos, preservação das entradas e da tabela, ausência de rede,
   precisão além de duas casas e releitura financeira com comparação por `Decimal.as_tuple()`.
   Conferem saída não zero em falhas, preservação de resultados anteriores, caminhos independentes
@@ -412,9 +416,92 @@ Zeros finais adicionais no CSV preservam a representação de Decimal, sem alter
   acertos não reduziu consumo ou custo. São relações determinadas pelas entradas e fórmulas,
   sem evidência empírica sobre comportamento, aprendizagem ou qualidade dos feedbacks.
 
-A validação e o cálculo estão concluídos. Comparações monetárias e percentuais entre políticas,
-participações, custo por usuário, interpretação, gráficos, relatório e recomendações ainda não
-foram produzidos nesta rotina.
+A validação e o cálculo estão concluídos. As comparações monetárias e percentuais foram
+implementadas posteriormente, conforme a seção 5.7. Participações e custo por usuário não foram
+incorporados como indicadores à rotina. Gráficos, síntese final e recomendações permanecem pendentes.
+
+### 5.7. Políticas de feedback e sensibilidade dos tokens
+
+**Registro documental:** 19/11/2026. A implementação e a execução são anteriores a esta atualização;
+não foi atribuída uma data exata a esses eventos sem evidência adicional. Modelo, tarifas e câmbio
+continuam com as referências históricas de 18/11/2026. Não houve nova consulta às fontes.
+
+#### Funções e comparabilidade
+
+`comparar_politicas()` e `analisar_sensibilidade()` recebem a tabela de resultados já calculada,
+sem recalcular consumo ou custos pelo MVP. As auxiliares `_indexar_comparacoes()` e `_validar_par()`
+verificam colunas obrigatórias e únicas, identificadores preenchidos, sem duplicidade, e presença
+dos cenários necessários. Os pares são localizados por identificador, independentemente da ordem
+das linhas ou dos índices do DataFrame. A tabela de origem não é modificada.
+
+Os custos mensais em BRL e os campos financeiros exigidos devem ser Decimal finitos e não
+negativos nas funções de comparação. A leitura de condições continua exigindo tarifas e câmbio
+estritamente positivos. Entre cada cenário e sua referência devem coincidir as cinco hipóteses
+não variadas e os 12 campos de condições: provedor, modelo, modalidade, tarifas, câmbio, fontes e
+datas. O campo previsto deve realmente mudar; nomes e consumos derivados não definem o par.
+
+Nas políticas, varia somente `proporcao_acertos_com_feedback`, entre 0 e 1; a referência deve usar
+1, isto é, feedback em todas as respostas. Na sensibilidade, C10/C11 variam somente `tokens_entrada`
+e C12/C13 somente `tokens_saida`, com valor finito não negativo. Alterações nas demais hipóteses ou
+condições são rejeitadas com identificação do par e dos campos divergentes.
+
+`apresentar_comparacoes()` mostra as duas tabelas com símbolos monetários, sinais e percentuais;
+`formatar_percentual()` apresenta valores positivos com `+` e `None` como `Não aplicável`.
+A execução calcula e valida ambas as comparações antes de iniciar a exportação dos três arquivos.
+
+#### Exportações das comparações
+
+A execução continua sendo a da seção 5.6 e também substitui estes dois arquivos, sem acumular linhas:
+
+- `resultados/estudo_de_caso/comparacao_politicas.csv`: **seis linhas e 20 colunas**.
+- `resultados/estudo_de_caso/sensibilidade_tokens.csv`: **quatro linhas e 24 colunas**.
+
+Os caminhos padrão são relativos à pasta do script. As funções aceitam destinos temporários;
+por padrão, as comparações ficam na mesma pasta de `resultados_cenarios.csv`. A regra `/resultados/`
+as mantém fora do Git. A tabela original conserva suas 13 linhas e 35 colunas.
+
+Em cada exportação, os campos estão na ordem abaixo, seguidos dos mesmos 12 campos de condições
+listados na seção 5.6, de `provedor` até `data_consulta_cambio`:
+
+| Arquivo | Campos específicos, na ordem exportada |
+| --- | --- |
+| `comparacao_politicas.csv` | `id_cenario`, `id_referencia`, `usuarios_ativos`, `proporcao_acertos_com_feedback`, `custo_politica_mensal_br`, `custo_referencia_mensal_br`, `reducao_mensal_br`, `reducao_percentual` |
+| `sensibilidade_tokens.csv` | `id_cenario`, `id_referencia`, `campo_alterado`, `usuarios_ativos`, `tokens_entrada_referencia`, `tokens_saida_referencia`, `tokens_entrada_cenario`, `tokens_saida_cenario`, `custo_referencia_mensal_br`, `custo_cenario_mensal_br`, `variacao_mensal_br`, `variacao_percentual` |
+
+As exportações preservam UTF-8, vírgula entre campos, ponto decimal, cabeçalho e ausência de índice,
+sem símbolos monetários, sinais de porcentagem ou arredondamento para duas casas. Custos,
+diferenças e percentuais aplicáveis permanecem Decimal; os campos financeiros devem ser relidos
+como texto e convertidos diretamente para Decimal.
+
+As divisões percentuais seguem a precisão e o arredondamento do contexto Decimal vigente.
+A rotina não altera esse contexto nem aplica `quantize()` ou arredondamento explícito intermediário.
+Isso não significa precisão infinita para dízimas: um teste com precisão local de dez dígitos
+confere `33.33333333`, preservando a configuração. As duas casas são somente para apresentação.
+
+**Referência zero:** o percentual é `None`, exibido como `Não aplicável` e exportado como campo vazio.
+A diferença monetária permanece calculada e exportada, mesmo que negativa. Não substituir o
+percentual indefinido por zero. Esse comportamento está coberto por testes com tabelas simuladas;
+não é o caso das referências de custo positivo nos arquivos atuais do estudo.
+
+#### Evidências e alcance
+
+O arquivo de testes contém **17 métodos adicionais**, totalizando **47 métodos do estudo** e
+**235 no conjunto com os 188 do MVP**, em 18 classes. A contagem foi conferida nos arquivos atuais.
+A aprovação dos 235 na execução anterior foi informada no pedido desta atualização; não há log
+adicional dessa execução nos arquivos consultados. Não foi repetida a suíte em 19/11/2026.
+
+Os novos testes cobrem os resultados e fórmulas independentes das comparações, referências,
+identificadores ausentes/duplicados, colunas inválidas, hipóteses e condições incompatíveis,
+custos inválidos, preservação da tabela e ausência de recálculo. Também cobrem referência zero,
+precisão do contexto Decimal, exportação dos valores completos e falha de comparabilidade sem
+sobrescrever os três resultados anteriores. Casos de `subTest` não são métodos adicionais.
+
+Nesta revisão, as conferências pontuais de leitura dos CSVs já existentes confirmaram esquemas,
+seis pares de políticas, quatro variações de tokens e percentuais descritos na seção 6.
+Os componentes de custo de C05 também foram conferidos nos resultados exportados. Isso não é uma
+nova execução de `analise_estudo.py`, da suíte ou dos cenários, nem cria novos testes persistentes.
+As relações conferidas decorrem das hipóteses e fórmulas, sem comprovar comportamento dos
+estudantes, aprendizagem ou qualidade pedagógica equivalente. Não houve chamadas reais a APIs.
 
 ## 6. Unidade de análise e indicadores
 
@@ -428,17 +515,22 @@ Indicadores do estudo, com estágios distintos:
 - Quantidade mensal estimada de feedbacks: calculada.
 - Tokens mensais de entrada e de saída faturáveis: calculados.
 - Custo mensal de IA em USD e BRL: calculado.
-- Participação da entrada e da saída no custo mensal de IA.
-- Custo mensal de IA por usuário ativo, sem infraestrutura ou outras despesas.
-- Diferenças monetárias e percentuais entre políticas e entre as variações de tokens.
+- Participação da entrada e da saída no custo mensal de IA: interpretação pontual de C05 conferida;
+  indicador ainda não incorporado à rotina para todos os cenários.
+- Custo mensal de IA por usuário ativo: ainda não incorporado, sem infraestrutura ou outras despesas.
+- Diferenças monetárias e percentuais entre políticas e variações de tokens: calculadas e exportadas.
 
-A rotina do estudo já reutiliza o MVP para fornecer consumos e custos por cenário. Participações,
-custo por usuário e comparações específicas permanecem planejados para a próxima etapa; não são
-novas funcionalidades implementadas no terminal nem colunas já acrescentadas à exportação.
+A rotina do estudo fornece consumos, custos e as duas comparações. Participações e custo por usuário
+não são colunas das exportações atuais nem novas funcionalidades do menu do MVP.
 
 ### Participação no custo e custo por usuário
 
-Os custos dos componentes já estão exportados; suas participações e o custo por usuário são futuros:
+Os custos dos componentes já estão exportados. Em **C05**, entrada é **US$ 0,55**, isto é, **25%**
+dos US$ 2,20 mensais; saída é **US$ 1,65**, ou **75%**. A conferência pontual usa `0.55 / 2.20`
+e `1.65 / 2.20`, multiplicados por 100, diretamente com Decimal. São componentes de uma hipótese,
+sem medição real ou comprovação de qualidade. As participações foram interpretadas para C05, mas
+não foram adicionadas como indicadores calculados ou colunas da rotina. O custo por usuário
+permanece futuro. As fórmulas correspondentes são:
 
 - Custo de entrada em USD = tokens mensais de entrada ÷ 1000000 × tarifa de entrada por milhão.
 - Custo de saída em USD = tokens mensais de saída ÷ 1000000 × tarifa de saída por milhão.
@@ -451,32 +543,48 @@ valores em USD e BRL como se fossem a mesma unidade.
 
 ### Comparação das políticas
 
-Comparar políticas dentro da mesma escala. Feedback em todas as respostas será a referência:
-**C03 para 100 usuários, C06 para 500 e C09 para 1000**.
+A rotina calcula seis pares dentro da mesma escala, em ordem fixa por identificador:
 
-Para cada comparação, chamar de `C_ref` o custo mensal dessa referência e de `C_pol` o da política
-avaliada, ambos na mesma moeda:
+| Usuários | Políticas avaliadas | Referência: feedback em todas as respostas |
+| --- | --- | --- |
+| 100 | C01 e C02 | C03 |
+| 500 | C04 e C05 | C06 |
+| 1000 | C07 e C08 | C09 |
 
-- Diferença monetária, expressa como economia = `C_ref − C_pol`.
-- Redução percentual = `100 × (C_ref − C_pol) ÷ C_ref`.
+As fórmulas implementadas, com ambos os custos mensais em BRL, são:
 
-O denominador percentual é o custo da política de feedback em todas as respostas na mesma escala.
-Valor positivo de economia indica custo menor que a referência; negativo indica custo maior.
-Comparar escalas sob a mesma política separadamente, sem confundir os efeitos de usuários e política.
+- `reducao_mensal_br = custo_referencia - custo_politica`.
+- `reducao_percentual = reducao_mensal_br / custo_referencia * 100`.
+
+Redução positiva indica custo menor que a referência; negativa indicaria custo maior.
+O denominador é o custo de feedback em todas as respostas **na mesma escala**.
+Nos seis registros existentes, feedback somente nos erros reduz o custo em **60%**; feedback nos
+erros e em 25% dos acertos reduz em **45%**. As reduções se repetem nas três escalas sob as mesmas
+hipóteses, tarifas e cotação; não são evidência empírica de economia de escala ou aprendizagem.
+Comparar escalas sob a mesma política é uma leitura distinta, sem confundir usuários e política.
 
 ### Sensibilidade dos tokens
 
-Comparar cada cenário de **C10 a C13 com C05**, mantendo a referência fixa. Chamar de `C_var` o
-custo mensal da variação e de `C_05` o custo mensal de C05, na mesma moeda:
+A rotina compara C10 a C13 com **C05**, preservando as demais hipóteses e condições. As fórmulas são:
 
-- Variação monetária = `C_var − C_05`.
-- Variação percentual = `100 × (C_var − C_05) ÷ C_05`.
+- `variacao_mensal_br = custo_cenario - custo_C05`.
+- `variacao_percentual = variacao_mensal_br / custo_C05 * 100`.
 
-Variação positiva significa aumento; negativa significa redução. Aqui o denominador é C05, e não
-a política de feedback em todas as respostas usada na comparação principal.
+| Cenário | Única hipótese alterada contra C05 | Variação do custo mensal |
+| --- | --- | ---: |
+| C10 | Entrada de 500 para 250 tokens por feedback | -12,5% |
+| C11 | Entrada de 500 para 1000 tokens por feedback | +25% |
+| C12 | Saída de 300 para 150 tokens por feedback | -37,5% |
+| C13 | Saída de 300 para 600 tokens por feedback | +75% |
 
-**Se qualquer denominador for zero, a razão ou variação percentual correspondente será não
-aplicável**, com o motivo registrado. Não substituir esse caso por zero ou uma divisão inválida.
+Aqui, variação negativa significa redução e positiva significa aumento: a subtração é **cenário
+menos referência**, no sentido inverso da redução das políticas. O denominador é sempre o custo
+de **C05**, e não C03, C06 ou C09. Esses sinais e denominadores não são intercambiáveis.
+As variações usam tokens hipotéticos; não demonstram consumo medido ou qualidade equivalente.
+
+Se uma referência for zero, o percentual é não aplicável, exportado como campo vazio; a diferença
+absoluta é preservada. Outras razões futuras também deverão tratar denominador zero sem inventar
+um percentual. A seção 5.7 distingue esse caso testado dos arquivos atuais com referências positivas.
 
 ## 7. Andamento das etapas da análise
 
@@ -486,9 +594,10 @@ aplicável**, com o motivo registrado. Não substituir esse caso por zero ou uma
 3. **Processar e calcular — concluído:** a rotina da seção 5.6 valida os arquivos e produz consumos
    e custos dos 13 cenários, com condições fixas e Decimal financeiro. A execução foi conferida e
    a suíte passou. Isso não equivale a medição real de consumo ou teste de acesso à API.
-4. **Analisar e interpretar — pendente:** comparar políticas por escala e variações de tokens
-   contra C05, com diferenças monetárias, percentuais e denominadores claros. A conferência por
-   fórmula independente já está nos testes; as verificações aritméticas não substituem a análise.
+4. **Comparar — calculado e conferido:** seis pares de políticas por escala e quatro variações
+   de tokens contra C05, com diferenças, percentuais e denominadores documentados. A participação
+   dos componentes em C05 foi conferida pontualmente; a síntese interpretativa final permanece
+   pendente. Verificações aritméticas não comprovam comportamento real ou qualidade pedagógica.
 5. **Compartilhar — pendente:** produzir síntese interpretativa, relatório e dois gráficos:
    - Custo mensal por escala e política, com moeda e referência identificadas.
    - Variação do custo em relação a C05 na análise de tokens, identificando o fator alterado.
@@ -523,6 +632,8 @@ Situação dos entregáveis:
 - Tabela de entradas preparada em `dados/estudo_de_caso/cenarios.csv`, com C01 a C13, e condições
   compartilhadas em `condicoes_fixas.csv`: concluídas. Validação e cálculo reproduzíveis
   implementados em `analise_estudo.py`; exportação dos 13 resultados concluída, conforme 5.6.
+- Comparações de políticas e tokens calculadas, conferidas e exportadas, conforme 5.7 e 6.
+  Síntese interpretativa final e recomendações ainda não produzidas.
 - Dois gráficos conforme a etapa Compartilhar, ainda não produzidos, sem dashboard neste escopo.
 - Relatório curto com pergunta, preparação, resultados, recomendações condicionais e limitações,
   ainda não produzido.
@@ -547,19 +658,20 @@ o estudo tenha sido aprovado pelo curso.
 
 ## 10. Próximo passo
 
-1. Comparar políticas dentro de cada escala, usando C03, C06 e C09 como referências de feedback
-   em todas as respostas para 100, 500 e 1000 usuários, respectivamente.
-2. Avaliar a sensibilidade de C10 a C13 em relação a C05, mantendo modelo, tarifas e câmbio fixos.
-   Calcular indicadores pendentes da seção 6, explicitar denominadores e tratar divisões por zero.
-3. Interpretar as estimativas sob as hipóteses e somente depois produzir gráficos, relatório e
-   recomendações condicionais. Não apresentar relações aritméticas como descobertas sobre estudantes.
+1. Elaborar a síntese interpretativa dos custos e das comparações já calculadas, mantendo claros
+   referências, denominadores, sinais e limites das hipóteses. Não apresentar relações aritméticas
+   como descobertas sobre estudantes ou qualidade pedagógica.
+2. Preparar os dois gráficos previstos e o relatório, distinguindo resultados simulados de dados
+   observados. Participações gerais e custo por usuário não devem ser tratados como já implementados.
+3. Formular recomendações condicionais e um plano de medição real, sem inferir aprendizagem pelo custo.
 4. Manter a v0.1.0 publicada como referência histórica, sem mover, substituir ou modificar sua tag.
    A rotina separada do estudo não representa automaticamente uma nova release.
 
-**Concluído:** preparação dos dois CSVs, validação, cálculo, exportação dos 13 cenários e conferências
-registradas na seção 5.6. A pesquisa documental e a cotação histórica fixa permanecem preservadas.
-Não foram comprovados acesso à conta, configuração de raciocínio, consumo real ou qualidade
-pedagógica. Comparações analíticas, gráficos, relatório e recomendações continuam pendentes.
+**Concluído:** preparação, validação, cálculo e exportação dos 13 cenários; seis comparações de
+políticas e quatro de sensibilidade, com as conferências descritas nas seções 5.6 e 5.7.
+Pesquisa documental e cotação histórica fixa permanecem preservadas. Não foram comprovados acesso
+à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Gráficos, síntese final,
+relatório e recomendações continuam pendentes.
 
-Esta atualização altera somente documentação, sem repetir a execução dos cenários ou os testes.
-O código e o funcionamento do MVP permanecem inalterados.
+Esta atualização documental de 19/11/2026 não repete os cálculos ou os testes anteriores e não
+altera código, entradas ou resultados existentes. O funcionamento do MVP permanece preservado.

@@ -1780,3 +1780,70 @@ políticas dentro de cada escala e avaliar a sensibilidade dos tokens contra C05
 gráficos, relatório e recomendações permanecem pendentes. Os cenários não são dados observados,
 o estudo não está concluído ou aprovado pelo curso e a rotina não representa nova release.
 A v0.1.0 publicada e sua tag foram preservadas. Não houve commit ou push.
+
+## 40. Comparação das políticas de feedback e sensibilidade dos tokens
+
+**Data desta atualização documental:** 19/11/2026.
+
+**Etapa:** registro das comparações implementadas e exportadas, antes dos gráficos e da síntese final.
+
+**Objetivo dos pedidos:** comparar políticas dentro da mesma escala e variações de tokens contra
+C05, mantendo hipóteses e condições comparáveis e preservando o MVP v0.1.0 publicado.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Acrescentar à rotina do estudo as comparações por identificador, validar os pares e condições,
+calcular diferenças absolutas e percentuais com Decimal e exportar duas tabelas específicas.
+Registrar depois o comportamento confirmado no README, no estudo e neste histórico, sem alterar
+código ou repetir os testes nesta atualização documental.
+
+**Participação e aprendizado:** as explicações distinguem redução de custo, calculada como
+referência menos política, de variação de sensibilidade, calculada como cenário menos C05.
+O percentual depende da referência correta; denominador zero não deve ser substituído por zero.
+Preservar Decimal não significa precisão infinita em divisões: o contexto rege as dízimas.
+
+**Decisões e implementação registradas:**
+
+- `comparar_politicas()` produz seis pares: C01/C02 contra C03, C04/C05 contra C06 e C07/C08
+  contra C09. As referências usam feedback em todas as respostas na mesma escala de usuários.
+- `analisar_sensibilidade()` compara C10/C11 com C05 alterando somente entrada e C12/C13 alterando
+  somente saída. As demais hipóteses e todos os campos de condições devem permanecer iguais.
+- `_indexar_comparacoes()` e `_validar_par()` verificam colunas, identificadores, presença dos
+  cenários necessários, hipóteses e condições. Ordem das linhas e índices não definem os pares.
+- A rotina compara resultados já calculados, sem modificar a tabela de origem ou recalcular pelo
+  MVP. As validações e ambas as comparações terminam antes de iniciar as três exportações.
+- Exportar `resultados/estudo_de_caso/comparacao_politicas.csv` com seis linhas e 20 colunas e
+  `resultados/estudo_de_caso/sensibilidade_tokens.csv` com quatro linhas e 24 colunas. Ambos incluem
+  as condições e preservam UTF-8, vírgula, ponto decimal, cabeçalho, ausência de índice e Decimal.
+- Manter dados completos no CSV, formatação somente na apresentação e percentuais não aplicáveis
+  como campos vazios quando a referência for zero, preservando as diferenças absolutas.
+
+**Resultados registrados:** as exportações existentes e os resultados esperados nos testes
+mostram redução de 60% para feedback somente nos erros e de 45% para erros e 25% dos acertos,
+nas três escalas. As variações contra C05 são -12,5% em C10, +25% em C11, -37,5% em C12 e +75%
+em C13. Em C05, entrada custa USD 0.55 e representa 25%; saída custa USD 1.65 e representa 75%.
+Essa participação foi conferida pontualmente; não é um indicador incorporado à rotina para todos
+os cenários. Custo por usuário também não foi acrescentado.
+
+**Testes e evidências:** o arquivo atual confirma 17 métodos adicionados aos 30 do estudo, somando
+47; com os 188 do MVP, são **235 métodos em 18 classes**. Os novos testes cobrem referências,
+fórmulas, independência da ordem e do índice, hipóteses e condições incompatíveis, campos e custos
+inválidos, preservação da tabela, referência zero, contexto Decimal, exportação precisa e falha de
+comparabilidade sem sobrescrever os resultados anteriores. Casos de `subTest` não são métodos extras.
+
+A aprovação dos 235 métodos na execução anterior foi informada no pedido desta atualização.
+Não foi encontrado log adicional dessa execução nos arquivos consultados; a suíte não foi repetida
+em 19/11/2026. A data exata da implementação e dessa execução não foi presumida. As condições fixas
+continuam com pesquisa e referência cambial de 18/11/2026, distintas desta atualização documental.
+
+Nesta revisão, a leitura dos CSVs existentes conferiu esquemas, referências e percentuais, e uma
+conferência pontual com Decimal verificou os componentes e participações de C05. Essas verificações
+não executaram a rotina nem a suíte, não geraram arquivos e não acrescentaram testes persistentes.
+Não houve nova pesquisa de preços, câmbio ou chamada real a APIs. Os resultados decorrem das
+hipóteses e fórmulas, sem comprovar comportamento dos estudantes ou qualidade pedagógica equivalente.
+
+**Marco deste registro:** comparações calculadas e conferidas. Gráficos, síntese final, relatório
+e recomendações permanecem pendentes. Somente README.md, ESTUDO_DE_CASO.md e este histórico foram
+atualizados. Código e testes pendentes do autor foram preservados, assim como entradas, resultados,
+dependências, configurações e a tag v0.1.0. A rotina do estudo não representa nova release do MVP.
+Não houve commit ou push.

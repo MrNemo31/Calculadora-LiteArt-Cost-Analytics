@@ -158,6 +158,171 @@ def calcular_resultados(cenarios, condicoes):
     return pd.DataFrame.from_records(resultados, coerce_float=False)
 
 
+def _indexar_comparacoes(tabela, necessarios):
+    """Indexa registros por ID e verifica o contrato necessário às comparações."""
+    obrigatorias = {
+        "id_cenario", *COLUNAS_HIPOTESES, *COLUNAS_CONDICOES, "custo_ia_mensal_br",
+    }
+    if not tabela.columns.is_unique:
+        raise ValueError("Comparações: colunas duplicadas na tabela de resultados.")
+    ausentes = obrigatorias - set(tabela.columns)
+    if ausentes:
+        raise ValueError(f"Comparações: colunas obrigatórias ausentes: {sorted(ausentes)}.")
+    por_id = {}
+    for registro in tabela.to_dict("records"):
+        identificador = registro["id_cenario"]
+        if not isinstance(identificador, str) or not identificador.strip():
+            raise ValueError("Comparações: id_cenario deve ser um texto preenchido.")
+        if identificador in por_id:
+            raise ValueError(f"Comparações: identificador duplicado: {identificador}.")
+        por_id[identificador] = registro
+    ausentes = set(necessarios) - set(por_id)
+    if ausentes:
+        raise ValueError(f"Comparações: cenários necessários ausentes: {sorted(ausentes)}.")
+    for identificador in necessarios:
+        registro = por_id[identificador]
+        validar_numero_nao_negativo(
+            registro["custo_ia_mensal_br"], f"{identificador}: custo mensal BRL", (Decimal,),
+        )
+        for campo in CAMPOS_FINANCEIROS:
+            validar_numero_nao_negativo(
+                registro[campo], f"{identificador}: {campo}", (Decimal,),
+            )
+    return por_id
+
+
+def _validar_par(cenario, referencia, campo_alterado):
+    """Exige hipóteses fixas e condições idênticas; não compara nomes ou consumos derivados."""
+    campos_fixos = (
+        *(campo for campo in COLUNAS_HIPOTESES if campo != campo_alterado),
+        *COLUNAS_CONDICOES,
+    )
+    divergentes = [campo for campo in campos_fixos if cenario[campo] != referencia[campo]]
+    if divergentes:
+        raise ValueError(
+            f"{cenario['id_cenario']} contra {referencia['id_cenario']}: "
+            f"cenários não comparáveis; campos divergentes: {', '.join(divergentes)}."
+        )
+    if cenario[campo_alterado] == referencia[campo_alterado]:
+        raise ValueError(
+            f"{cenario['id_cenario']} contra {referencia['id_cenario']}: "
+            f"a hipótese '{campo_alterado}' deve ser diferente da referência."
+        )
+
+
+def comparar_politicas(tabela):
+    """Redução de IA = referência menos política; percentual usa a referência da mesma escala."""
+    pares = (
+        ("C01", "C03"), ("C02", "C03"), ("C04", "C06"),
+        ("C05", "C06"), ("C07", "C09"), ("C08", "C09"),
+    )
+    por_id = _indexar_comparacoes(tabela, {id_ for par in pares for id_ in par})
+    comparacoes = []
+    for id_cenario, id_referencia in pares:
+        cenario, referencia = por_id[id_cenario], por_id[id_referencia]
+        _validar_par(cenario, referencia, "proporcao_acertos_com_feedback")
+        proporcao = cenario["proporcao_acertos_com_feedback"]
+        validar_numero_nao_negativo(proporcao, f"{id_cenario}: proporção de acertos com feedback")
+        if referencia["proporcao_acertos_com_feedback"] != 1 or proporcao > 1:
+            raise ValueError(
+                f"{id_cenario} contra {id_referencia}: a referência deve usar proporção 1 "
+                "e a política deve estar entre 0 e 1."
+            )
+        custo_referencia = referencia["custo_ia_mensal_br"]
+        reducao = custo_referencia - cenario["custo_ia_mensal_br"]
+        # A divisão segue a precisão Decimal vigente; referência zero não tem percentual.
+        percentual = None if custo_referencia == 0 else reducao / custo_referencia * Decimal("100")
+        comparacoes.append({
+            "id_cenario": id_cenario,
+            "id_referencia": id_referencia,
+            "usuarios_ativos": cenario["usuarios_ativos"],
+            "proporcao_acertos_com_feedback": proporcao,
+            "custo_politica_mensal_br": cenario["custo_ia_mensal_br"],
+            "custo_referencia_mensal_br": custo_referencia,
+            "reducao_mensal_br": reducao,
+            "reducao_percentual": percentual,
+            **{campo: referencia[campo] for campo in COLUNAS_CONDICOES},
+        })
+    return pd.DataFrame.from_records(comparacoes, coerce_float=False)
+
+
+def analisar_sensibilidade(tabela):
+    """Variação de IA = cenário menos C05; somente o token previsto pode mudar."""
+    variacoes = (
+        ("C10", "tokens_entrada"), ("C11", "tokens_entrada"),
+        ("C12", "tokens_saida"), ("C13", "tokens_saida"),
+    )
+    por_id = _indexar_comparacoes(tabela, {"C05", *(id_ for id_, _ in variacoes)})
+    referencia = por_id["C05"]
+    custo_referencia = referencia["custo_ia_mensal_br"]
+    comparacoes = []
+    for id_cenario, campo_alterado in variacoes:
+        cenario = por_id[id_cenario]
+        _validar_par(cenario, referencia, campo_alterado)
+        validar_numero_nao_negativo(cenario[campo_alterado], f"{id_cenario}: {campo_alterado}")
+        variacao = cenario["custo_ia_mensal_br"] - custo_referencia
+        percentual = None if custo_referencia == 0 else variacao / custo_referencia * Decimal("100")
+        comparacoes.append({
+            "id_cenario": id_cenario,
+            "id_referencia": "C05",
+            "campo_alterado": campo_alterado,
+            "usuarios_ativos": cenario["usuarios_ativos"],
+            "tokens_entrada_referencia": referencia["tokens_entrada"],
+            "tokens_saida_referencia": referencia["tokens_saida"],
+            "tokens_entrada_cenario": cenario["tokens_entrada"],
+            "tokens_saida_cenario": cenario["tokens_saida"],
+            "custo_referencia_mensal_br": custo_referencia,
+            "custo_cenario_mensal_br": cenario["custo_ia_mensal_br"],
+            "variacao_mensal_br": variacao,
+            "variacao_percentual": percentual,
+            **{campo: referencia[campo] for campo in COLUNAS_CONDICOES},
+        })
+    return pd.DataFrame.from_records(comparacoes, coerce_float=False)
+
+
+def formatar_percentual(valor):
+    """Retorna texto com sinal; None significa percentual não aplicável, nunca zero."""
+    if valor is None:
+        return "Não aplicável"
+    sinal = "+" if valor > 0 else ""
+    return f"{sinal}{formatar_moeda_br(valor)}%"
+
+
+def apresentar_comparacoes(politicas, sensibilidade):
+    """Formata cópias de apresentação, sem arredondar os dados das comparações."""
+    formatos = {
+        campo: lambda valor: f"R$ {formatar_moeda_br(valor)}"
+        for campo in (
+            "custo_politica_mensal_br", "custo_referencia_mensal_br",
+            "custo_cenario_mensal_br", "reducao_mensal_br", "variacao_mensal_br",
+        )
+    }
+    formatos.update(reducao_percentual=formatar_percentual, variacao_percentual=formatar_percentual)
+    print("\nPolíticas — redução do custo mensal de IA contra feedback em todas as respostas")
+    print(politicas[[
+        "id_cenario", "id_referencia", "usuarios_ativos", "proporcao_acertos_com_feedback",
+        "custo_politica_mensal_br", "custo_referencia_mensal_br",
+        "reducao_mensal_br", "reducao_percentual",
+    ]].to_string(
+        index=False, formatters=formatos, na_rep="Não aplicável",
+        header=["Cenário", "Referência", "Usuários", "Proporção nos acertos",
+                "IA/mês BRL", "Referência BRL", "Redução BRL", "Redução (%)"],
+    ))
+    print("Redução = referência menos política; percentual usa a referência da mesma escala.")
+    print("\nTokens — variação do custo mensal de IA em relação a C05")
+    print(sensibilidade[[
+        "id_cenario", "id_referencia", "campo_alterado",
+        "tokens_entrada_cenario", "tokens_saida_cenario", "custo_cenario_mensal_br",
+        "variacao_mensal_br", "variacao_percentual",
+    ]].to_string(
+        index=False, formatters=formatos, na_rep="Não aplicável",
+        header=["Cenário", "Referência", "Hipótese", "Entrada/feedback", "Saída/feedback",
+                "IA/mês BRL", "Variação BRL", "Variação (%)"],
+    ))
+    print("Variação = cenário menos C05; sinal negativo indica redução e positivo indica aumento.")
+    print("Referência zero: percentual não aplicável (campo vazio no CSV).")
+    print("Relações das fórmulas sob hipóteses; não comprovam aprendizagem ou qualidade equivalente.")
+
 def apresentar_resultados(tabela):
     """Formata apenas a apresentação; os valores da tabela continuam numéricos."""
     colunas = [
@@ -183,8 +348,11 @@ def exportar_resultados(tabela, caminho):
     return caminho
 
 
-def executar_estudo(caminho_cenarios=None, caminho_condicoes=None, caminho_saida=None):
-    """Valida tudo e calcula antes de exportar; aceita caminhos temporários nos testes."""
+def executar_estudo(
+    caminho_cenarios=None, caminho_condicoes=None, caminho_saida=None,
+    caminho_politicas=None, caminho_sensibilidade=None,
+):
+    """Valida e compara tudo antes de exportar; aceita caminhos temporários nos testes."""
     entrada = PASTA / "dados" / "estudo_de_caso"
     cenarios = ler_cenarios_estudo(
         entrada / "cenarios.csv" if caminho_cenarios is None else caminho_cenarios
@@ -193,14 +361,29 @@ def executar_estudo(caminho_cenarios=None, caminho_condicoes=None, caminho_saida
         entrada / "condicoes_fixas.csv" if caminho_condicoes is None else caminho_condicoes
     )
     tabela = calcular_resultados(cenarios, condicoes)
-    destino = exportar_resultados(
-        tabela, PASTA / "resultados" / "estudo_de_caso" / "resultados_cenarios.csv"
-        if caminho_saida is None else caminho_saida,
+    politicas = comparar_politicas(tabela)
+    sensibilidade = analisar_sensibilidade(tabela)
+    destino = Path(
+        PASTA / "resultados" / "estudo_de_caso" / "resultados_cenarios.csv"
+        if caminho_saida is None else caminho_saida
     )
+    destino_politicas = (
+        destino.parent / "comparacao_politicas.csv"
+        if caminho_politicas is None else Path(caminho_politicas)
+    )
+    destino_sensibilidade = (
+        destino.parent / "sensibilidade_tokens.csv"
+        if caminho_sensibilidade is None else Path(caminho_sensibilidade)
+    )
+    for dados, caminho in (
+        (tabela, destino), (politicas, destino_politicas), (sensibilidade, destino_sensibilidade),
+    ):
+        exportar_resultados(dados, caminho)
     apresentar_resultados(tabela)
-    print(f"Arquivo salvo: {destino}")
+    apresentar_comparacoes(politicas, sensibilidade)
+    for caminho in (destino, destino_politicas, destino_sensibilidade):
+        print(f"Arquivo salvo: {caminho}")
     return tabela
-
 
 def main():
     try:

@@ -373,9 +373,12 @@ Firebase como alternativa em estudo; isso não implica contratação ou migraç�
 - 24 métodos de integração dos cenários, cotação, tabelas, mensagens e exportação.
 
 Esses 188 métodos passaram na validação em ambiente novo de 14/11/2026. A rotina do estudo
-acrescentou **30 métodos em uma classe** em [test_analise_estudo.py](test_analise_estudo.py),
-sem alterar os testes do MVP. Em 18/11/2026, a execução conjunta passou com **218 métodos em
-18 classes**. Alguns métodos usam `subTest`; suas combinações não são métodos adicionais.
+acrescentou inicialmente 30 métodos e depois **17 métodos para as comparações**, totalizando
+**47 métodos em uma classe** em [test_analise_estudo.py](test_analise_estudo.py), sem alterar os
+testes do MVP. São **235 métodos em 18 classes** no conjunto atual. Em 18/11/2026 passaram os
+218 métodos da primeira rotina; a aprovação dos 235 na execução posterior foi informada no pedido
+desta atualização, sem log de execução adicional nos arquivos consultados. A suíte não foi
+repetida em 19/11/2026. Casos de `subTest` não são métodos adicionais.
 Os testes persistentes simulam `input()` com `unittest.mock.patch` e usam
 arquivos temporários nas integrações. Conferem erros e cancelamento sem sobrescrita, execução de
 outra pasta, ordem de múltiplos cenários, cenário único, ausência de chamadas à infraestrutura e ao
@@ -395,7 +398,10 @@ Os testes do estudo cobrem esquema, campos obrigatórios, identificadores e comb
 conversões numéricas, taxas, datas e condições fixas. Também conferem fórmulas independentes,
 Decimal, precisão da exportação, preservação das entradas e dos resultados anteriores diante de
 falhas, importação sem efeitos, execução de outra pasta e reexecução sem duplicar linhas.
-As conferências pontuais do CSV real complementam esses testes, sem aumentar sua contagem.
+Os 17 métodos adicionais cobrem referências e fórmulas das comparações, identificação independente
+de ordem/índice, condições compatíveis, preservação da tabela, percentuais com referência zero,
+precisão do contexto Decimal e exportação das três tabelas. As conferências pontuais dos CSVs
+existentes complementam esses testes, sem aumentar sua contagem.
 Nesta atualização documental, a suíte não foi repetida; os resultados acima são da implementação.
 
 Para executar a suíte com o ambiente existente:
@@ -455,7 +461,10 @@ calculadora. O `cenarios.csv` do estudo inclui `id_cenario` além das sete colun
 o importador atual**. O MVP não lê automaticamente nenhum dos dois arquivos do estudo.
 A leitura específica está implementada em [analise_estudo.py](analise_estudo.py), separada do menu
 e do código do MVP. Ela valida os dois CSVs, adapta as hipóteses às funções reutilizáveis, calcula
-consumos e custos sob as condições fixas e exporta somente após concluir todos os registros.
+consumos e custos sob as condições fixas e calcula as comparações antes de exportar.
+`comparar_politicas()` produz seis pares: C01/C02 contra C03, C04/C05 contra C06 e C07/C08 contra
+C09, sempre dentro da mesma escala. `analisar_sensibilidade()` compara C10 a C13 com C05,
+variando somente o token previsto e mantendo hipóteses e condições comerciais compatíveis.
 Não consulta a rede. Importar o módulo não lê arquivos, imprime ou exporta resultados.
 
 Com o terminal na raiz do projeto, executar o cálculo, os testes do estudo ou toda a suíte:
@@ -469,9 +478,16 @@ Com o terminal na raiz do projeto, executar o cálculo, os testes do estudo ou t
 A saída é `resultados/estudo_de_caso/resultados_cenarios.csv`, relativa à pasta do script,
 independentemente da pasta atual do terminal. São **13 linhas e 35 colunas**: identificador e nome,
 seis hipóteses, sete consumos, oito custos e os 12 campos das condições com fontes e datas.
-A pasta é criada automaticamente e cada execução substitui o arquivo, sem acumular linhas.
-Erros de entrada encerram com mensagem e código diferente de zero, preservando resultados anteriores.
-O resultado fica ignorado pelo Git, junto dos demais arquivos de `resultados/`.
+A mesma execução também exporta:
+
+- `resultados/estudo_de_caso/comparacao_politicas.csv`: seis linhas e 20 colunas, com referências,
+  custos e reduções absolutas e percentuais, acompanhadas das condições utilizadas.
+- `resultados/estudo_de_caso/sensibilidade_tokens.csv`: quatro linhas e 24 colunas, com tokens
+  comparados, custos e variações absolutas e percentuais, acompanhadas das condições utilizadas.
+
+A pasta é criada automaticamente e cada execução substitui os arquivos, sem acumular linhas.
+Erros de entrada ou comparabilidade impedem a exportação e preservam resultados anteriores.
+Os três resultados ficam ignorados pelo Git, junto dos demais arquivos de `resultados/`.
 
 Tarifas, câmbio e custos permanecem `Decimal`. O terminal exibe uma tabela curta com identificador,
 usuários, feedbacks e custos mensais, usando `US$` e `R$`, vírgula decimal e duas casas somente na
@@ -479,8 +495,10 @@ apresentação. O CSV usa UTF-8, vírgula entre campos, ponto decimal, cabeçalh
 com valores completos. Na releitura, converter os campos financeiros de texto diretamente para
 Decimal. O esquema e as conferências estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md).
 
-**Os 13 cenários foram calculados e conferidos em 18/11/2026.** Comparações analíticas entre
-políticas e variações de tokens, gráficos, relatório e recomendações continuam pendentes.
+**Os 13 cenários foram calculados e conferidos em 18/11/2026; as comparações de políticas e tokens
+já estão implementadas e exportadas.** A atualização documental de 19/11/2026 registra esse avanço
+sem atribuir à implementação uma nova data ou atualizar as condições fixas. Gráficos, síntese final,
+relatório e recomendações continuam pendentes.
 As conferências não comprovam acesso pela conta da API, consumo real de tokens, configuração de
 raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado pelo
 curso ou validado pelo Google.
@@ -498,9 +516,9 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 [notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
-O próximo passo do estudo é comparar políticas dentro de cada escala e avaliar a sensibilidade
-dos tokens em relação a C05, usando os resultados já calculados. Depois, produzir os gráficos,
-relatório e recomendações condicionais. As verificações por fórmulas não são evidências empíricas.
+O próximo passo do estudo é elaborar a síntese interpretativa dos resultados e das comparações
+já calculadas, preparar os gráficos e o relatório e formular recomendações condicionais.
+As relações verificadas pelas fórmulas não são evidências empíricas sobre estudantes.
 A tag v0.1.0 permanece preservada como referência histórica.
 
 Ambientes e resultados gerados permanecem fora do versionamento: `.venv/` e `resultados/` pelas

@@ -397,5 +397,254 @@ class TestAnaliseEstudo(unittest.TestCase):
         self.assertEqual(saida.read_bytes(), anterior)
 
 
+    def resultados_comparacoes(self):
+        return estudo.calcular_resultados(
+            estudo.ler_cenarios_estudo(self.cenarios), estudo.ler_condicoes_fixas(self.condicoes),
+        )
+
+    def test_comparacao_politicas_referencias_custos_e_reducoes_independentes(self):
+        politicas = estudo.comparar_politicas(self.resultados_comparacoes())
+        esperados = (
+            ("C01", "C03", "0.32", "0.80", "60"),
+            ("C02", "C03", "0.44", "0.80", "45"),
+            ("C04", "C06", "1.60", "4.00", "60"),
+            ("C05", "C06", "2.20", "4.00", "45"),
+            ("C07", "C09", "3.20", "8.00", "60"),
+            ("C08", "C09", "4.40", "8.00", "45"),
+        )
+        self.assertEqual(len(politicas), 6)
+        for linha, (id_, ref, custo, base, percentual) in zip(
+            politicas.to_dict("records"), esperados, strict=True,
+        ):
+            self.assertEqual((linha["id_cenario"], linha["id_referencia"]), (id_, ref))
+            custo_br = Decimal(custo) * Decimal("5.8102")
+            base_br = Decimal(base) * Decimal("5.8102")
+            self.assertEqual(linha["custo_politica_mensal_br"], custo_br)
+            self.assertEqual(linha["custo_referencia_mensal_br"], base_br)
+            self.assertEqual(linha["reducao_mensal_br"], base_br - custo_br)
+            self.assertEqual(linha["reducao_percentual"], Decimal(percentual))
+            for campo in ("custo_politica_mensal_br", "custo_referencia_mensal_br",
+                          "reducao_mensal_br", "reducao_percentual", *estudo.CAMPOS_FINANCEIROS):
+                self.assertIsInstance(linha[campo], Decimal)
+
+    def test_sensibilidade_custos_diferencas_percentuais_e_campos_alterados(self):
+        tabela = self.resultados_comparacoes()
+        self.assertEqual(tabela.set_index("id_cenario").loc["C05", "custo_ia_mensal_usd"], Decimal("2.20"))
+        sensibilidade = estudo.analisar_sensibilidade(tabela)
+        esperados = (
+            ("C10", "tokens_entrada", "1.925", "-12.5", 250, 300),
+            ("C11", "tokens_entrada", "2.75", "25", 1000, 300),
+            ("C12", "tokens_saida", "1.375", "-37.5", 500, 150),
+            ("C13", "tokens_saida", "3.85", "75", 500, 600),
+        )
+        self.assertEqual(len(sensibilidade), 4)
+        for linha, (id_, campo, usd, percentual, entrada, saida) in zip(
+            sensibilidade.to_dict("records"), esperados, strict=True,
+        ):
+            self.assertEqual((linha["id_cenario"], linha["id_referencia"]), (id_, "C05"))
+            self.assertEqual(linha["campo_alterado"], campo)
+            self.assertEqual((linha["tokens_entrada_referencia"], linha["tokens_saida_referencia"]), (500, 300))
+            self.assertEqual((linha["tokens_entrada_cenario"], linha["tokens_saida_cenario"]), (entrada, saida))
+            self.assertEqual(tabela.set_index("id_cenario").loc[id_, "custo_ia_mensal_usd"], Decimal(usd))
+            custo_br = Decimal(usd) * Decimal("5.8102")
+            base_br = Decimal("2.20") * Decimal("5.8102")
+            self.assertEqual(linha["custo_cenario_mensal_br"], custo_br)
+            self.assertEqual(linha["custo_referencia_mensal_br"], base_br)
+            self.assertEqual(linha["variacao_mensal_br"], custo_br - base_br)
+            self.assertEqual(linha["variacao_percentual"], Decimal(percentual))
+            for coluna in ("custo_cenario_mensal_br", "custo_referencia_mensal_br",
+                           "variacao_mensal_br", "variacao_percentual"):
+                self.assertIsInstance(linha[coluna], Decimal)
+
+    def test_comparacoes_por_identificador_independem_da_ordem_e_do_indice(self):
+        tabela = self.resultados_comparacoes()
+        reordenada = tabela.iloc[::-1].copy()
+        reordenada.index = ["mesmo_indice"] * 13
+        for funcao in (estudo.comparar_politicas, estudo.analisar_sensibilidade):
+            assert_frame_equal(funcao(reordenada), funcao(tabela), check_exact=True)
+
+    def test_comparacoes_nao_alteram_entradas_nem_recalculam_mvp(self):
+        tabela = self.resultados_comparacoes()
+        antes = tabela.copy(deep=True)
+        with patch.object(estudo, "calcular_consumo_cenario", side_effect=AssertionError("recálculo")), \
+                patch.object(estudo, "calcular_custo_ia_cenario", side_effect=AssertionError("recálculo")):
+            politicas = estudo.comparar_politicas(tabela)
+            sensibilidade = estudo.analisar_sensibilidade(tabela)
+        with redirect_stdout(io.StringIO()):
+            estudo.apresentar_comparacoes(politicas, sensibilidade)
+        assert_frame_equal(tabela, antes, check_exact=True)
+
+    def test_comparacoes_rejeitam_identificadores_ausentes_ou_duplicados(self):
+        tabela = self.resultados_comparacoes()
+        for funcao, ids in (
+            (estudo.comparar_politicas, [f"C{i:02d}" for i in range(1, 10)]),
+            (estudo.analisar_sensibilidade, ["C05", "C10", "C11", "C12", "C13"]),
+        ):
+            for id_ in ids:
+                with self.subTest(funcao=funcao.__name__, id=id_):
+                    with self.assertRaisesRegex(ValueError, f"ausentes.*{id_}"):
+                        funcao(tabela[tabela["id_cenario"] != id_])
+                    duplicada = pd.concat([tabela, tabela[tabela["id_cenario"] == id_]])
+                    with self.assertRaisesRegex(ValueError, f"duplicado.*{id_}"):
+                        funcao(duplicada)
+
+    def test_comparacoes_rejeitam_colunas_ausentes_duplicadas_e_id_vazio(self):
+        tabela = self.resultados_comparacoes()
+        for funcao in (estudo.comparar_politicas, estudo.analisar_sensibilidade):
+            for campo in ("id_cenario", "taxa_acerto", "modelo", "custo_ia_mensal_br"):
+                with self.subTest(funcao=funcao.__name__, campo=campo):
+                    with self.assertRaisesRegex(ValueError, "colunas obrigatórias ausentes"):
+                        funcao(tabela.drop(columns=campo))
+            with self.assertRaisesRegex(ValueError, "colunas duplicadas"):
+                funcao(pd.concat([tabela, tabela[["modelo"]]], axis=1))
+            invalida = tabela.copy()
+            invalida.loc[invalida["id_cenario"] == "C05", "id_cenario"] = ""
+            with self.assertRaisesRegex(ValueError, "id_cenario.*preenchido"):
+                funcao(invalida)
+
+    def test_politicas_rejeitam_hipoteses_ou_condicoes_diferentes(self):
+        tabela = self.resultados_comparacoes()
+        campos = [c for c in estudo.COLUNAS_HIPOTESES if c != "proporcao_acertos_com_feedback"]
+        for campo in (*campos, *estudo.COLUNAS_CONDICOES):
+            with self.subTest(campo=campo):
+                invalida = tabela.copy(deep=True)
+                valor = invalida.loc[0, campo]
+                invalida.loc[0, campo] = valor + " alterado" if isinstance(valor, str) else valor + 1
+                with self.assertRaisesRegex(ValueError, f"C01 contra C03.*{campo}"):
+                    estudo.comparar_politicas(invalida)
+
+    def test_politicas_exigem_referencia_todas_respostas_e_taxa_valida(self):
+        tabela = self.resultados_comparacoes()
+        for id_, valor in (("C03", 0.5), ("C01", 1.1), ("C01", -0.1)):
+            with self.subTest(id=id_, valor=valor):
+                invalida = tabela.copy()
+                invalida.loc[invalida["id_cenario"] == id_, "proporcao_acertos_com_feedback"] = valor
+                with self.assertRaises(ValueError):
+                    estudo.comparar_politicas(invalida)
+
+    def test_sensibilidade_rejeita_alteracoes_fora_do_token_previsto(self):
+        tabela = self.resultados_comparacoes()
+        for id_, alterado in (("C10", "tokens_entrada"), ("C11", "tokens_entrada"),
+                              ("C12", "tokens_saida"), ("C13", "tokens_saida")):
+            campos = [c for c in estudo.COLUNAS_HIPOTESES if c != alterado]
+            for campo in (*campos, *estudo.COLUNAS_CONDICOES):
+                with self.subTest(id=id_, campo=campo):
+                    invalida = tabela.copy(deep=True)
+                    indice = invalida.index[invalida["id_cenario"] == id_][0]
+                    valor = invalida.loc[indice, campo]
+                    invalida.loc[indice, campo] = valor + " alterado" if isinstance(valor, str) else valor + 1
+                    with self.assertRaisesRegex(ValueError, f"{id_} contra C05.*{campo}"):
+                        estudo.analisar_sensibilidade(invalida)
+
+    def test_sensibilidade_exige_mudanca_real_no_token_previsto(self):
+        tabela = self.resultados_comparacoes()
+        invalida = tabela.copy()
+        invalida.loc[invalida["id_cenario"] == "C10", "tokens_entrada"] = 500
+        with self.assertRaisesRegex(ValueError, "C10 contra C05.*tokens_entrada.*diferente"):
+            estudo.analisar_sensibilidade(invalida)
+
+    def test_comparacoes_rejeitam_custos_float_negativos_e_nao_finitos(self):
+        tabela = self.resultados_comparacoes()
+        for funcao in (estudo.comparar_politicas, estudo.analisar_sensibilidade):
+            for valor in (2.2, Decimal("-1"), Decimal("NaN"), Decimal("Infinity")):
+                with self.subTest(funcao=funcao.__name__, valor=valor):
+                    invalida = tabela.copy()
+                    invalida.loc[invalida["id_cenario"] == "C05", "custo_ia_mensal_br"] = valor
+                    with self.assertRaises((TypeError, ValueError)):
+                        funcao(invalida)
+
+    def test_politicas_referencia_zero_nao_inventa_percentual(self):
+        tabela = self.resultados_comparacoes()
+        tabela.loc[tabela["id_cenario"].isin(["C03", "C06", "C09"]), "custo_ia_mensal_br"] = Decimal("0")
+        politicas = estudo.comparar_politicas(tabela)
+        for linha in politicas.to_dict("records"):
+            self.assertIsNone(linha["reducao_percentual"])
+            self.assertEqual(linha["reducao_mensal_br"], -linha["custo_politica_mensal_br"])
+        self.assertEqual(estudo.formatar_percentual(None), "Não aplicável")
+
+    def test_sensibilidade_referencia_zero_preserva_diferenca_absoluta(self):
+        tabela = self.resultados_comparacoes()
+        tabela.loc[tabela["id_cenario"] == "C05", "custo_ia_mensal_br"] = Decimal("0")
+        for linha in estudo.analisar_sensibilidade(tabela).to_dict("records"):
+            self.assertIsNone(linha["variacao_percentual"])
+            self.assertEqual(linha["variacao_mensal_br"], linha["custo_cenario_mensal_br"])
+
+    def test_percentuais_seguem_precisao_decimal_sem_alterar_configuracao(self):
+        from decimal import getcontext, localcontext
+        tabela = self.resultados_comparacoes()
+        tabela.loc[tabela["id_cenario"] == "C01", "custo_ia_mensal_br"] = Decimal("2")
+        tabela.loc[tabela["id_cenario"] == "C03", "custo_ia_mensal_br"] = Decimal("3")
+        precisao_original = getcontext().prec
+        with localcontext() as contexto:
+            contexto.prec = 10
+            resultado = estudo.comparar_politicas(tabela)
+            self.assertEqual(resultado.iloc[0]["reducao_percentual"], Decimal("33.33333333"))
+            self.assertEqual(contexto.prec, 10)
+        self.assertEqual(getcontext().prec, precisao_original)
+
+    def test_exportacao_comparacoes_preserva_decimal_e_percentual_nao_aplicavel(self):
+        self.alterar(self.condicoes, "brl_por_usd", "5.81023456789")
+        tabela = self.resultados_comparacoes()
+        for nome, funcao, percentual in (
+            ("politicas", estudo.comparar_politicas, "reducao_percentual"),
+            ("sensibilidade", estudo.analisar_sensibilidade, "variacao_percentual"),
+        ):
+            for zero in (False, True):
+                with self.subTest(nome=nome, zero=zero):
+                    entrada = tabela.copy()
+                    if zero:
+                        ids = ["C03", "C06", "C09"] if nome == "politicas" else ["C05"]
+                        entrada.loc[entrada["id_cenario"].isin(ids), "custo_ia_mensal_br"] = Decimal("0")
+                    comparacoes = funcao(entrada)
+                    antes = comparacoes.copy(deep=True)
+                    caminho = self.raiz / f"{nome}_{zero}.csv"
+                    estudo.exportar_resultados(comparacoes, caminho)
+                    registros = self.ler_texto(caminho)
+                    self.assertEqual(len(registros), len(comparacoes))
+                    for texto, original in zip(registros, comparacoes.to_dict("records"), strict=True):
+                        for campo, valor in original.items():
+                            if isinstance(valor, Decimal):
+                                self.assertEqual(texto[campo], str(valor))
+                                self.assertEqual(Decimal(texto[campo]).as_tuple(), valor.as_tuple())
+                        if zero:
+                            self.assertEqual(texto[percentual], "")
+                    assert_frame_equal(comparacoes, antes, check_exact=True)
+
+    def test_fluxo_exporta_tres_tabelas_e_mostra_sinais_sem_modificar_dados(self):
+        caminho_politicas = self.raiz / "outra" / "politicas.csv"
+        caminho_sensibilidade = self.raiz / "outra" / "tokens.csv"
+        with redirect_stdout(io.StringIO()) as texto:
+            tabela = estudo.executar_estudo(
+                self.cenarios, self.condicoes, self.saida, caminho_politicas, caminho_sensibilidade,
+            )
+        self.assertEqual(tabela.shape, (13, 35))
+        self.assertEqual(len(self.ler_texto(self.saida)), 13)
+        self.assertEqual(len(self.ler_texto(caminho_politicas)), 6)
+        self.assertEqual(len(self.ler_texto(caminho_sensibilidade)), 4)
+        self.assertIn("+60,00%", texto.getvalue())
+        self.assertIn("-12,50%", texto.getvalue())
+        self.assertIn("+75,00%", texto.getvalue())
+        self.assertIn("campo vazio no CSV", texto.getvalue())
+        self.assertEqual(estudo.formatar_percentual(Decimal("0")), "0,00%")
+
+    def test_falha_de_comparabilidade_preserva_todos_os_csvs_anteriores(self):
+        self.saida.parent.mkdir()
+        destinos = (
+            self.saida, self.saida.parent / "comparacao_politicas.csv",
+            self.saida.parent / "sensibilidade_tokens.csv",
+        )
+        for caminho in destinos:
+            caminho.write_bytes(b"anterior")
+        original = self.cenarios.read_bytes()
+        for numero in (0, 9):
+            with self.subTest(registro=numero):
+                self.cenarios.write_bytes(original)
+                self.alterar(self.cenarios, "taxa_acerto", "0.61", numero=numero)
+                with redirect_stdout(io.StringIO()) as texto, self.assertRaisesRegex(ValueError, "não comparáveis"):
+                    estudo.executar_estudo(self.cenarios, self.condicoes, self.saida)
+                self.assertEqual(texto.getvalue(), "")
+                for caminho in destinos:
+                    self.assertEqual(caminho.read_bytes(), b"anterior")
+
 if __name__ == "__main__":
     unittest.main()
