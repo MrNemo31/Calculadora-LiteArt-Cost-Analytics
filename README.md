@@ -527,8 +527,8 @@ sem atualizar as condições fixas. Os dois gráficos foram implementados e gera
 conforme abaixo. A revisão visual foi concluída no Chrome nas dimensões informadas. As participações
 e os custos por usuário foram implementados e conferidos em **25/11/2026**. A interpretação e a
 formulação de recomendações condicionais foram concluídas nessa data. O relatório final e as duas
-imagens estão produzidos; revisão final, conferência das orientações do curso e publicação do
-estudo permanecem pendentes.
+imagens estão produzidos. A revisão técnica local de 25/11/2026 não identificou divergências
+materiais; conferência das orientações do curso e publicação do estudo permanecem pendentes.
 As conferências não comprovam acesso pela conta da API, consumo real de tokens, configuração de
 raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado pelo
 curso ou validado pelo Google.
@@ -543,9 +543,11 @@ para o repositório. Os HTMLs interativos e os quatro CSVs de resultados ficam f
 ser regenerados pelos comandos de reprodução abaixo.
 
 O material foi produzido e conferido no alcance documentado, mas o estudo ainda não foi publicado,
-aprovado pelo Google ou avaliado pelo curso. Permanecem a revisão final de coerência, a conferência
-das orientações específicas da atividade e a preparação da publicação. O estudo é separado do
-MVP v0.1.0 publicado e não representa uma nova release da calculadora.
+aprovado pelo Google ou avaliado pelo curso. A revisão final de coerência foi realizada localmente
+em 25/11/2026, conforme [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md); a apresentação no GitHub não foi
+observada. Permanecem a conferência das orientações específicas da atividade e a preparação da
+publicação. O estudo é separado do MVP v0.1.0 publicado e não representa uma nova release da
+calculadora.
 
 ### Interpretação e recomendações propostas
 
@@ -647,9 +649,10 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 [notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
-O relatório final do estudo e suas imagens estão produzidos. Os próximos passos são a revisão
-final de coerência, a conferência das orientações específicas do curso, inclusive a declaração do
-apoio de IA, e a preparação da publicação. O estudo ainda não foi publicado.
+O relatório final do estudo e suas imagens passaram pela revisão técnica local de coerência.
+Os próximos passos são a revisão dos materiais pelo responsável, a conferência das orientações
+específicas do curso, inclusive a declaração do apoio de IA, e a preparação da publicação.
+O estudo ainda não foi publicado; a revisão local não comprova conformidade com a atividade.
 A revisão dos HTMLs em outros tamanhos ou navegadores depende de uma conferência própria, sem
 ampliar automaticamente o alcance já comprovado.
 As relações verificadas pelas fórmulas não são evidências empíricas sobre estudantes.

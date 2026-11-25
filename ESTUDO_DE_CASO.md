@@ -7,8 +7,9 @@ concluídos e conferidos. Os dois gráficos estão implementados, com revisão v
 seção 5.10. Participações de custo e custos por usuário ativo foram implementados e verificados em
 25/11/2026, conforme 5.11. A interpretação e as recomendações condicionais foram documentadas nessa
 data, conforme 5.12. O relatório final e suas duas imagens foram produzidos conforme 5.13.
-Revisão final de coerência, conferência das orientações do curso e preparação da publicação
-permanecem pendentes; piloto, coleta e avaliação pedagógica não foram executados.
+A revisão técnica final local de 25/11/2026 não encontrou divergências materiais, conforme 5.14.
+Conferência das orientações do curso e preparação da publicação permanecem pendentes; piloto,
+coleta e avaliação pedagógica não foram executados.
 As condições fixas permanecem com pesquisa e referência de 18/11/2026; a pausa no desenvolvimento
 não atualizou modelo, tarifas, cotação ou datas históricas.
 O estudo se destina ao Google Data Analytics Professional Certificate, sem aprovação formal do
@@ -1024,6 +1025,38 @@ final de coerência, a conferência das orientações específicas do curso, inc
 e a preparação da publicação. A produção do relatório não encerra o estudo nem comprova aprovação
 pelo Google, avaliação pelo curso ou revisão final aprovada pelo responsável.
 
+### 5.14. Revisão final local antes da publicação — 2026-11-25
+
+Revisados README, planejamento do estudo, interpretação, relatório e registros pertinentes de
+PROMPTS.md. O Git estava limpo em `main`, no commit
+`e384020fbdd861082784bfcfdd0fea69436d89bc`; os ajustes documentais desta revisão ainda precisam
+ser incorporados a um commit posterior. A tag v0.1.0 permanece no commit já registrado na seção 1.
+
+A conferência independente dos seis CSVs com Decimal validou os 13 cenários/resultados, seis
+comparações, quatro sensibilidades e 13 indicadores. Referências, denominadores, sinais, moedas,
+valores citados, datas e condições históricas estão coerentes, sem divergências materiais.
+O tratamento de denominadores zero foi conferido no código e nos testes existentes por leitura,
+sem executá-los. A contagem estática confirma 290 métodos em 21 classes; isso não é nova aprovação
+da suíte. As versões instaladas coincidem com requirements.txt, sem reinstalação ou atualização.
+
+A prévia local do relatório usou Markdown-it já instalado e Chrome, com a página offline.
+Foram observados abertura, figuras e tabelas de resultados/recomendações em 1440×1000; em 800×900,
+foi conferida a seção de sensibilidade. Imagens carregaram sem cortes observados; seus textos
+diminuem na janela menor, com valores também disponíveis nas tabelas e imagens em tamanho original.
+Essa prévia não é a renderização final do GitHub. Os PNGs correspondem, por hash, às exportações
+dos HTMLs atuais calculadas apenas em memória; nenhuma imagem ou gráfico foi substituído.
+
+Relatório, imagens, entradas e arquivos necessários à reprodução estão versionados e não ignorados.
+Resultados gerados, HTMLs e ambientes permanecem ignorados. O relatório é compreensível sem hover
+ou acesso aos resultados ignorados. As instruções de reprodução estão coerentes; instalação limpa,
+execução da análise e suíte completa não foram repetidas nesta revisão documental.
+
+**Resultado:** pronto tecnicamente para publicação em portfólio no alcance local conferido,
+sem declaração de publicação ou aprovação pelo responsável. Não foram disponibilizadas instruções
+específicas ou critérios de avaliação do curso: sua conferência, inclusive quanto ao apoio de IA,
+depende do responsável. A revisão dos materiais pelo responsável e a preparação da publicação
+continuam pendentes. Não houve validação empírica, piloto ou avaliação de aprendizagem.
+
 ## 6. Unidade de análise e indicadores
 
 No CSV de cenários e na tabela de resultados, **uma linha representa um cenário mensal**,
@@ -1114,7 +1147,7 @@ um percentual. A seção 5.7 distingue esse caso testado dos arquivos atuais com
 3. **Processar e calcular — concluído:** a rotina da seção 5.6 valida os arquivos e produz consumos
    e custos dos 13 cenários, com condições fixas e Decimal financeiro. A execução foi conferida e
    a suíte passou. Isso não equivale a medição real de consumo ou teste de acesso à API.
-4. **Comparar — calculado e conferido:** seis pares de políticas por escala e quatro variações
+4. **Analisar — comparações calculadas e conferidas:** seis pares de políticas por escala e quatro variações
    de tokens contra C05, com diferenças, percentuais e denominadores documentados. Participações
    e custos por usuário foram implementados e conferidos em 25/11/2026 para os 13 cenários.
    A interpretação está documentada na seção 5.12. Verificações aritméticas não comprovam
@@ -1122,7 +1155,8 @@ um percentual. A seção 5.7 distingue esse caso testado dos arquivos atuais com
 5. **Compartilhar — parcialmente implementado:** dois gráficos gerados em HTML offline: custo
    mensal por escala/política e sensibilidade dos tokens contra C05, conforme 5.8 e 5.9. A revisão
    visual está concluída no alcance da seção 5.10. Síntese, relatório e PNGs estão produzidos,
-   conforme 5.12 e 5.13; revisão final, orientações do curso e publicação permanecem pendentes.
+   conforme 5.12 e 5.13. A revisão técnica local está em 5.14; orientações do curso e publicação
+   permanecem pendentes.
 6. **Agir — propostas formuladas, execução pendente:** recomendações condicionais e plano de medição
    estão documentados na seção 5.12. Piloto, coleta de dados e avaliação pedagógica não foram realizados;
    nenhuma política foi adotada definitivamente com base nesta síntese.
@@ -1164,7 +1198,8 @@ Situação dos entregáveis:
   inspecionados conforme 5.13, sem dashboard. Outros tamanhos e navegadores não foram validados.
 - Relatório final com pergunta, fontes, preparação, resultados, dois gráficos, recomendações
   condicionais e limitações: produzido em [RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md), com duas
-  imagens conforme 5.13. Revisão final, orientações do curso e publicação permanecem pendentes.
+  imagens conforme 5.13. Revisão técnica local realizada conforme 5.14; revisão pelo responsável,
+  orientações do curso e publicação permanecem pendentes.
 - Apoio de IA descrito no relatório; sua adequação às orientações específicas da atividade ainda
   precisa ser conferida, sem atribuir decisões ou verificações pessoais não confirmadas.
 
@@ -1186,8 +1221,8 @@ o estudo tenha sido aprovado pelo curso.
 
 ## 10. Próximo passo
 
-1. Realizar a revisão final de coerência de [RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md), suas imagens,
-   fontes e materiais de apoio, sem tratar estimativas como dados observados ou presumir aprovação.
+1. Revisar os materiais pelo responsável, considerando a revisão técnica local da seção 5.14,
+   sem tratar estimativas como dados observados ou presumir aprovação.
 2. Revisar o relatório contra as orientações da atividade do curso, inclusive a transparência
    sobre apoio de IA. Essa conferência e a publicação do estudo ainda não ocorreram.
 3. Preparar a publicação após a revisão. Piloto, coleta e avaliação pedagógica continuam propostas
@@ -1204,12 +1239,14 @@ Pesquisa documental e cotação histórica fixa permanecem preservadas. Não for
 à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Os indicadores foram
 implementados e verificados em 25/11/2026. A interpretação e as recomendações condicionais foram
 documentadas nessa data, conforme 5.12. Relatório final e imagens estão produzidos conforme 5.13;
-revisão final de coerência, orientações do curso e publicação permanecem pendentes.
+revisão técnica local de coerência realizada conforme 5.14. Revisão pelo responsável, orientações
+do curso e publicação permanecem pendentes.
 Nenhuma ação de piloto, coleta ou avaliação pedagógica foi executada.
 
 A etapa dos indicadores de 25/11/2026 acrescentou cálculo, testes e exportação, conforme 5.11.
-A etapa posterior de interpretação acrescentou somente a síntese e as propostas da seção 5.12;
+A etapa posterior de interpretação acrescentou somente a síntese e as propostas da seção 5.12.
 A etapa do relatório acrescentou o texto e duas imagens exportadas dos HTMLs existentes, conforme
-5.13. Esta atualização registra os materiais sem nova execução de testes, cálculos, exportações
-ou inspeção visual.
-O funcionamento do MVP e as condições históricas permanecem preservados.
+5.13. O registro documental dessa etapa não repetiu testes, cálculos, exportações ou inspeção
+visual.
+A revisão técnica local posterior está na seção 5.14. O funcionamento do MVP e as condições
+históricas permanecem preservados.

@@ -2221,3 +2221,35 @@ revisão final de coerência, a conferência das instruções específicas do cu
 apoio de IA e a preparação da publicação. O estudo ainda não foi publicado ou declarado aprovado
 pelo Google ou avaliado pelo curso. O MVP v0.1.0 publicado e sua tag permanecem preservados.
 Não houve instalações, commit, push ou publicação.
+
+## 47. Revisão final local do estudo antes da publicação
+
+**Data:** 25/11/2026.
+
+**Objetivo do pedido:** conferir pergunta, narrativa, cálculos, proveniência, gráficos e reprodução
+antes da publicação, permitindo somente pequenos ajustes documentais e preservando o MVP.
+
+**Revisão realizada:** leitura dos cinco documentos do estudo e dos registros pertinentes,
+conferência independente dos seis CSVs com Decimal e consulta pontual ao código e testes.
+Os 13 cenários/resultados, seis políticas, quatro sensibilidades e 13 indicadores não apresentaram
+divergências materiais. Referências, sinais, denominadores, unidades e condições de 18/11/2026
+foram preservados. A contagem estática confirmou 290 métodos em 21 classes; nenhum teste foi
+executado. As versões instaladas coincidem com requirements.txt, sem nova instalação limpa.
+
+O relatório foi renderizado localmente com Markdown-it e Chrome, offline. Abertura, figuras e
+tabelas foram observadas em 1440×1000; a seção de sensibilidade também em 800×900. Textos das
+figuras ficam menores quando reduzidos; tabelas e imagens originais permitem consultar valores.
+Isso não comprova a renderização final no GitHub nem acesso em todos os dispositivos.
+Os PNGs coincidiram por hash com exportações dos HTMLs atuais apenas em memória, sem substituir
+arquivos. Links, versionamento e regras de exclusão dos arquivos de publicação foram conferidos.
+
+**Ajustes documentais:** README e ESTUDO_DE_CASO registram a revisão local, seus limites e as
+pendências do responsável. A etapa de comparação/interpretação foi identificada como Analisar
+no andamento. Este registro foi acrescentado sem reescrever o histórico. Não foram alterados
+relatório, interpretação, código, testes, dados, imagens, HTMLs, dependências ou a tag v0.1.0.
+
+**Resultado:** pronto tecnicamente para portfólio no alcance revisado. Instruções específicas do
+curso não foram disponibilizadas; conformidade e declaração de apoio de IA dependem de conferência
+pelo responsável. Revisão dos materiais pelo responsável, commit final e publicação continuam
+pendentes, sem aprovação presumida. Não houve nova execução da análise ou da suíte, atualização
+de preços/câmbio, commit, push ou publicação.
