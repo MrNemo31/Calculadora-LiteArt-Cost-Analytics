@@ -2114,3 +2114,56 @@ arquivos e alterações pendentes foram preservados, incluindo código, dados, H
 **Marco deste registro:** indicadores implementados e verificados. Interpretação final,
 recomendações e relatório permanecem como próximos passos. O estudo continua separado do MVP
 v0.1.0 publicado, sem alteração da tag. Não houve instalações, commit ou push.
+
+## 45. Interpretação dos resultados e recomendações condicionais do estudo
+
+**Data desta atualização documental:** 25/11/2026.
+
+**Data da interpretação e conferência registrada:** 25/11/2026. A criação da síntese e esta
+atualização são etapas distintas, realizadas na mesma data; as condições fixas são de 18/11/2026.
+
+**Etapa:** interpretação concluída e recomendações propostas; relatório final e ações pendentes.
+
+**Objetivo dos pedidos:** interpretar os resultados, fundamentar recomendações e propor medições
+futuras, preservando o MVP, as condições históricas e a diferença entre hipóteses e uso observado.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Conferir os arquivos de entrada e os quatro resultados existentes diretamente com Decimal e criar
+INTERPRETACAO_ESTUDO.md como síntese para o relatório final. Explicar políticas, sensibilidade e
+custo por usuário, com denominadores e limites explícitos. Para cada recomendação, apresentar
+evidência, ação proposta, condição e dado a medir. Depois, atualizar somente README.md,
+ESTUDO_DE_CASO.md e este histórico, sem repetir cálculos ou testes.
+
+**Material produzido:** [INTERPRETACAO_ESTUDO.md](INTERPRETACAO_ESTUDO.md) reúne a resposta à pergunta
+principal, seis comparações de políticas, quatro sensibilidades contra C05, escala e custo por
+usuário, cinco recomendações condicionais, plano de medição futura e limitações. Registra reduções
+de 60% e 45% contra a referência da mesma escala e variações de -12,5%, +25%, -37,5% e +75% contra
+C05. Explica que 25% de entrada e 75% de saída são as participações em C05, não em todos os cenários.
+
+**Propostas e limites:** avaliar feedback somente nos erros e opcional nos acertos; medir tokens
+faturáveis; revisar clareza e concisão junto da qualidade; planejar a parcela de orçamento de IA
+com hipóteses explícitas. O plano propõe medir uso, acertos com feedback, tokens por tipo de
+feedback, falhas, novas tentativas e qualidade. Toggle ligado não equivale à parcela efetiva de
+acertos com feedback. Nenhuma política foi adotada definitivamente; piloto, coleta e avaliação
+pedagógica não foram executados. Menor custo não comprova superioridade pedagógica.
+
+**Conferências efetivamente realizadas na etapa da interpretação:** os dois CSVs de entrada e os
+quatro de resultados foram lidos como texto, com reconstrução direta em Decimal. A conferência
+independente comparou 13 resultados, seis políticas, quatro sensibilidades e 13 indicadores às
+entradas e condições, incluindo referências, denominadores, sinais e precisão. Não encontrou
+divergências. Foram confirmados sete links relativos válidos e a preservação por hashes dos
+26 arquivos existentes; somente a síntese foi criada. O Markdownlint não apontou problemas.
+
+Essas são verificações pontuais, sem novos testes automatizados, nova execução da suíte ou da
+rotina de análise, regeneração de gráficos ou pesquisa atual de preços e câmbio. Os resultados
+decorrem das hipóteses e fórmulas; não são observações de estudantes nem medição de aprendizagem.
+
+Nesta atualização, somente os três documentos autorizados registram o avanço. A síntese, os
+registros históricos e as demais alterações pendentes foram preservados. Não foram executados
+testes de código nem cálculos novamente. O MVP v0.1.0 publicado e sua tag permanecem preservados.
+
+**Próximo passo:** elaborar o relatório final com pergunta, fontes, preparação, resultados, dois
+gráficos, recomendações e limitações. Revisar as orientações do curso e preparar a publicação do
+estudo continuam pendentes; a síntese não declara conclusão ou aprovação pelo curso ou pelo Google.
+Não houve instalações, commit ou push.

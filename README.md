@@ -525,11 +525,23 @@ Decimal. O esquema e as conferências estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CA
 já estão implementadas e exportadas.** A atualização documental de 19/11/2026 registra esse avanço
 sem atualizar as condições fixas. Os dois gráficos foram implementados e gerados em 19/11/2026,
 conforme abaixo. A revisão visual foi concluída no Chrome nas dimensões informadas. As participações
-e os custos por usuário foram implementados e conferidos em **25/11/2026**; interpretação final,
-relatório e recomendações continuam pendentes.
+e os custos por usuário foram implementados e conferidos em **25/11/2026**. A interpretação e a
+formulação de recomendações condicionais foram concluídas nessa data; o relatório final permanece
+como próxima entrega.
 As conferências não comprovam acesso pela conta da API, consumo real de tokens, configuração de
 raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado pelo
 curso ou validado pelo Google.
+
+### Interpretação e recomendações propostas
+
+[INTERPRETACAO_ESTUDO.md](INTERPRETACAO_ESTUDO.md) reúne a interpretação das políticas de feedback,
+da sensibilidade dos tokens e do custo por usuário. A síntese explica os resultados sob hipóteses
+constantes e apresenta recomendações condicionais, acompanhadas de um plano de medição futura de
+uso, tokens faturáveis e qualidade dos feedbacks.
+
+Nenhuma política foi adotada definitivamente ou demonstrada como pedagogicamente superior.
+Piloto, coleta de dados e avaliação pedagógica não foram executados. O próximo passo é compor
+o relatório final com os dois gráficos existentes, as recomendações e as limitações.
 
 ### Indicadores do estudo
 
@@ -619,8 +631,9 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 [notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
-O próximo passo do estudo é elaborar a síntese interpretativa dos resultados, das comparações e
-dos indicadores já calculados, preparar o relatório e formular recomendações condicionais.
+O próximo passo do estudo é elaborar o relatório final com pergunta, fontes, preparação, resultados,
+dois gráficos, a interpretação já produzida, recomendações condicionais e limitações. A revisão
+contra as orientações do curso e a publicação do estudo permanecem pendentes.
 A revisão dos HTMLs em outros tamanhos ou navegadores depende de uma conferência própria, sem
 ampliar automaticamente o alcance já comprovado.
 As relações verificadas pelas fórmulas não são evidências empíricas sobre estudantes.
