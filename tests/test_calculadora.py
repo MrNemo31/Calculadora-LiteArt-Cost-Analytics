@@ -1006,7 +1006,7 @@ class TestLerCenariosCsv(unittest.TestCase):
                     self.assertIs(type(hipoteses[coluna]), float)
 
     def test_exemplo_ordem_e_feedbacks_dos_dois_cenarios(self):
-        caminho = Path(__file__).resolve().parent / "dados" / "cenarios_exemplo.csv"
+        caminho = Path(__file__).resolve().parents[1] / "dados" / "cenarios_exemplo.csv"
         cenarios = ler_cenarios_csv(caminho)
         self.assertEqual([c["nome"] for c in cenarios], [
             "Cenário didático: 100 usuários", "Cenário didático: 500 usuários",
@@ -1201,7 +1201,7 @@ class TestLerCenariosCsv(unittest.TestCase):
         self.assertEqual(list(self.caminho.parent.iterdir()), arquivos_antes)
 
     def test_importacao_nao_le_csv_nem_cria_arquivos(self):
-        script = Path(__file__).resolve().parent / "calculadora.py"
+        script = Path(__file__).resolve().parents[1] / "calculadora.py"
         with patch("pandas.read_csv", side_effect=AssertionError("leitura na importação")), \
                 patch("pandas.DataFrame.to_csv", side_effect=AssertionError("exportação na importação")), \
                 patch("builtins.input", side_effect=AssertionError("pergunta na importação")), \
@@ -1518,7 +1518,7 @@ class TestIntegracaoCenariosCsv(unittest.TestCase):
         self.addCleanup(temporario.cleanup)
         self.raiz = Path(temporario.name).resolve()
         self.script = self.raiz / "calculadora.py"
-        origem = Path(__file__).resolve().parent
+        origem = Path(__file__).resolve().parents[1]
         self.script.write_bytes((origem / "calculadora.py").read_bytes())
         self.entrada = self.raiz / "dados" / "cenarios_exemplo.csv"
         self.entrada.parent.mkdir()

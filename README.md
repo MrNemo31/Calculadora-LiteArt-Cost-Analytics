@@ -94,6 +94,30 @@ nem substituir a falha por cotação fixa. Cancelar, usar Ctrl+C ou encerrar a e
 fluxo antes da exportação, com mensagem e código diferente de zero, preservando resultados
 anteriores. Importar o módulo não consulta a rede, não interage e não gera arquivos.
 
+## Organização do repositório
+
+README, relatório final, licença, dependências e os três scripts permanecem na raiz.
+Os documentos de apoio estão em `docs/` e os testes em `tests/`:
+
+```text
+docs/
+  PLANEJAMENTO.md
+  PROMPTS.md
+  RELEASE_NOTES.md
+  ESTUDO_DE_CASO.md
+  INTERPRETACAO_ESTUDO.md
+  imagens/
+tests/
+  __init__.py
+  test_calculadora.py
+  test_analise_estudo.py
+  test_graficos_estudo.py
+```
+
+**Todos os comandos deste README partem da raiz do projeto**, inclusive os testes e as rotinas
+do estudo. Não é necessário mudar para `docs/` ou `tests/`. Dados, imagens, resultados gerados e
+ambientes mantêm suas localizações; a reorganização não altera os cálculos.
+
 ## Instalação e execução no Windows
 
 O conjunto foi validado em **14/11/2026**, com **Python convencional 3.14.10 x64** e
@@ -103,8 +127,8 @@ o Python do MSYS2 não foi utilizado nessa validação.
 
 ### Obter os arquivos
 
-Usar uma cópia do projeto que contenha `calculadora.py`, `test_calculadora.py`,
-`dados/cenarios_exemplo.csv` e `requirements.txt`. A documentação acompanha esses arquivos.
+Usar uma cópia do projeto com os três scripts, `requirements.txt`, as pastas `dados/`, `docs/`
+e `tests/` completas, incluindo `tests/__init__.py`. README e relatório acompanham esses arquivos.
 Código, testes, `requirements.txt` e CSV de exemplo estão versionados no repositório local.
 A validação em ambiente novo usou uma cópia dos arquivos locais; o registro correspondente descreve
 o estado daquela etapa. Antes de publicar uma versão, incorporar também os materiais finais e
@@ -136,7 +160,7 @@ $pythonBase = Read-Host 'Caminho completo do python.exe convencional (Python 3.1
 $pythonProjeto = (Resolve-Path -LiteralPath '.\.venv-win\Scripts\python.exe').Path
 & $pythonProjeto -X utf8 -B -m pip install -r requirements.txt
 & $pythonProjeto -X utf8 -B -m pip check
-& $pythonProjeto -X utf8 -B -m unittest -q
+& $pythonProjeto -X utf8 -B -m unittest discover -s tests -t . -v
 & $pythonProjeto -X utf8 -B calculadora.py
 ```
 
@@ -363,13 +387,13 @@ histórico; orçamento não é uma opção do menu atual. Sua retomada e a integ
 preservados serão decisões futuras, separadas do MVP de IA.
 
 As pesquisas históricas de infraestrutura, datas, fontes, fórmulas e ressalvas permanecem no
-[planejamento](PLANEJAMENTO.md). Mensalidades pesquisadas não comprovam capacidade para atender aos
-cenários. A arquitetura de referência do LiteArt continua Flutter, NestJS e PostgreSQL, com
+[planejamento](docs/PLANEJAMENTO.md). Mensalidades pesquisadas não comprovam capacidade para atender
+aos cenários. A arquitetura de referência do LiteArt continua Flutter, NestJS e PostgreSQL, com
 Firebase como alternativa em estudo; isso não implica contratação ou migração.
 
 ## Testes e verificações
 
-`test_calculadora.py` contém **188 métodos de teste em 17 classes**, usando `unittest`:
+`tests/test_calculadora.py` contém **188 métodos de teste em 17 classes**, usando `unittest`:
 
 - 111 métodos em 11 classes de cálculos e coordenadoras, incluindo infraestrutura e cenário completo.
 - 25 métodos para leitura e validação de CSV.
@@ -381,12 +405,12 @@ Firebase como alternativa em estudo; isso não implica contratação ou migraç�
 
 Esses 188 métodos passaram na validação em ambiente novo de 14/11/2026. A rotina do estudo
 acrescentou inicialmente 30 métodos, depois 17 para as comparações e **19 para os indicadores**,
-totalizando **66 métodos em duas classes** em [test_analise_estudo.py](test_analise_estudo.py),
+totalizando **66 métodos em duas classes** em [test_analise_estudo.py](tests/test_analise_estudo.py),
 sem alterar os testes do MVP. Os gráficos possuem **36 métodos em duas classes** em
-[test_graficos_estudo.py](test_graficos_estudo.py): 18 do primeiro e 18 acrescentados para o segundo.
+[test_graficos_estudo.py](tests/test_graficos_estudo.py): 18 do primeiro e 18 acrescentados para o segundo.
 O conjunto atual possui **290 métodos em 21 classes**: 188 do MVP, 66 da análise e 36 dos gráficos.
 Todos passaram em **25/11/2026** na implementação dos indicadores, conforme a execução registrada
-nesta sessão. A suíte não foi repetida nesta atualização documental. Casos de `subTest` não são
+nesta sessão. O registro documental daquela etapa não repetiu a suíte. Casos de `subTest` não são
 métodos adicionais.
 Os testes persistentes simulam `input()` com `unittest.mock.patch` e usam
 arquivos temporários nas integrações. Conferem erros e cancelamento sem sobrescrita, execução de
@@ -395,7 +419,7 @@ cálculo completo, nove campos exportados e preservação exata de Decimal.
 
 Também conferem os símbolos monetários da tabela sem alteração dos dados, precisão além da segunda
 casa e equivalência dos dois modos para as mesmas hipóteses. As verificações pontuais históricas,
-registradas em [PROMPTS.md](PROMPTS.md), não devem ser contadas como novos métodos automatizados.
+registradas em [PROMPTS.md](docs/PROMPTS.md), não devem ser contadas como novos métodos automatizados.
 Os testes cambiais simulam respostas da API, timeout, erros HTTP/rede e leitura, JSON inválido,
 estruturas e tipos incorretos, campos ausentes, datas e taxas inválidas. Também conferem modo manual
 sem rede, alternativa manual após falha, cancelamento sem exportação e uma consulta para múltiplos
@@ -424,12 +448,20 @@ preservação de Decimal e integração que constrói ambas as figuras antes de 
 Esses testes estruturais não comprovam legibilidade visual. A revisão separada no Chrome ocorreu
 em 19/11/2026, no alcance descrito abaixo. Após um ajuste de posição de texto, os 36 testes dos
 gráficos passaram novamente, sem alteração dos testes; a suíte completa não foi repetida nessa
-revisão. Nenhum teste foi executado nesta atualização documental.
+revisão. O registro documental da revisão visual não executou novamente os testes.
 
-Para executar a suíte com o ambiente existente:
+Na reorganização em `docs/` e `tests/`, em 25/11/2026, os 290 métodos passaram antes e depois da
+movimentação. A descoberta explícita e a padrão localizaram os mesmos 290 métodos, sem perdas ou
+duplicações; os três módulos também passaram individualmente. Os scripts e os dados foram
+preservados. O [registro da reorganização](docs/PROMPTS.md) distingue essa execução das anteriores.
+
+Para executar a suíte ou cada módulo separadamente, na raiz e com o ambiente existente:
 
 ```powershell
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -s tests -t . -v
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_calculadora -v
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_analise_estudo -v
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_graficos_estudo -v
 ```
 
 ## Estudo de caso
@@ -456,7 +488,7 @@ a C05. As condições fixas de cálculo foram documentadas em **2026-11-18**:
 Essas tarifas e a cotação serão mantidas nos 13 cenários para permitir comparações reproduzíveis.
 São referências históricas dessa pesquisa, sem afirmar preços, câmbio ou disponibilidade
 permanentemente atuais. As fontes, modalidades, exclusões e evidência cambial estão em
-[ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md), junto da matriz, indicadores e etapas.
+[ESTUDO_DE_CASO.md](docs/ESTUDO_DE_CASO.md), junto da matriz, indicadores e etapas.
 
 O MVP continua permitindo consultar o BCB ou informar uma taxa manual. A rotina separada do estudo
 lê **5.8102** de `condicoes_fixas.csv`, sem interação ou atualização automática do câmbio.
@@ -495,8 +527,8 @@ Com o terminal na raiz do projeto, executar o cálculo, os testes do estudo ou t
 
 ```powershell
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_analise_estudo -q
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -v
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_analise_estudo -v
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -s tests -t . -v
 ```
 
 A saída é `resultados/estudo_de_caso/resultados_cenarios.csv`, relativa à pasta do script,
@@ -519,7 +551,7 @@ Tarifas, câmbio e custos permanecem `Decimal`. A tabela de custos no terminal a
 usuários, feedbacks e custos mensais, usando `US$` e `R$`, vírgula decimal e duas casas somente na
 apresentação. O CSV usa UTF-8, vírgula entre campos, ponto decimal, cabeçalho e ausência de índice,
 com valores completos. Na releitura, converter os campos financeiros de texto diretamente para
-Decimal. O esquema e as conferências estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md).
+Decimal. O esquema e as conferências estão em [ESTUDO_DE_CASO.md](docs/ESTUDO_DE_CASO.md).
 
 **Os 13 cenários foram calculados e conferidos em 18/11/2026; as comparações de políticas e tokens
 já estão implementadas e exportadas.** A atualização documental de 19/11/2026 registra esse avanço
@@ -544,14 +576,14 @@ ser regenerados pelos comandos de reprodução abaixo.
 
 O material foi produzido e conferido no alcance documentado, mas o estudo ainda não foi publicado,
 aprovado pelo Google ou avaliado pelo curso. A revisão final de coerência foi realizada localmente
-em 25/11/2026, conforme [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md); a apresentação no GitHub não foi
+em 25/11/2026, conforme [ESTUDO_DE_CASO.md](docs/ESTUDO_DE_CASO.md); a apresentação no GitHub não foi
 observada. Permanecem a conferência das orientações específicas da atividade e a preparação da
 publicação. O estudo é separado do MVP v0.1.0 publicado e não representa uma nova release da
 calculadora.
 
 ### Interpretação e recomendações propostas
 
-[INTERPRETACAO_ESTUDO.md](INTERPRETACAO_ESTUDO.md) reúne a interpretação das políticas de feedback,
+[INTERPRETACAO_ESTUDO.md](docs/INTERPRETACAO_ESTUDO.md) reúne a interpretação das políticas de feedback,
 da sensibilidade dos tokens e do custo por usuário. A síntese explica os resultados sob hipóteses
 constantes e apresenta recomendações condicionais, acompanhadas de um plano de medição futura de
 uso, tokens faturáveis e qualidade dos feedbacks.
@@ -587,7 +619,7 @@ Esse custo unitário inclui **somente IA**, sem representar o custo operacional 
 economia de escala ou viabilidade financeira comprovada. Modelo, tarifas e cotação histórica fixa
 `Decimal("5.8102")` continuam com as referências de **18/11/2026**. A pausa no desenvolvimento não
 atualizou essas condições. Fórmulas, validações e evidências estão em
-[ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md).
+[ESTUDO_DE_CASO.md](docs/ESTUDO_DE_CASO.md).
 
 ### Gráficos do estudo
 
@@ -599,14 +631,14 @@ alternativas lado a lado, sem somar custos. C10 a C13 não entram nesse gráfico
 O segundo gráfico mostra a **sensibilidade do custo mensal de IA aos tokens**, comparando C10 a
 C13 com C05. São quatro barras horizontais: negativas indicam redução de custo; positivas, aumento.
 A linha em zero e o eixo percentual usam C05 como denominador, mantendo condições fixas.
-Os detalhes das comparações estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md).
+Os detalhes das comparações estão em [ESTUDO_DE_CASO.md](docs/ESTUDO_DE_CASO.md).
 
 Com o terminal na raiz, gerar os CSVs e depois os dois gráficos pelo comando existente:
 
 ```powershell
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B graficos_estudo.py
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_graficos_estudo -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_graficos_estudo -v
 ```
 
 O comando `graficos_estudo.py` gera ambos os arquivos, relativos à pasta do script:
@@ -632,7 +664,7 @@ restauração dos eixos. Uma sobreposição entre título e referência no segun
 os HTMLs foram regenerados e revistos. As instruções de abertura manual permanecem as mesmas.
 
 A revisão não cobre telas menores, dispositivos móveis ou outros navegadores. As evidências e o
-alcance estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md). A rotina gera HTMLs; os PNGs do relatório
+alcance estão em [ESTUDO_DE_CASO.md](docs/ESTUDO_DE_CASO.md). A rotina gera HTMLs; os PNGs do relatório
 foram exportados separadamente pelo navegador. Exportação automática em imagem pela rotina e
 dashboard não foram implementados.
 
@@ -646,7 +678,7 @@ concluídos no alcance descrito.
 
 A revisão técnica final de 14/11/2026 conferiu a coerência entre código, requisitos, exemplos e
 instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de terminal; as
-[notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
+[notas da versão](docs/RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
 O relatório final do estudo e suas imagens passaram pela revisão técnica local de coerência.
@@ -677,8 +709,8 @@ projeto não substitui nem amplia as permissões sobre esses materiais de tercei
 
 ## Documentação e aprendizado
 
-O [planejamento](PLANEJAMENTO.md) separa estado atual, recursos preservados e roteiro futuro.
-O [registro de prompts](PROMPTS.md) mantém as decisões e os marcos históricos do desenvolvimento.
+O [planejamento](docs/PLANEJAMENTO.md) separa estado atual, recursos preservados e roteiro futuro.
+O [registro de prompts](docs/PROMPTS.md) mantém as decisões e os marcos históricos do desenvolvimento.
 O projeto evolui em pequenos incrementos, com apoio de IA para orientação, explicações e revisão.
 
 A configuração `.markdownlint.json` limita o texto a 100 caracteres por linha, exceto tabelas e

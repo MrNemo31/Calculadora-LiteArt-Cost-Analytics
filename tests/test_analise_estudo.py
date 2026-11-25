@@ -28,7 +28,7 @@ class TestAnaliseEstudo(unittest.TestCase):
         self.cenarios = self.raiz / "cenarios.csv"
         self.condicoes = self.raiz / "condicoes.csv"
         self.saida = self.raiz / "resultados" / "resultados_cenarios.csv"
-        origem = Path(__file__).resolve().parent / "dados" / "estudo_de_caso"
+        origem = Path(__file__).resolve().parents[1] / "dados" / "estudo_de_caso"
         self.cenarios.write_bytes((origem / "cenarios.csv").read_bytes())
         self.condicoes.write_bytes((origem / "condicoes_fixas.csv").read_bytes())
 
@@ -372,7 +372,7 @@ class TestAnaliseEstudo(unittest.TestCase):
         self.assertEqual(texto.getvalue(), "")
 
     def test_caminhos_independentes_da_pasta_atual_e_reexecucao_sem_duplicacao(self):
-        origem = Path(__file__).resolve().parent
+        origem = Path(__file__).resolve().parents[1]
         for nome in ("analise_estudo.py", "calculadora.py"):
             shutil.copyfile(origem / nome, self.raiz / nome)
         entrada = self.raiz / "dados" / "estudo_de_caso"
@@ -657,7 +657,7 @@ class TestIndicadores(unittest.TestCase):
         return pd.DataFrame([registro], dtype=object)
 
     def resultados_reais(self):
-        entrada = Path(__file__).resolve().parent / "dados" / "estudo_de_caso"
+        entrada = Path(__file__).resolve().parents[1] / "dados" / "estudo_de_caso"
         return estudo.calcular_resultados(
             estudo.ler_cenarios_estudo(entrada / "cenarios.csv"),
             estudo.ler_condicoes_fixas(entrada / "condicoes_fixas.csv"),

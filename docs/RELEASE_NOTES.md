@@ -42,13 +42,14 @@ Origem e data da cotação aparecem no terminal; não são metadados exportados 
 
 ## Como começar
 
-Seguir o [README](README.md) para obter os arquivos e criar a `.venv-win` com Python convencional.
-Na pasta do projeto, com o ambiente criado, usar o PowerShell sem precisar ativá-lo:
+Seguir o [README](../README.md) para obter os arquivos e criar a `.venv-win` com Python convencional.
+Na raiz do projeto, com o ambiente criado, usar o PowerShell sem precisar ativá-lo. Os comandos
+de reprodução abaixo refletem a organização atual dos testes em `tests/`:
 
 ```powershell
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B -m pip install -r requirements.txt
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B -m pip check
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -s tests -t . -v
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B calculadora.py
 ```
 
@@ -97,7 +98,7 @@ As fontes, datas e ressalvas estão no README e no [planejamento](PLANEJAMENTO.m
 
 ## Licença
 
-O código do projeto é disponibilizado sob a [licença MIT](LICENSE), autorizada explicitamente em
+O código do projeto é disponibilizado sob a [licença MIT](../LICENSE), autorizada explicitamente em
 14/11/2026. O arquivo contém o texto integral e os avisos de direitos autorais. Uso, modificação e
 distribuição, inclusive comercial, são permitidos, mantendo os avisos exigidos.
 Dependências e fontes de dados mantêm suas próprias licenças e condições; não são relicenciadas

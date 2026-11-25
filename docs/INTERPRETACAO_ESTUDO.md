@@ -18,9 +18,9 @@ curto. As tarifas históricas são **USD 0.10 por milhão de tokens de entrada s
 **USD 0.50 por milhão de tokens de saída faturáveis**. A cotação fixa é **5.8102 BRL por USD**,
 BCB/SGS série 1, dólar de venda diário. Pesquisa de preços, referência e consulta cambial são de
 **18/11/2026**, conforme [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md) e
-[condicoes_fixas.csv](dados/estudo_de_caso/condicoes_fixas.csv). Não houve nova consulta às fontes.
+[condicoes_fixas.csv](../dados/estudo_de_caso/condicoes_fixas.csv). Não houve nova consulta às fontes.
 
-Os [13 cenários de entrada](dados/estudo_de_caso/cenarios.csv) são hipotéticos. Todos consideram
+Os [13 cenários de entrada](../dados/estudo_de_caso/cenarios.csv) são hipotéticos. Todos consideram
 40 respostas por usuário/mês, taxa de acerto de 60% e feedback em todos os erros. C01 a C09 usam
 500 tokens de entrada e 300 de saída por feedback; C10 a C13 variam um desses consumos contra C05.
 Há uma chamada por feedback, sem novas tentativas, e o mesmo consumo por feedback de acerto e erro.
@@ -238,8 +238,8 @@ As definições, fontes históricas, unidades e limites estão em
 
 | Arquivo | Conteúdo utilizado nesta síntese |
 | --- | --- |
-| [dados/estudo_de_caso/cenarios.csv](dados/estudo_de_caso/cenarios.csv) | 13 combinações hipotéticas e seus identificadores |
-| [dados/estudo_de_caso/condicoes_fixas.csv](dados/estudo_de_caso/condicoes_fixas.csv) | Uma configuração histórica compartilhada, fontes e datas |
+| [dados/estudo_de_caso/cenarios.csv](../dados/estudo_de_caso/cenarios.csv) | 13 combinações hipotéticas e seus identificadores |
+| [dados/estudo_de_caso/condicoes_fixas.csv](../dados/estudo_de_caso/condicoes_fixas.csv) | Uma configuração histórica compartilhada, fontes e datas |
 | `resultados/estudo_de_caso/resultados_cenarios.csv` | 13 registros de hipóteses, consumo, custos e condições |
 | `resultados/estudo_de_caso/comparacao_politicas.csv` | Seis comparações com C03, C06 ou C09 |
 | `resultados/estudo_de_caso/sensibilidade_tokens.csv` | Quatro variações contra C05 |
@@ -259,7 +259,7 @@ alteração das entradas e resultados. A conferência aritmética não é uma va
 
 Os resultados são reproduzíveis por `analise_estudo.py`, mas a pasta `resultados/` está ignorada
 pelo Git. Portanto, os quatro CSVs e os HTMLs não devem ser presumidos disponíveis no GitHub.
-Em uma cópia preparada conforme o [README](README.md), os comandos abaixo podem gerá-los;
+Na raiz de uma cópia preparada conforme o [README](../README.md), os comandos podem gerá-los;
 eles são instruções de reprodução e não foram executados nesta tarefa:
 
 ```powershell

@@ -77,7 +77,7 @@ foi concluída e as notas foram preparadas; aprovação dos materiais e publica�
 Catálogo e seleção de modelos, comparação de provedores, gráficos, dashboard, integração futura de
 infraestrutura e orçamento e análises avançadas não fazem parte dessa entrega.
 A arquitetura de referência do LiteArt continua Flutter, backend Node.js/NestJS e PostgreSQL,
-com Firebase como alternativa em estudo. O [README](README.md) descreve a execução atual.
+com Firebase como alternativa em estudo. O [README](../README.md) descreve a execução atual.
 
 ## 3. Tipos de informação
 
@@ -626,7 +626,7 @@ cenário completo permanecem testados separadamente, mesmo fora da execução pr
 
 ### Testes existentes e verificações pontuais
 
-`test_calculadora.py` contém **188 métodos em 17 classes**, todos aprovados na validação de
+`tests/test_calculadora.py` contém **188 métodos em 17 classes**, todos aprovados na validação de
 14/11/2026 em ambiente virtual novo.
 São 111 métodos em 11 classes de cálculos e coordenadoras, 25 de leitura CSV, quatro de formatação
 monetária, sete de leitura manual, nove de consulta BCB, oito de interação/apresentação cambial e
@@ -646,11 +646,12 @@ R$ 5,00 preserva os resultados didáticos. Uma consulta real separada é confer�
 substituir os testes nem comprovar disponibilidade futura da API.
 
 Os roteiros pontuais históricos de DataFrames, filtros e saldos estão no [registro](PROMPTS.md).
-Não equivalem a novos testes persistentes. Esta atualização altera somente documentação e não
-adiciona métodos de teste. Para repetir a suíte no ambiente existente:
+Não equivalem a novos testes persistentes. A reorganização das pastas não adiciona métodos de
+teste. Para repetir a suíte no ambiente existente, executar da raiz do projeto,
+onde estão os scripts, mantendo os testes em `tests/`:
 
 ```powershell
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -s tests -t . -v
 ```
 
 ### Dependências e validação em ambiente limpo — 14/11/2026
@@ -780,7 +781,7 @@ são anexos da release; a `.venv-win` usa o `.gitignore` criado dentro dela, sem
 
 ### Licença MIT — concluída em 14/11/2026
 
-A escolha da MIT foi explicitamente autorizada. O arquivo [LICENSE](LICENSE) contém o texto padrão
+A escolha da MIT foi explicitamente autorizada. O arquivo [LICENSE](../LICENSE) contém o texto padrão
 integral em inglês, com ano de 2026 e titular confirmado pelo responsável pelo projeto.
 A licença permite uso, modificação e distribuição, inclusive comercial, mantendo os avisos exigidos.
 Dependências e fontes de dados conservam suas próprias licenças e condições, separadas desta decisão.

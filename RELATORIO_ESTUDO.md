@@ -37,7 +37,7 @@ avaliações com estudantes ou comparações de qualidade entre modelos.
 
 ### Fontes e condições históricas
 
-A pesquisa documental registrada em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md) definiu as condições
+A pesquisa documental registrada em [ESTUDO_DE_CASO.md](docs/ESTUDO_DE_CASO.md) definiu as condições
 abaixo, compartilhadas pelos 13 cenários. Os registros estão em
 [condicoes_fixas.csv](dados/estudo_de_caso/condicoes_fixas.csv).
 
@@ -85,7 +85,7 @@ ligado. Supõe-se o mesmo consumo por feedback de acerto e erro, algo ainda não
 As entradas foram separadas entre hipóteses e condições comerciais, identificadas por C01 a C13
 e validadas quanto a esquema, campos obrigatórios, tipos, unicidade, intervalos, datas e números
 finitos. As comparações também validam hipóteses e condições compatíveis. A preparação e as
-verificações detalhadas estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md).
+verificações detalhadas estão em [ESTUDO_DE_CASO.md](docs/ESTUDO_DE_CASO.md).
 
 A rotina reaproveita o cálculo de consumo e de IA do MVP. Calcula feedbacks a partir dos erros
 e dos acertos contemplados, multiplica pelos tokens por feedback, aplica as tarifas por milhão
@@ -181,7 +181,7 @@ somente IA; as oito casas preservam a leitura dos valores em USD inferiores a um
 
 ## 5. Recomendações condicionais
 
-As propostas seguem [INTERPRETACAO_ESTUDO.md](INTERPRETACAO_ESTUDO.md). Nenhuma foi tratada como
+As propostas seguem [INTERPRETACAO_ESTUDO.md](docs/INTERPRETACAO_ESTUDO.md). Nenhuma foi tratada como
 decisão definitivamente adotada, orçamento máximo ou meta pedagógica aprovada.
 
 | Evidência | Ação proposta | Condição ou limite | Dado para revisar a proposta |
@@ -228,7 +228,9 @@ Uma avaliação de resultados educacionais exigirá desenho próprio antes da co
 ### Arquivos e comandos
 
 O [README](README.md) apresenta o preparo completo do ambiente. Em uma cópia do projeto, com
-Python convencional instalado e sem `.venv-win` existente, os comandos PowerShell são:
+Python convencional instalado e sem `.venv-win` existente, executar os comandos PowerShell abaixo
+**a partir da raiz do projeto**, onde estão os três scripts. Os testes estão em `tests/` e a
+documentação de apoio em `docs/`; os comandos refletem essa organização atual.
 
 ```powershell
 $pythonBase = Read-Host 'Caminho completo do python.exe convencional (Python 3.14.10 x64)'
@@ -238,7 +240,7 @@ $pythonProjeto = (Resolve-Path -LiteralPath '.\.venv-win\Scripts\python.exe').Pa
 & $pythonProjeto -X utf8 -B -m pip check
 & $pythonProjeto -X utf8 -B analise_estudo.py
 & $pythonProjeto -X utf8 -B graficos_estudo.py
-& $pythonProjeto -X utf8 -B -m unittest -q
+& $pythonProjeto -X utf8 -B -m unittest discover -s tests -t . -v
 ```
 
 Preservar ambientes existentes. Se `.venv-win` já estiver preparada, começar pela definição de
@@ -278,7 +280,7 @@ com condições fixas não consulta a rede.
 O histórico registra **290 métodos de teste em 21 classes aprovados em 25/11/2026**: 188 do MVP,
 66 da análise e 36 dos gráficos. Subtests não são métodos adicionais. Essa execução é anterior
 ao relatório; a suíte não foi repetida aqui, pois nenhum código foi alterado. Os detalhes estão
-no [README](README.md) e em [PROMPTS.md](PROMPTS.md).
+no [README](README.md) e em [PROMPTS.md](docs/PROMPTS.md).
 
 Na preparação deste relatório, a conferência pontual releu os seis CSVs e verificou, diretamente
 com Decimal, consumos e custos dos 13 cenários, seis reduções, quatro sensibilidades e 13
@@ -295,12 +297,12 @@ estruturais e da revisão interativa anterior registrada no estudo, de 19/11/202
 ### Apoio de IA e situação da entrega
 
 O projeto utiliza apoio de IA para orientação, explicações, implementação, testes e revisão,
-conforme o [histórico de prompts](PROMPTS.md). A elaboração desta síntese também contou com IA
+conforme o [histórico de prompts](docs/PROMPTS.md). A elaboração desta síntese também contou com IA
 para organizar o texto, conferir aritmética e exportar as figuras. Isso não atribui ao estudante
 verificações pessoais ou decisões que não foram confirmadas.
 
 O relatório reúne o planejamento, os resultados e a
-[interpretação fundamentada](INTERPRETACAO_ESTUDO.md), com recomendações ainda propostas.
+[interpretação fundamentada](docs/INTERPRETACAO_ESTUDO.md), com recomendações ainda propostas.
 Antes da publicação e entrega, permanece necessária a revisão dos materiais e das instruções
 específicas do curso, inclusive a forma de declarar o apoio de IA. Não se declara aprovação pelo
 Google nem atendimento já conferido de todas as exigências da atividade. Nenhum piloto, coleta

@@ -16,7 +16,7 @@ será considerado pela calculadora.
   mensagem.
 - As descrições de objetivo e contribuição são notas de organização, não fazem parte dos prompts
   originais.
-- As respostas da IA não estão reproduzidas. As decisões atuais estão no [README](README.md) e no
+- As respostas da IA não estão reproduzidas. As decisões atuais estão no [README](../README.md) e no
   [planejamento](PLANEJAMENTO.md) , que devem prevalecer caso o projeto evolua.
 - Novos registros serão incluídos quando ajudarem a entender uma decisão, um aprendizado ou uma
   mudança relevante no projeto.
@@ -2187,7 +2187,7 @@ fórmulas ou condições históricas. Conferir números e legibilidade, explicar
 estudo e declarar o apoio de IA. Depois, atualizar somente README.md, ESTUDO_DE_CASO.md e este
 registro, distinguindo material produzido, verificações realizadas e publicação ainda pendente.
 
-**Material produzido:** [RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md) reúne resumo, contexto, dados,
+**Material produzido:** [RELATORIO_ESTUDO.md](../RELATORIO_ESTUDO.md) reúne resumo, contexto, dados,
 método, resultados, dois gráficos, recomendações condicionais, limitações e reprodução. As imagens
 foram criadas em `docs/imagens/custo_mensal_ia_por_escala_politica.png` (2880×1300) e
 `docs/imagens/sensibilidade_custo_ia_tokens.png` (2880×1200), com links relativos no relatório.
@@ -2253,3 +2253,52 @@ curso não foram disponibilizadas; conformidade e declaração de apoio de IA de
 pelo responsável. Revisão dos materiais pelo responsável, commit final e publicação continuam
 pendentes, sem aprovação presumida. Não houve nova execução da análise ou da suíte, atualização
 de preços/câmbio, commit, push ou publicação.
+
+## 48. Organização da documentação em docs/ e dos testes em tests/
+
+**Data:** 25/11/2026.
+
+**Objetivo do pedido:** separar documentos de apoio e testes, corrigindo referências e comandos
+sem alterar o funcionamento, as condições históricas ou os três scripts principais.
+
+**Movimentações:** usar git mv para levar PLANEJAMENTO.md, PROMPTS.md, RELEASE_NOTES.md,
+ESTUDO_DE_CASO.md e INTERPRETACAO_ESTUDO.md para docs/; mover os três módulos de teste para tests/.
+Manter README.md e RELATORIO_ESTUDO.md na raiz e criar `tests/__init__.py` vazio. Os destinos foram
+conferidos antes da movimentação, sem arquivos conflitantes. O Git estava limpo no commit
+`5a0e6e8907c4abfddb2c1a4e942e4c0f89a5dc43`.
+
+**Ajustes:** seis referências nos testes da calculadora e da análise passaram a usar
+`Path(__file__).resolve().parents[1]`, localizando a raiz para CSVs, scripts temporários e subprocessos.
+As expectativas e verificações foram preservadas; não houve alteração de sys.path ou PYTHONPATH.
+O módulo dos gráficos foi somente movido. Links e comandos atuais foram atualizados nos documentos;
+os comandos partem da raiz e os módulos individuais usam o prefixo tests.
+
+O texto dos registros históricos foi preservado: somente os destinos relativos de dois links
+existentes deste histórico foram ajustados para continuar navegáveis. Pedidos antigos e seus
+comandos não foram reescritos como se já utilizassem a nova estrutura.
+
+**Verificações realizadas:** a suíte anterior passou com 290 métodos. Após a reorganização,
+`unittest discover -s tests -t . -v` passou com 290; a descoberta padrão pela raiz também passou
+com 290, e os módulos individuais passaram com 188, 66 e 36 métodos. Os identificadores foram
+comparados, descontando somente o prefixo de pacote: nenhum método perdido ou duplicado.
+Não foram instalados ou atualizados pacotes nem repetido o preparo de ambientes.
+
+Os comandos usaram o Python da .venv-win, explicitamente, a partir da raiz. Foram conferidos
+69 links relativos nos sete documentos, sem destinos ausentes ou ignorados. O Markdownlint da
+raiz e de docs/ passou sem problemas. Resultados e ambientes continuam ignorados, enquanto os
+arquivos novos e movidos são versionáveis. Os testes mantêm as integrações em arquivos temporários.
+
+**Preservação:** a tag v0.1.0 continua apontando para
+`10cc485cde5d1c00a743611017fac58f226b7458`. Os SHA-256 registrados antes da mudança e conferidos
+depois são iguais:
+
+| Script | SHA-256 |
+| --- | --- |
+| calculadora.py | 13c8a6b637085db2f8743ff7778e1b9dcbcd71d79d9aa635df93667ceaee4610 |
+| analise_estudo.py | 04d35e6127a8f32025e1ba1067a2cd83891ae3fc5634732c72ecd2ffc9a5596f |
+| graficos_estudo.py | f723f5aaf03725532c14a22df81cb98c990af493160c93627981724db110da42 |
+
+Dados, resultados, HTMLs, imagens, dependências, configurações e ambientes permanecem nos mesmos
+locais. As execuções dos scripts mantêm os comandos anteriores; a validação usa as integrações
+com diretórios temporários da suíte, sem regenerar resultados ou gráficos do projeto.
+Não houve commit, push, alteração de tag ou publicação.

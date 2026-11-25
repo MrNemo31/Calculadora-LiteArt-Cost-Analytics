@@ -2,6 +2,10 @@
 
 **Data do planejamento:** 18/11/2026.
 
+**Navegação atual:** este documento está em `docs/`; testes estão em `tests/`. Os caminhos textuais
+de dados, resultados e imagens e os comandos de reprodução partem da raiz do projeto, onde os
+três scripts permanecem. Os links relativos consideram a pasta de cada documento.
+
 **Atualização documental:** 25/11/2026. Preparação, validação, cálculo dos 13 cenários e comparações
 concluídos e conferidos. Os dois gráficos estão implementados, com revisão visual no alcance da
 seção 5.10. Participações de custo e custos por usuário ativo foram implementados e verificados em
@@ -18,9 +22,9 @@ ser conferidas antes da entrega.
 
 ## 1. Contexto e objetivo
 
-A rotina [analise_estudo.py](analise_estudo.py) reutiliza as funções da calculadora
+A rotina [analise_estudo.py](../analise_estudo.py) reutiliza as funções da calculadora
 **LiteArt Cost Analytics v0.1.0**, preservando seu código e fluxo. O MVP publicado estima custos
-de feedbacks de IA no terminal, conforme o [README](README.md) e o
+de feedbacks de IA no terminal, conforme o [README](../README.md) e o
 [planejamento do projeto](PLANEJAMENTO.md). A tag local v0.1.0 identifica o commit
 `10cc485cde5d1c00a743611017fac58f226b7458`, conferido nesta preparação documental.
 
@@ -231,7 +235,7 @@ sinais de porcentagem ou separadores de milhares. Esses CSVs são dados de entra
 
 #### Hipóteses dos cenários
 
-Arquivo: [dados/estudo_de_caso/cenarios.csv](dados/estudo_de_caso/cenarios.csv).
+Arquivo: [dados/estudo_de_caso/cenarios.csv](../dados/estudo_de_caso/cenarios.csv).
 Contém **13 registros**, ordenados de C01 a C13, com identificadores e nomes descritivos únicos.
 Cada registro representa uma hipótese de cenário mensal. As oito colunas, nesta ordem, são:
 
@@ -260,7 +264,7 @@ preparando as hipóteses no formato esperado pelas funções do MVP, sem alterar
 
 #### Referências pesquisadas e condições compartilhadas
 
-Arquivo: [dados/estudo_de_caso/condicoes_fixas.csv](dados/estudo_de_caso/condicoes_fixas.csv).
+Arquivo: [dados/estudo_de_caso/condicoes_fixas.csv](../dados/estudo_de_caso/condicoes_fixas.csv).
 Contém **uma única linha de dados**, aplicável a todos os 13 cenários. Não há associação por linha
 ou necessidade de repetir tarifas e câmbio em cada cenário. As 12 colunas são:
 
@@ -325,7 +329,7 @@ os cálculos e os testes descritos abaixo; isso não comprova as hipóteses nem 
 
 ### 5.6. Rotina de validação e cálculo — 2026-11-18
 
-**Implementado e executado:** [analise_estudo.py](analise_estudo.py), separado do código e do menu
+**Implementado e executado:** [analise_estudo.py](../analise_estudo.py), separado do código e do menu
 do MVP. A rotina resolve caminhos a partir de `Path(__file__).resolve().parent`; suas funções
 aceitam caminhos para permitir testes com arquivos temporários. O bloco `if __name__ == "__main__"`
 protege a importação: importar o módulo não lê CSVs, pergunta, imprime, consulta a rede ou exporta.
@@ -363,8 +367,8 @@ Com o terminal na raiz do projeto e a `.venv-win` existente:
 
 ```powershell
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_analise_estudo -q
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -v
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_analise_estudo -v
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -s tests -t . -v
 ```
 
 As entradas são `dados/estudo_de_caso/cenarios.csv` e
@@ -405,7 +409,7 @@ Os valores abaixo são resultados das fórmulas sob as hipóteses fixas, não de
 A conversão usou os valores exatos em USD multiplicados por `Decimal("5.8102")`.
 Zeros finais adicionais no CSV preservam a representação de Decimal, sem alterar esses valores.
 
-- **Testes automatizados da primeira etapa:** [test_analise_estudo.py](test_analise_estudo.py)
+- **Testes automatizados da primeira etapa:** [test_analise_estudo.py](../tests/test_analise_estudo.py)
   recebeu inicialmente 30 métodos em uma classe, usando `unittest`, arquivos temporários e
   simulações. Os 17 métodos posteriores estão descritos na seção 5.7. Os primeiros cobrem as
   validações, importação sem efeitos, preservação das entradas e da tabela, ausência de rede,
@@ -519,7 +523,7 @@ estudantes, aprendizagem ou qualidade pedagógica equivalente. Não houve chamad
 
 ### 5.8. Primeiro gráfico Plotly — 2026-11-19
 
-**Implementado e gerado em 19/11/2026:** [graficos_estudo.py](graficos_estudo.py), separado da rotina
+**Implementado e gerado em 19/11/2026:** [graficos_estudo.py](../graficos_estudo.py), separado da rotina
 de cálculo e do MVP. O primeiro gráfico apresenta custo mensal estimado de IA por escala e
 política, usando somente C01 a C09. Esta evolução do estudo não publica uma nova versão nem altera
 a tag v0.1.0. Fontes, tarifas, câmbio e referências de 18/11/2026 permanecem preservados.
@@ -577,7 +581,7 @@ Com o terminal na raiz e a `.venv-win` existente, executar nesta ordem:
 ```powershell
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B graficos_estudo.py
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_graficos_estudo -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_graficos_estudo -v
 ```
 
 `executar_grafico()` coordena leitura, criação e exportação, aceitando caminhos para testes.
@@ -602,8 +606,8 @@ anteriores. `pip check` retornou `No broken requirements found.` Não houve inst
 Dash, navegadores ou outros componentes opcionais. A instalação limpa do conjunto ampliado não
 foi repetida; a validação histórica do MVP permanece com seu alcance original.
 
-Na primeira etapa, [test_graficos_estudo.py](test_graficos_estudo.py) acrescentou **18 métodos em
-uma classe**. A ampliação posterior está na seção 5.9. Os primeiros testes usam
+Na primeira etapa, [test_graficos_estudo.py](../tests/test_graficos_estudo.py) acrescentou
+**18 métodos em uma classe**. A ampliação posterior está na seção 5.9. Os primeiros testes usam
 `unittest`, dados controlados e arquivos temporários. Cobrem leitura e preservação exata de Decimal,
 nove barras e três séries, ordens das escalas e políticas, cores e padrões distintos, alturas
 aproximadas e textos monetários. Também conferem exclusão de C10 a C13, independência da ordem e
@@ -699,7 +703,7 @@ Com o terminal na raiz do projeto, o comando existente gera os dois gráficos a 
 ```powershell
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B graficos_estudo.py
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_graficos_estudo -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_graficos_estudo -v
 ```
 
 O primeiro comando prepara os resultados quando necessário; o script dos gráficos não executa
@@ -715,7 +719,7 @@ Explorador de Arquivos e abri-lo manualmente no navegador. Ambos ficam ignorados
 
 #### Testes, execução real e revisão visual
 
-Foram acrescentados **18 métodos em uma segunda classe** de `test_graficos_estudo.py`, preservando
+Foram acrescentados **18 métodos em uma segunda classe** de `tests/test_graficos_estudo.py`, preservando
 os 18 testes do primeiro gráfico e adaptando seus dados temporários para a integração. Os novos
 conferem quatro barras, orientação, linha em zero, ordem, referência, sinais, textos monetários e
 percentuais, associação por identificador e rótulos obtidos dos dados. Cobrem campos/IDs inválidos,
@@ -899,8 +903,8 @@ centavo não ficam ocultos nos exemplos. Uma cópia recebe os textos de exibiç�
 Os comandos executados na raiz, com a `.venv-win` existente, foram:
 
 ```powershell
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_analise_estudo -q
-& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest tests.test_analise_estudo -v
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -s tests -t . -v
 & '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
 ```
 
@@ -986,14 +990,14 @@ a conferência das orientações do curso e a preparação da publicação perma
 **Produção do material:** 25/11/2026. **Atualização documental:** 25/11/2026. São etapas distintas,
 realizadas na mesma data, sem nova pesquisa de preços ou câmbio.
 
-[RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md) reúne contexto, dados, método, resultados, dois gráficos,
+[RELATORIO_ESTUDO.md](../RELATORIO_ESTUDO.md) reúne contexto, dados, método, resultados, dois gráficos,
 recomendações condicionais, limitações, reprodução e declaração do apoio de IA. O relatório utiliza
 a interpretação da seção 5.12; não substitui as condições históricas nem altera o MVP v0.1.0.
 Os arquivos de imagem que acompanham o Markdown são:
 
-- [Custo mensal por escala e política](docs/imagens/custo_mensal_ia_por_escala_politica.png):
+- [Custo mensal por escala e política](imagens/custo_mensal_ia_por_escala_politica.png):
   `docs/imagens/custo_mensal_ia_por_escala_politica.png`, com 2880×1300 pixels; nove barras C01 a C09.
-- [Sensibilidade do custo aos tokens](docs/imagens/sensibilidade_custo_ia_tokens.png):
+- [Sensibilidade do custo aos tokens](imagens/sensibilidade_custo_ia_tokens.png):
   `docs/imagens/sensibilidade_custo_ia_tokens.png`, com 2880×1200 pixels; quatro barras C10 a C13.
 
 Os PNGs foram exportados dos HTMLs existentes por `Plotly.toImage()` no Chrome instalado, com as
@@ -1197,7 +1201,7 @@ Situação dos entregáveis:
   Revisão visual concluída no alcance da seção 5.10; os dois PNGs do relatório foram exportados e
   inspecionados conforme 5.13, sem dashboard. Outros tamanhos e navegadores não foram validados.
 - Relatório final com pergunta, fontes, preparação, resultados, dois gráficos, recomendações
-  condicionais e limitações: produzido em [RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md), com duas
+  condicionais e limitações: produzido em [RELATORIO_ESTUDO.md](../RELATORIO_ESTUDO.md), com duas
   imagens conforme 5.13. Revisão técnica local realizada conforme 5.14; revisão pelo responsável,
   orientações do curso e publicação permanecem pendentes.
 - Apoio de IA descrito no relatório; sua adequação às orientações específicas da atividade ainda
