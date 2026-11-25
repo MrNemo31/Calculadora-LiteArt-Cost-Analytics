@@ -2042,3 +2042,75 @@ resultados, capturas, dependências e demais alterações pendentes foram preser
 outras condições. Indicadores restantes, interpretação, recomendações e relatório final continuam
 pendentes. O estudo permanece separado do MVP v0.1.0 publicado, cuja tag não foi alterada.
 Não houve commit nem push.
+
+## 44. Indicadores de participação e custo mensal de IA por usuário ativo
+
+**Data desta atualização documental:** 25/11/2026.
+
+**Etapa:** registro dos indicadores implementados e conferidos; interpretação e relatório pendentes.
+
+**Objetivo dos pedidos:** completar o estudo com participações de entrada/saída e custo por usuário
+em USD e BRL, preservando precisão, resultados anteriores e o MVP publicado.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Criar calcular_indicadores(tabela) em analise_estudo.py, usar custos já calculados sem repetir as
+funções do MVP e produzir uma tabela separada. Validar as bases, tratar denominadores zero,
+exportar um quarto CSV e conferir os indicadores com testes temporários. Registrar essa etapa em
+ESTUDO_DE_CASO.md e, depois, atualizar somente README.md e este histórico, sem repetir a execução.
+
+**Participação e aprendizado:** as participações usam componente e total na mesma moeda; custos
+unitários usam a contagem de usuários ativos. Cada denominador é independente. Não aplicável é
+None, diferente de um resultado financeiro zero. A precisão Decimal vigente limita divisões não
+exatas; oito casas na exibição dos custos unitários não arredondam os dados exportados.
+
+**Implementação e decisões registradas:**
+
+- Acrescentar `calcular_indicadores()` com identificação, usuários, custos de base, participações
+  de entrada/saída e custo mensal de IA por usuário ativo em USD e BRL, preservando os 13 cenários
+  e a ordem recebida sem alterar a tabela de entrada ou recalcular consumo/custos do MVP.
+- Dividir entrada e saída em USD pelo total mensal em USD e multiplicar por Decimal("100").
+  Dividir o total de cada moeda pelos usuários, convertidos de inteiro diretamente para Decimal.
+- Validar colunas, nomes, IDs preenchidos e únicos, custos Decimal finitos não negativos e
+  usuários inteiros não negativos, incluindo escalares inteiros do Pandas e rejeitando booleanos
+  ou frações. Conferir componentes e total mensal na precisão vigente.
+- Retornar None nas participações quando o total USD for zero e nos custos por usuário quando
+  usuários forem zero. Tratar as duas bases separadamente, sem inventar zero ou percentual.
+- Herdar a precisão e o arredondamento em `localcontext()`, sem alterar o contexto global.
+  Apresentar participações com duas casas e custos unitários com oito casas em uma cópia textual,
+  com unidade por usuário ativo/mês e `Não aplicável` nos casos sem denominador válido.
+- Exportar `resultados/estudo_de_caso/indicadores_cenarios.csv` com 13 linhas e 11 colunas, UTF-8,
+  vírgula, ponto decimal, cabeçalho e sem índice. Preservar Decimal completo e None como campo vazio.
+- Calcular e validar todas as tabelas antes da exportação. Preservar o retorno de executar_estudo(),
+  os três esquemas anteriores e chamadas existentes; acrescentar caminho opcional para indicadores.
+
+**Resultados e testes da implementação em 25/11/2026:** os 19 novos métodos de TestIndicadores
+conferiram os 13 cenários com expectativas independentes, denominadores zero separados, entrada
+gratuita, custos e usuários inválidos, coerência de total, IDs, inteiros do Pandas e precisão.
+Também cobriram preservação da entrada e do contexto, divisões não exatas, releitura exata dos
+Decimal, None vazio na exportação, apresentação com oito casas e falhas sem sobrescrever resultados.
+A análise passou com **66 métodos em duas classes** e a suíte completa com **290 métodos em
+21 classes**: 188 do MVP, 66 da análise e 36 dos gráficos. Subtests não são métodos adicionais.
+
+Em C05 foram conferidos 25% de entrada, 75% de saída, USD 0.0044 e BRL 0.02556488 por usuário
+ativo/mês. C02, C05 e C08 têm os mesmos custos unitários sob as hipóteses atuais. Isso decorre das
+fórmulas e não comprova economia de escala, viabilidade ou qualidade pedagógica. O custo por
+usuário inclui somente IA, sem representar o custo operacional completo da aplicação.
+
+A execução real gerou o novo CSV. Conferências pontuais confirmaram sua precisão na releitura e
+os três CSVs anteriores idênticos. Os leitores dos gráficos continuaram compatíveis, com figuras
+de nove e quatro barras construídas em memória, sem alterar os HTMLs ou realizar nova inspeção
+visual. Essas conferências não acrescentaram métodos automatizados persistentes.
+
+**Condições históricas preservadas:** OpenAI, gpt-6-luna, Standard, entrada 0.10 e saída 0.50 USD
+por milhão e cotação fixa Decimal("5.8102") BRL por USD, com pesquisa e referência de 18/11/2026.
+A pausa no desenvolvimento não alterou essas referências. A implementação e a verificação são de
+25/11/2026, sem consulta à cotação atual, atualização de preços ou substituição de datas históricas.
+
+Nesta atualização, somente README.md e este registro foram alterados, com base na implementação,
+testes e ESTUDO_DE_CASO.md. Não foram repetidos testes, cálculos ou exportações. Os demais
+arquivos e alterações pendentes foram preservados, incluindo código, dados, HTMLs e dependências.
+
+**Marco deste registro:** indicadores implementados e verificados. Interpretação final,
+recomendações e relatório permanecem como próximos passos. O estudo continua separado do MVP
+v0.1.0 publicado, sem alteração da tag. Não houve instalações, commit ou push.

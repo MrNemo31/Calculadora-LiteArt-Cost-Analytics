@@ -380,12 +380,12 @@ Firebase como alternativa em estudo; isso não implica contratação ou migraç�
 - 24 métodos de integração dos cenários, cotação, tabelas, mensagens e exportação.
 
 Esses 188 métodos passaram na validação em ambiente novo de 14/11/2026. A rotina do estudo
-acrescentou inicialmente 30 métodos e depois **17 métodos para as comparações**, totalizando
-**47 métodos em uma classe** em [test_analise_estudo.py](test_analise_estudo.py), sem alterar os
-testes do MVP. Os gráficos possuem **36 métodos em duas classes** em
+acrescentou inicialmente 30 métodos, depois 17 para as comparações e **19 para os indicadores**,
+totalizando **66 métodos em duas classes** em [test_analise_estudo.py](test_analise_estudo.py),
+sem alterar os testes do MVP. Os gráficos possuem **36 métodos em duas classes** em
 [test_graficos_estudo.py](test_graficos_estudo.py): 18 do primeiro e 18 acrescentados para o segundo.
-O conjunto atual possui **271 métodos em 20 classes**: 188 do MVP, 47 da análise e 36 dos gráficos.
-Todos passaram em 19/11/2026 na implementação do segundo gráfico, conforme a execução registrada
+O conjunto atual possui **290 métodos em 21 classes**: 188 do MVP, 66 da análise e 36 dos gráficos.
+Todos passaram em **25/11/2026** na implementação dos indicadores, conforme a execução registrada
 nesta sessão. A suíte não foi repetida nesta atualização documental. Casos de `subTest` não são
 métodos adicionais.
 Os testes persistentes simulam `input()` com `unittest.mock.patch` e usam
@@ -411,6 +411,11 @@ Os 17 métodos adicionais cobrem referências e fórmulas das comparações, ide
 de ordem/índice, condições compatíveis, preservação da tabela, percentuais com referência zero,
 precisão do contexto Decimal e exportação das três tabelas. As conferências pontuais dos CSVs
 existentes complementam esses testes, sem aumentar sua contagem.
+Os 19 testes dos indicadores cobrem os 13 cenários, denominadores zero independentes, entrada
+gratuita, custos e usuários inválidos, inteiros escalares do Pandas, coerência dos totais,
+preservação da entrada e do contexto Decimal, divisões não exatas, exportação precisa e campos
+vazios para None. Também conferem as oito casas na apresentação e a integração do quarto CSV
+sem sobrescrever resultados anteriores diante de falhas.
 Os 36 testes dos gráficos usam dados controlados e arquivos temporários. Os primeiros conferem
 nove barras, três séries, ordens, associação por ID, valores e textos monetários, entrada inválida,
 preservação dos dados, importação sem efeitos e HTML offline. Os 18 novos cobrem quatro barras
@@ -482,6 +487,8 @@ consumos e custos sob as condições fixas e calcula as comparações antes de e
 `comparar_politicas()` produz seis pares: C01/C02 contra C03, C04/C05 contra C06 e C07/C08 contra
 C09, sempre dentro da mesma escala. `analisar_sensibilidade()` compara C10 a C13 com C05,
 variando somente o token previsto e mantendo hipóteses e condições comerciais compatíveis.
+`calcular_indicadores()` usa os resultados já calculados para obter participações e custos por
+usuário ativo. Todas as tabelas são validadas e calculadas antes de iniciar a exportação.
 Não consulta a rede. Importar o módulo não lê arquivos, imprime ou exporta resultados.
 
 Com o terminal na raiz do projeto, executar o cálculo, os testes do estudo ou toda a suíte:
@@ -501,12 +508,14 @@ A mesma execução também exporta:
   custos e reduções absolutas e percentuais, acompanhadas das condições utilizadas.
 - `resultados/estudo_de_caso/sensibilidade_tokens.csv`: quatro linhas e 24 colunas, com tokens
   comparados, custos e variações absolutas e percentuais, acompanhadas das condições utilizadas.
+- `resultados/estudo_de_caso/indicadores_cenarios.csv`: 13 linhas e 11 colunas, com identificação,
+  usuários, custos de base, participações de entrada/saída e custos mensais por usuário em USD e BRL.
 
 A pasta é criada automaticamente e cada execução substitui os arquivos, sem acumular linhas.
 Erros de entrada ou comparabilidade impedem a exportação e preservam resultados anteriores.
-Os três resultados ficam ignorados pelo Git, junto dos demais arquivos de `resultados/`.
+Os quatro resultados ficam ignorados pelo Git, junto dos demais arquivos de `resultados/`.
 
-Tarifas, câmbio e custos permanecem `Decimal`. O terminal exibe uma tabela curta com identificador,
+Tarifas, câmbio e custos permanecem `Decimal`. A tabela de custos no terminal apresenta identificador,
 usuários, feedbacks e custos mensais, usando `US$` e `R$`, vírgula decimal e duas casas somente na
 apresentação. O CSV usa UTF-8, vírgula entre campos, ponto decimal, cabeçalho e ausência de índice,
 com valores completos. Na releitura, converter os campos financeiros de texto diretamente para
@@ -515,11 +524,41 @@ Decimal. O esquema e as conferências estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CA
 **Os 13 cenários foram calculados e conferidos em 18/11/2026; as comparações de políticas e tokens
 já estão implementadas e exportadas.** A atualização documental de 19/11/2026 registra esse avanço
 sem atualizar as condições fixas. Os dois gráficos foram implementados e gerados em 19/11/2026,
-conforme abaixo. A revisão visual foi concluída no Chrome nas dimensões informadas; indicadores
-restantes, síntese final, relatório e recomendações continuam pendentes.
+conforme abaixo. A revisão visual foi concluída no Chrome nas dimensões informadas. As participações
+e os custos por usuário foram implementados e conferidos em **25/11/2026**; interpretação final,
+relatório e recomendações continuam pendentes.
 As conferências não comprovam acesso pela conta da API, consumo real de tokens, configuração de
 raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado pelo
 curso ou validado pelo Google.
+
+### Indicadores do estudo
+
+A execução de `analise_estudo.py`, pelos comandos acima, também mostra e exporta as participações
+de entrada e saída no custo de IA e o custo mensal de IA por usuário ativo, em USD e BRL.
+A tabela separada preserva os 13 identificadores e a ordem dos cenários. Seu arquivo é
+`resultados/estudo_de_caso/indicadores_cenarios.csv`, relativo à pasta do script, sem alterar
+os três CSVs anteriores, o retorno da rotina ou o funcionamento do MVP v0.1.0.
+
+As participações dividem cada componente pelo total mensal **na mesma moeda, USD**, multiplicando
+por 100. O custo por usuário divide o total mensal da respectiva moeda pelos **usuários ativos**,
+convertidos de inteiro diretamente para Decimal. Se o total USD for zero, as participações são
+`None`; se os usuários forem zero, os dois custos unitários são `None`. Cada denominador é tratado
+independentemente. Esses casos aparecem como `Não aplicável` no terminal e como **campo vazio no
+CSV**; não são valores iguais a zero. Entrada gratuita com saída paga, por exemplo, tem participação
+de entrada igual a zero, e não um indicador não aplicável.
+
+Custos e percentuais aplicáveis continuam Decimal. As divisões seguem a precisão vigente em um
+contexto local, sem alterar o contexto global ou arredondar explicitamente os dados intermediários.
+No terminal, uma cópia de apresentação mostra percentuais com duas casas e custos unitários com
+**oito casas decimais**, para não ocultar valores inferiores a um centavo. Em C05 são 25% de entrada,
+75% de saída, `US$ 0,00440000` e `R$ 0,02556488` por usuário ativo/mês. O CSV exporta os valores
+completos; na releitura, manter texto até convertê-lo diretamente para Decimal, sem float.
+
+Esse custo unitário inclui **somente IA**, sem representar o custo operacional completo,
+economia de escala ou viabilidade financeira comprovada. Modelo, tarifas e cotação histórica fixa
+`Decimal("5.8102")` continuam com as referências de **18/11/2026**. A pausa no desenvolvimento não
+atualizou essas condições. Fórmulas, validações e evidências estão em
+[ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md).
 
 ### Gráficos do estudo
 
@@ -580,10 +619,10 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 [notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
-O próximo passo do estudo é elaborar a síntese interpretativa dos resultados e das comparações
-já calculadas, avaliar os indicadores ainda não incorporados, preparar o relatório e formular
-recomendações condicionais. A revisão dos HTMLs em outros tamanhos ou navegadores depende de
-uma conferência própria, sem ampliar automaticamente o alcance já comprovado.
+O próximo passo do estudo é elaborar a síntese interpretativa dos resultados, das comparações e
+dos indicadores já calculados, preparar o relatório e formular recomendações condicionais.
+A revisão dos HTMLs em outros tamanhos ou navegadores depende de uma conferência própria, sem
+ampliar automaticamente o alcance já comprovado.
 As relações verificadas pelas fórmulas não são evidências empíricas sobre estudantes.
 A tag v0.1.0 permanece preservada como referência histórica.
 

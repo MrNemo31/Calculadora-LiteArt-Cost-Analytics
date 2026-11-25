@@ -2,7 +2,8 @@
 
 import csv
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
+from numbers import Integral
 from pathlib import Path
 
 import pandas as pd
@@ -32,6 +33,14 @@ COLUNAS_CONDICOES = (
     "provedor", "modelo", "modalidade", *CAMPOS_FINANCEIROS,
     "fonte_modelo", "fonte_precos", "data_consulta_precos", "fonte_cambio",
     "data_referencia_cambio", "data_consulta_cambio",
+)
+COLUNAS_BASE_INDICADORES = (
+    "id_cenario", "cenario", "usuarios_ativos", "custo_entrada_usd", "custo_saida_usd",
+    "custo_ia_mensal_usd", "custo_ia_mensal_br",
+)
+COLUNAS_INDICADORES = (
+    "participacao_entrada_percentual", "participacao_saida_percentual",
+    "custo_ia_mensal_por_usuario_usd", "custo_ia_mensal_por_usuario_br",
 )
 
 
@@ -280,6 +289,79 @@ def analisar_sensibilidade(tabela):
     return pd.DataFrame.from_records(comparacoes, coerce_float=False)
 
 
+def calcular_indicadores(tabela):
+    """Deriva indicadores dos custos existentes, sem recalcular ou alterar a entrada."""
+    if not tabela.columns.is_unique:
+        raise ValueError("Indicadores: colunas duplicadas.")
+    ausentes = set(COLUNAS_BASE_INDICADORES) - set(tabela.columns)
+    if ausentes:
+        raise ValueError(f"Indicadores: colunas obrigatórias ausentes: {sorted(ausentes)}.")
+    if tabela.empty:
+        raise ValueError("Indicadores: tabela sem cenários.")
+    identificadores = set()
+    resultados = []
+    # Herda a precisão e o arredondamento atuais, sem alterar o contexto global ou seus flags.
+    with localcontext():
+        for registro in tabela[list(COLUNAS_BASE_INDICADORES)].to_dict("records"):
+            id_ = registro["id_cenario"]
+            if not isinstance(id_, str) or not id_.strip():
+                raise ValueError("Indicadores: id_cenario deve ser um texto preenchido.")
+            if id_ in identificadores:
+                raise ValueError(f"Indicadores: identificador duplicado: {id_}.")
+            identificadores.add(id_)
+            nome = registro["cenario"]
+            if not isinstance(nome, str) or not nome.strip():
+                raise ValueError(f"{id_}: nome do cenário obrigatório.")
+            usuarios = registro["usuarios_ativos"]
+            if isinstance(usuarios, bool) or not isinstance(usuarios, Integral) or usuarios < 0:
+                raise ValueError(f"{id_}: usuarios_ativos deve ser inteiro não negativo, sem booleano.")
+            for campo in COLUNAS_BASE_INDICADORES[3:]:
+                validar_numero_nao_negativo(registro[campo], f"{id_}: {campo}", (Decimal,))
+            entrada = registro["custo_entrada_usd"]
+            saida = registro["custo_saida_usd"]
+            total_usd = registro["custo_ia_mensal_usd"]
+            total_br = registro["custo_ia_mensal_br"]
+            if entrada + saida != +total_usd:
+                raise ValueError(f"{id_}: componentes e total mensal USD incoerentes na precisão vigente.")
+            # As duas bases são independentes: total zero não implica usuários zero, ou vice-versa.
+            usuarios_decimal = Decimal(int(usuarios))
+            resultados.append({
+                **registro,
+                "participacao_entrada_percentual": None if total_usd == 0 else entrada / total_usd * Decimal("100"),
+                "participacao_saida_percentual": None if total_usd == 0 else saida / total_usd * Decimal("100"),
+                "custo_ia_mensal_por_usuario_usd": None if usuarios == 0 else total_usd / usuarios_decimal,
+                "custo_ia_mensal_por_usuario_br": None if usuarios == 0 else total_br / usuarios_decimal,
+            })
+    return pd.DataFrame.from_records(resultados, coerce_float=False)
+
+
+def apresentar_indicadores(indicadores):
+    """Mostra participações e oito casas por usuário; não substitui os dados por textos."""
+    def por_usuario(valor, moeda):
+        if valor is None:
+            return "Não aplicável"
+        texto = f"{valor:,.8f}".translate(str.maketrans(",.", ".,"))
+        return f"{moeda} {texto}"
+
+    print("\nIndicadores — participações e custo de IA por usuário ativo/mês")
+    exibicao = indicadores[["id_cenario", "usuarios_ativos", *COLUNAS_INDICADORES]].copy()
+    formatos = {
+        "participacao_entrada_percentual": formatar_percentual,
+        "participacao_saida_percentual": formatar_percentual,
+        "custo_ia_mensal_por_usuario_usd": lambda valor: por_usuario(valor, "US$"),
+        "custo_ia_mensal_por_usuario_br": lambda valor: por_usuario(valor, "R$"),
+    }
+    # to_string pode ignorar formatadores para None; preparar esses textos só na cópia.
+    for campo, formatador in formatos.items():
+        exibicao[campo] = exibicao[campo].map(formatador)
+    print(exibicao.to_string(
+        index=False, na_rep="Não aplicável",
+        header=["Cenário", "Usuários", "Entrada (%)", "Saída (%)",
+                "USD/usuário ativo/mês", "BRL/usuário ativo/mês"],
+    ))
+    print("Somente IA; custo por usuário não comprova economia de escala ou viabilidade financeira.")
+
+
 def formatar_percentual(valor):
     """Retorna texto com sinal; None significa percentual não aplicável, nunca zero."""
     if valor is None:
@@ -350,7 +432,7 @@ def exportar_resultados(tabela, caminho):
 
 def executar_estudo(
     caminho_cenarios=None, caminho_condicoes=None, caminho_saida=None,
-    caminho_politicas=None, caminho_sensibilidade=None,
+    caminho_politicas=None, caminho_sensibilidade=None, caminho_indicadores=None,
 ):
     """Valida e compara tudo antes de exportar; aceita caminhos temporários nos testes."""
     entrada = PASTA / "dados" / "estudo_de_caso"
@@ -363,6 +445,7 @@ def executar_estudo(
     tabela = calcular_resultados(cenarios, condicoes)
     politicas = comparar_politicas(tabela)
     sensibilidade = analisar_sensibilidade(tabela)
+    indicadores = calcular_indicadores(tabela)
     destino = Path(
         PASTA / "resultados" / "estudo_de_caso" / "resultados_cenarios.csv"
         if caminho_saida is None else caminho_saida
@@ -375,13 +458,19 @@ def executar_estudo(
         destino.parent / "sensibilidade_tokens.csv"
         if caminho_sensibilidade is None else Path(caminho_sensibilidade)
     )
+    destino_indicadores = (
+        destino.parent / "indicadores_cenarios.csv"
+        if caminho_indicadores is None else Path(caminho_indicadores)
+    )
     for dados, caminho in (
         (tabela, destino), (politicas, destino_politicas), (sensibilidade, destino_sensibilidade),
+        (indicadores, destino_indicadores),
     ):
         exportar_resultados(dados, caminho)
     apresentar_resultados(tabela)
     apresentar_comparacoes(politicas, sensibilidade)
-    for caminho in (destino, destino_politicas, destino_sensibilidade):
+    apresentar_indicadores(indicadores)
+    for caminho in (destino, destino_politicas, destino_sensibilidade, destino_indicadores):
         print(f"Arquivo salvo: {caminho}")
     return tabela
 

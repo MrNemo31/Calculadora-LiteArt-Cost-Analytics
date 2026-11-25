@@ -646,5 +646,243 @@ class TestAnaliseEstudo(unittest.TestCase):
                 for caminho in destinos:
                     self.assertEqual(caminho.read_bytes(), b"anterior")
 
+class TestIndicadores(unittest.TestCase):
+    def tabela(self, **alteracoes):
+        registro = {
+            "id_cenario": "C05", "cenario": "Cenário de referência", "usuarios_ativos": 500,
+            "custo_entrada_usd": Decimal("0.55"), "custo_saida_usd": Decimal("1.65"),
+            "custo_ia_mensal_usd": Decimal("2.20"), "custo_ia_mensal_br": Decimal("12.7824400"),
+        }
+        registro.update(alteracoes)
+        return pd.DataFrame([registro], dtype=object)
+
+    def resultados_reais(self):
+        entrada = Path(__file__).resolve().parent / "dados" / "estudo_de_caso"
+        return estudo.calcular_resultados(
+            estudo.ler_cenarios_estudo(entrada / "cenarios.csv"),
+            estudo.ler_condicoes_fixas(entrada / "condicoes_fixas.csv"),
+        )
+
+    def test_indicadores_dos_13_cenarios_com_expectativas_independentes(self):
+        resultados = estudo.calcular_indicadores(self.resultados_reais())
+        self.assertEqual(resultados.shape, (13, 11))
+        self.assertEqual(list(resultados.columns), [*estudo.COLUNAS_BASE_INDICADORES, *estudo.COLUNAS_INDICADORES])
+        self.assertEqual(list(resultados["id_cenario"]), [f"C{i:02d}" for i in range(1, 14)])
+        esperados = (
+            ("25", "75", "0.0032", "0.01859264"),
+            ("25", "75", "0.0044", "0.02556488"),
+            ("25", "75", "0.008", "0.0464816"),
+            ("25", "75", "0.0032", "0.01859264"),
+            ("25", "75", "0.0044", "0.02556488"),
+            ("25", "75", "0.008", "0.0464816"),
+            ("25", "75", "0.0032", "0.01859264"),
+            ("25", "75", "0.0044", "0.02556488"),
+            ("25", "75", "0.008", "0.0464816"),
+            (Decimal("100") / 7, Decimal("600") / 7, "0.00385", "0.02236927"),
+            ("40", "60", "0.0055", "0.0319561"),
+            ("40", "60", "0.00275", "0.01597805"),
+            (Decimal("100") / 7, Decimal("600") / 7, "0.0077", "0.04473854"),
+        )
+        for registro, valores in zip(resultados.to_dict("records"), esperados, strict=True):
+            with self.subTest(id=registro["id_cenario"]):
+                for campo, esperado in zip(estudo.COLUNAS_INDICADORES, valores, strict=True):
+                    self.assertIsInstance(registro[campo], Decimal)
+                    self.assertEqual(registro[campo], Decimal(esperado))
+                soma = registro["participacao_entrada_percentual"] + registro["participacao_saida_percentual"]
+                self.assertLessEqual(abs(soma - Decimal("100")), Decimal("1e-25"))
+
+    def test_c05_e_mesmo_custo_unitario_em_c02_c05_c08(self):
+        indicadores = estudo.calcular_indicadores(self.resultados_reais()).set_index("id_cenario")
+        for id_ in ("C02", "C05", "C08"):
+            self.assertEqual(indicadores.loc[id_, "custo_ia_mensal_por_usuario_usd"], Decimal("0.0044"))
+            self.assertEqual(indicadores.loc[id_, "custo_ia_mensal_por_usuario_br"], Decimal("0.02556488"))
+        self.assertEqual(indicadores.loc["C05", "participacao_entrada_percentual"], Decimal("25"))
+        self.assertEqual(indicadores.loc["C05", "participacao_saida_percentual"], Decimal("75"))
+
+    def test_zero_total_participacoes_none_custo_unitario_zero(self):
+        dados = self.tabela(custo_entrada_usd=Decimal("0"), custo_saida_usd=Decimal("0"),
+                            custo_ia_mensal_usd=Decimal("0"), custo_ia_mensal_br=Decimal("0"))
+        resultado = estudo.calcular_indicadores(dados).iloc[0]
+        for campo in estudo.COLUNAS_INDICADORES[:2]:
+            self.assertIsNone(resultado[campo])
+        for campo in estudo.COLUNAS_INDICADORES[2:]:
+            self.assertIsInstance(resultado[campo], Decimal)
+            self.assertEqual(resultado[campo], Decimal("0"))
+
+    def test_zero_usuarios_custo_unitario_none_participacoes_validas(self):
+        resultado = estudo.calcular_indicadores(self.tabela(usuarios_ativos=0)).iloc[0]
+        self.assertEqual(resultado["participacao_entrada_percentual"], Decimal("25"))
+        self.assertEqual(resultado["participacao_saida_percentual"], Decimal("75"))
+        for campo in estudo.COLUNAS_INDICADORES[2:]:
+            self.assertIsNone(resultado[campo])
+
+    def test_ambos_denominadores_zero(self):
+        dados = self.tabela(usuarios_ativos=0, custo_entrada_usd=Decimal("0"),
+                            custo_saida_usd=Decimal("0"), custo_ia_mensal_usd=Decimal("0"),
+                            custo_ia_mensal_br=Decimal("0"))
+        resultado = estudo.calcular_indicadores(dados).iloc[0]
+        self.assertTrue(all(resultado[campo] is None for campo in estudo.COLUNAS_INDICADORES))
+
+    def test_entrada_gratuita_com_saida_paga(self):
+        dados = self.tabela(custo_entrada_usd=Decimal("0"), custo_saida_usd=Decimal("2.20"))
+        resultado = estudo.calcular_indicadores(dados).iloc[0]
+        self.assertEqual(resultado["participacao_entrada_percentual"], Decimal("0"))
+        self.assertEqual(resultado["participacao_saida_percentual"], Decimal("100"))
+
+    def test_custos_invalidos_rejeitados_com_identificador_e_campo(self):
+        for campo in estudo.COLUNAS_BASE_INDICADORES[3:]:
+            for valor in (1.0, "1.00", True, None, Decimal("-1"), Decimal("NaN"), Decimal("Infinity")):
+                with self.subTest(campo=campo, valor=valor):
+                    with self.assertRaises((TypeError, ValueError)) as erro:
+                        estudo.calcular_indicadores(self.tabela(**{campo: valor}))
+                    self.assertIn("C05", str(erro.exception))
+                    self.assertIn(campo, str(erro.exception))
+
+    def test_total_incoerente_rejeitado(self):
+        with self.assertRaisesRegex(ValueError, "C05.*incoerentes"):
+            estudo.calcular_indicadores(self.tabela(custo_ia_mensal_usd=Decimal("2.21")))
+
+    def test_usuarios_invalidos_sem_booleanos_ou_truncamento(self):
+        for valor in (-1, True, False, 500.0, 500.5, Decimal("500"), "500", None):
+            with self.subTest(valor=valor):
+                with self.assertRaisesRegex(ValueError, "usuarios_ativos.*inteiro"):
+                    estudo.calcular_indicadores(self.tabela(usuarios_ativos=valor))
+
+    def test_inteiros_escalares_e_nullable_do_pandas(self):
+        escalar = pd.Series([500], dtype="int64").iloc[0]
+        dados = self.tabela(usuarios_ativos=escalar)
+        self.assertEqual(estudo.calcular_indicadores(dados).iloc[0]["custo_ia_mensal_por_usuario_usd"], Decimal("0.0044"))
+        dados["usuarios_ativos"] = pd.Series([500], dtype="Int64")
+        self.assertEqual(estudo.calcular_indicadores(dados).iloc[0]["custo_ia_mensal_por_usuario_br"], Decimal("0.02556488"))
+
+    def test_ids_nomes_vazios_e_identificadores_duplicados(self):
+        for campo in ("id_cenario", "cenario"):
+            for valor in (None, "", "  ", 5):
+                with self.subTest(campo=campo, valor=valor):
+                    with self.assertRaises(ValueError):
+                        estudo.calcular_indicadores(self.tabela(**{campo: valor}))
+        with self.assertRaisesRegex(ValueError, "duplicado.*C05"):
+            estudo.calcular_indicadores(pd.concat([self.tabela(), self.tabela()]))
+
+    def test_colunas_ausentes_duplicadas_e_tabela_vazia(self):
+        dados = self.tabela()
+        for campo in estudo.COLUNAS_BASE_INDICADORES:
+            with self.subTest(campo=campo), self.assertRaisesRegex(ValueError, "colunas.*ausentes"):
+                estudo.calcular_indicadores(dados.drop(columns=campo))
+        with self.assertRaisesRegex(ValueError, "colunas duplicadas"):
+            estudo.calcular_indicadores(pd.concat([dados, dados[["cenario"]]], axis=1))
+        with self.assertRaisesRegex(ValueError, "sem cenários"):
+            estudo.calcular_indicadores(dados.iloc[:0])
+
+    def test_preserva_ordem_indices_valores_tipos_sem_recalcular(self):
+        dados = self.resultados_reais().iloc[::-1].copy()
+        dados.index = ["repetido"] * 13
+        antes = dados.copy(deep=True)
+        with patch.object(estudo, "calcular_consumo_cenario", side_effect=AssertionError("recálculo")), \
+                patch.object(estudo, "calcular_custo_ia_cenario", side_effect=AssertionError("recálculo")):
+            indicadores = estudo.calcular_indicadores(dados)
+        self.assertEqual(list(indicadores["id_cenario"]), list(dados["id_cenario"]))
+        assert_frame_equal(dados, antes, check_exact=True)
+        for campo in estudo.COLUNAS_BASE_INDICADORES:
+            self.assertEqual(list(indicadores[campo]), list(dados[campo]))
+
+    def test_divisoes_nao_exatas_contexto_herdado_e_global_preservado(self):
+        from decimal import getcontext, localcontext
+        global_antes = getcontext().copy()
+        with localcontext() as contexto:
+            contexto.prec = 10
+            contexto.clear_flags()
+            dados = self.tabela(usuarios_ativos=3, custo_entrada_usd=Decimal("1"),
+                                custo_saida_usd=Decimal("2"), custo_ia_mensal_usd=Decimal("3"),
+                                custo_ia_mensal_br=Decimal("5"))
+            resultado = estudo.calcular_indicadores(dados).iloc[0]
+            self.assertEqual(resultado["participacao_entrada_percentual"], Decimal("33.33333333"))
+            self.assertEqual(resultado["participacao_saida_percentual"], Decimal("66.66666667"))
+            self.assertEqual(resultado["custo_ia_mensal_por_usuario_br"], Decimal("1.666666667"))
+            self.assertEqual(contexto.prec, 10)
+            self.assertFalse(any(contexto.flags.values()))
+        self.assertEqual(getcontext().prec, global_antes.prec)
+        self.assertEqual(getcontext().rounding, global_antes.rounding)
+        self.assertEqual(getcontext().flags, global_antes.flags)
+
+    def test_coerencia_dos_componentes_na_precisao_vigente(self):
+        from decimal import localcontext
+        with localcontext() as contexto:
+            contexto.prec = 5
+            dados = self.tabela(custo_entrada_usd=Decimal("0.123456"), custo_saida_usd=Decimal("0.234567"),
+                                custo_ia_mensal_usd=Decimal("0.358023"))
+            self.assertEqual(len(estudo.calcular_indicadores(dados)), 1)
+
+    def test_exportacao_decimal_completa_e_none_vazio(self):
+        dados = pd.concat([
+            self.tabela(id_cenario="A", usuarios_ativos=0),
+            self.tabela(id_cenario="B", custo_entrada_usd=Decimal("0"), custo_saida_usd=Decimal("0"),
+                        custo_ia_mensal_usd=Decimal("0"), custo_ia_mensal_br=Decimal("0")),
+            self.tabela(id_cenario="C", custo_ia_mensal_br=Decimal("12.7824400123456789")),
+        ], ignore_index=True)
+        indicadores = estudo.calcular_indicadores(dados)
+        antes = indicadores.copy(deep=True)
+        with TemporaryDirectory(prefix="liteart_indicadores_") as pasta:
+            destino = Path(pasta) / "indicadores.csv"
+            estudo.exportar_resultados(indicadores, destino)
+            with destino.open(encoding="utf-8", newline="") as arquivo:
+                leitor = csv.DictReader(arquivo)
+                self.assertEqual(leitor.fieldnames, list(indicadores.columns))
+                registros = list(leitor)
+            for registro, original in zip(registros, indicadores.to_dict("records"), strict=True):
+                for campo, valor in original.items():
+                    if isinstance(valor, Decimal):
+                        self.assertEqual(Decimal(registro[campo]).as_tuple(), valor.as_tuple())
+                        self.assertEqual(registro[campo], str(valor))
+                    elif valor is None:
+                        self.assertEqual(registro[campo], "")
+        assert_frame_equal(indicadores, antes, check_exact=True)
+
+    def test_apresentacao_oito_casas_unidades_e_nao_aplicavel(self):
+        indicadores = estudo.calcular_indicadores(pd.concat([
+            self.tabela(), self.tabela(id_cenario="zero", usuarios_ativos=0),
+        ]))
+        antes = indicadores.copy(deep=True)
+        with redirect_stdout(io.StringIO()) as texto:
+            estudo.apresentar_indicadores(indicadores)
+        self.assertIn("usuário ativo/mês", texto.getvalue())
+        self.assertIn("US$ 0,00440000", texto.getvalue())
+        self.assertIn("R$ 0,02556488", texto.getvalue())
+        self.assertIn("Não aplicável", texto.getvalue())
+        self.assertIn("25,00%", texto.getvalue())
+        assert_frame_equal(indicadores, antes, check_exact=True)
+
+    def test_integracao_quarto_csv_retorno_e_esquemas_anteriores_preservados(self):
+        with TemporaryDirectory(prefix="liteart_indicadores_fluxo_") as pasta:
+            saida = Path(pasta) / "resultados.csv"
+            indicadores = Path(pasta) / "opcional" / "indicadores.csv"
+            with redirect_stdout(io.StringIO()) as texto:
+                tabela = estudo.executar_estudo(caminho_saida=saida, caminho_indicadores=indicadores)
+            self.assertEqual(tabela.shape, (13, 35))
+            for nome, linhas, colunas in (
+                (saida, 13, 35), (saida.parent / "comparacao_politicas.csv", 6, 20),
+                (saida.parent / "sensibilidade_tokens.csv", 4, 24), (indicadores, 13, 11),
+            ):
+                with nome.open(encoding="utf-8", newline="") as arquivo:
+                    leitor = csv.DictReader(arquivo)
+                    self.assertEqual(len(leitor.fieldnames), colunas)
+                    self.assertEqual(len(list(leitor)), linhas)
+            self.assertIn(str(indicadores), texto.getvalue())
+
+    def test_falha_nos_indicadores_preserva_todas_as_exportacoes_anteriores(self):
+        with TemporaryDirectory(prefix="liteart_indicadores_falha_") as pasta:
+            pasta = Path(pasta)
+            nomes = ("resultados_cenarios.csv", "comparacao_politicas.csv",
+                     "sensibilidade_tokens.csv", "indicadores_cenarios.csv")
+            for nome in nomes:
+                (pasta / nome).write_bytes(b"anterior")
+            with patch.object(estudo, "calcular_indicadores", side_effect=ValueError("total incoerente")), \
+                    redirect_stdout(io.StringIO()) as texto, self.assertRaisesRegex(ValueError, "incoerente"):
+                estudo.executar_estudo(caminho_saida=pasta / nomes[0])
+            self.assertEqual(texto.getvalue(), "")
+            for nome in nomes:
+                self.assertEqual((pasta / nome).read_bytes(), b"anterior")
+
+
 if __name__ == "__main__":
     unittest.main()

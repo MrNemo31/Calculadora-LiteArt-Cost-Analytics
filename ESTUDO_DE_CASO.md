@@ -2,12 +2,12 @@
 
 **Data do planejamento:** 18/11/2026.
 
-**Atualização documental:** 19/11/2026. Preparação, validação, cálculo dos 13 cenários e comparações
-de políticas e tokens concluídos e conferidos. Os dois gráficos foram implementados e gerados como
-HTML; a revisão visual foi concluída no alcance da seção 5.10. Indicadores restantes,
-síntese interpretativa final, relatório
-e recomendações continuam pendentes. As condições fixas permanecem datadas de 18/11/2026;
-esta atualização documental não é nova pesquisa de preços, consulta cambial ou execução da suíte.
+**Atualização documental:** 25/11/2026. Preparação, validação, cálculo dos 13 cenários e comparações
+concluídos e conferidos. Os dois gráficos estão implementados, com revisão visual no alcance da
+seção 5.10. Participações de custo e custos por usuário ativo foram implementados e verificados em
+25/11/2026, conforme 5.11. Interpretação final, relatório e recomendações continuam pendentes.
+As condições fixas permanecem com pesquisa e referência de 18/11/2026; a pausa no desenvolvimento
+não atualizou modelo, tarifas, cotação ou datas históricas.
 O estudo se destina ao Google Data Analytics Professional Certificate, sem aprovação formal do
 curso ou validação pelo Google. As orientações da atividade, inclusive sobre apoio de IA, deverão
 ser conferidas antes da entrega.
@@ -343,7 +343,8 @@ protege a importação: importar o módulo não lê CSVs, pergunta, imprime, con
 - `apresentar_resultados()`: mostra identificador, usuários, feedbacks e custos mensais em USD e
   BRL. Reutiliza `formatar_moeda_br()` em formatadores de `to_string()`, sem modificar a tabela.
 - `exportar_resultados()` e `executar_estudo()`: coordenam a gravação e o fluxo completo.
-  Todos os registros são validados, calculados e comparados antes de escrever os três CSVs.
+  Todos os registros são validados, calculados e comparados antes de escrever. A etapa de
+  indicadores da seção 5.11 acrescentou um quarto CSV, também calculado antes da exportação.
   `main()` trata falhas esperadas de entrada com mensagem e saída diferente de zero, sem
   sobrescrever resultados anteriores em erros de validação ou de comparabilidade.
 
@@ -419,8 +420,8 @@ Zeros finais adicionais no CSV preservam a representação de Decimal, sem alter
   sem evidência empírica sobre comportamento, aprendizagem ou qualidade dos feedbacks.
 
 A validação e o cálculo estão concluídos. As comparações monetárias e percentuais foram
-implementadas posteriormente, conforme a seção 5.7. Participações e custo por usuário não foram
-incorporados como indicadores à rotina. Os gráficos estão registrados nas seções 5.8 e 5.9;
+implementadas posteriormente, conforme a seção 5.7. Participações e custo por usuário foram
+incorporados em 25/11/2026, conforme a seção 5.11. Os gráficos estão nas seções 5.8 e 5.9;
 a revisão visual está registrada na seção 5.10; síntese final e recomendações permanecem pendentes.
 
 ### 5.7. Políticas de feedback e sensibilidade dos tokens
@@ -450,7 +451,8 @@ condições são rejeitadas com identificação do par e dos campos divergentes.
 
 `apresentar_comparacoes()` mostra as duas tabelas com símbolos monetários, sinais e percentuais;
 `formatar_percentual()` apresenta valores positivos com `+` e `None` como `Não aplicável`.
-A execução calcula e valida ambas as comparações antes de iniciar a exportação dos três arquivos.
+A execução calcula e valida ambas as comparações antes de iniciar a exportação. Os três arquivos
+desta etapa foram preservados na ampliação para quatro tabelas descrita na seção 5.11.
 
 #### Exportações das comparações
 
@@ -476,7 +478,8 @@ sem símbolos monetários, sinais de porcentagem ou arredondamento para duas cas
 diferenças e percentuais aplicáveis permanecem Decimal; os campos financeiros devem ser relidos
 como texto e convertidos diretamente para Decimal.
 
-As divisões percentuais seguem a precisão e o arredondamento do contexto Decimal vigente.
+As divisões percentuais das comparações seguem a precisão e o arredondamento do contexto Decimal
+vigente.
 A rotina não altera esse contexto nem aplica `quantize()` ou arredondamento explícito intermediário.
 Isso não significa precisão infinita para dízimas: um teste com precisão local de dez dígitos
 confere `33.33333333`, preservando a configuração. As duas casas são somente para apresentação.
@@ -727,9 +730,9 @@ preservação dos CSVs e demais arquivos protegidos. Isso é execução e confer
 sem novos testes persistentes ou recálculo dos custos.
 
 Na implementação dos gráficos, a validação foi estrutural, sem observação da renderização.
-A inspeção visual posterior e a correção estão na seção 5.10. Indicadores restantes, interpretação
-final, relatório e recomendações continuam pendentes, sem dados reais de uso dos estudantes ou
-comprovação de qualidade pedagógica equivalente.
+A inspeção visual posterior e a correção estão na seção 5.10. Os indicadores então pendentes
+foram implementados na seção 5.11. Interpretação final, relatório e recomendações continuam
+pendentes, sem dados reais de uso dos estudantes ou qualidade pedagógica equivalente comprovada.
 
 ### 5.10. Revisão visual dos dois gráficos — 2026-11-19
 
@@ -804,8 +807,130 @@ protegidos; Decimal permanece nos dados, com float restrito à cópia de coorden
 hover e legenda em ambos os tamanhos e zoom/restauração na janela ampla. Telas menores, outros
 navegadores, dispositivos móveis, toque ou outros modos de acesso não foram testados. Não há
 validação universal de legibilidade, acessibilidade ou responsividade. As instruções de abertura
-manual dos HTMLs permanecem válidas. Indicadores restantes, interpretação, recomendações e relatório
-final continuam como próximas etapas; o MVP v0.1.0 e sua tag permanecem preservados.
+manual dos HTMLs permanecem válidas. Ao encerrar essa revisão em 19/11/2026, os indicadores ainda
+eram uma próxima etapa; sua implementação posterior está na seção 5.11. Interpretação, recomendações
+e relatório final continuam pendentes; o MVP v0.1.0 e sua tag permanecem preservados.
+
+### 5.11. Participações e custo mensal de IA por usuário — 2026-11-25
+
+**Implementação:** 25/11/2026. **Execução dos testes e conferência real:** 25/11/2026.
+**Atualização deste registro:** 25/11/2026. São atividades distintas, realizadas na mesma data.
+Modelo `gpt-6-luna`, tarifas de entrada `0.10` e saída `0.50` USD por milhão e cotação fixa
+`Decimal("5.8102")` BRL por USD continuam sendo as condições de 18/11/2026 dos arquivos do estudo.
+Não houve consulta atual a preços, BCB ou APIs, instalação ou atualização de pacotes.
+
+#### Cálculo, validação e denominadores independentes
+
+`calcular_indicadores(tabela)` recebe os resultados já calculados, sem chamar novamente as funções
+de consumo ou custo do MVP. Retorna uma tabela separada com os identificadores, nomes e ordem
+recebidos, sem modificar valores, tipos, colunas, índices ou ordenação da entrada.
+
+Valida colunas necessárias e únicas, tabela não vazia, identificadores textuais preenchidos e
+únicos e nomes preenchidos. Exige usuários inteiros não negativos, aceitando escalares inteiros
+do Pandas sem aceitar booleanos, texto, floats ou truncamento de frações. Os quatro custos de base
+devem ser objetos Decimal finitos e não negativos. A soma de entrada e saída em USD deve coincidir
+com o total mensal em USD, comparados na precisão Decimal vigente.
+
+As quatro fórmulas são:
+
+- `participacao_entrada_percentual = custo_entrada_usd / custo_ia_mensal_usd * Decimal("100")`.
+- `participacao_saida_percentual = custo_saida_usd / custo_ia_mensal_usd * Decimal("100")`.
+- `custo_ia_mensal_por_usuario_usd = custo_ia_mensal_usd / Decimal(int(usuarios_ativos))`.
+- `custo_ia_mensal_por_usuario_br = custo_ia_mensal_br / Decimal(int(usuarios_ativos))`.
+
+As participações usam componentes e total na mesma moeda, USD. O custo por usuário usa o total
+mensal da respectiva moeda; a conversão da contagem inteira para Decimal não passa por float.
+Todos os indicadores aplicáveis permanecem Decimal, sem arredondamento intermediário explícito.
+
+Os denominadores são tratados separadamente:
+
+| Condição | Participações de entrada/saída | Custos por usuário |
+| --- | --- | --- |
+| Total USD zero, usuários positivos | `None` | Divisão válida; custo USD por usuário é Decimal zero |
+| Usuários zero, total USD positivo | Calculadas normalmente | `None` em USD e BRL |
+| Ambos zero | `None` | `None` |
+| Entrada gratuita e saída paga | 0% de entrada e 100% de saída | Calculados se houver usuários |
+
+`None` significa não aplicável, nunca zero. Na exportação torna-se campo vazio; na apresentação,
+texto `Não aplicável`. Nenhum indicador é inventado para contornar divisão por zero.
+
+O cálculo usa `localcontext()` para herdar a precisão e o arredondamento atuais, isolando também
+os flags das operações, sem alterar o contexto global. Isso não oferece precisão matemática
+infinita: por exemplo, participações de um terço e dois terços, com dez dígitos de precisão,
+produzem `33.33333333` e `66.66666667`. Os testes conferem a soma em 100% dentro da precisão adotada.
+A verificação de coerência dos custos também usa essa precisão, sem arredondar os valores originais.
+
+#### Integração, arquivo e apresentação
+
+`executar_estudo()` calcula resultados, políticas, sensibilidade e indicadores antes de começar
+qualquer exportação. Preserva o retorno existente, a tabela original de 13 linhas e 35 colunas,
+e os esquemas dos três CSVs anteriores. O novo parâmetro opcional `caminho_indicadores` foi
+acrescentado ao final da assinatura, preservando chamadas existentes e permitindo testes temporários.
+
+A nova saída padrão é `resultados/estudo_de_caso/indicadores_cenarios.csv`, na mesma pasta dos
+resultados. O arquivo contém **13 linhas e 11 colunas**, nesta ordem:
+
+| Grupo | Colunas |
+| --- | --- |
+| Identificação e contagem | `id_cenario`, `cenario`, `usuarios_ativos` |
+| Custos de base | `custo_entrada_usd`, `custo_saida_usd`, `custo_ia_mensal_usd`, `custo_ia_mensal_br` |
+| Indicadores | `participacao_entrada_percentual`, `participacao_saida_percentual`, `custo_ia_mensal_por_usuario_usd`, `custo_ia_mensal_por_usuario_br` |
+
+São usados UTF-8, vírgula entre campos, ponto decimal, cabeçalho e `index=False`. Decimal é
+exportado com o valor completo e `None` com campo vazio; na releitura, manter texto até reconstruir
+Decimal diretamente. As condições e fontes continuam nos arquivos de entrada e resultados já
+existentes; não se atribuem colunas de metadados adicionais a esse novo CSV de 11 campos.
+A pasta permanece ignorada pelo Git. Falhas no cálculo dos indicadores impedem a gravação de
+qualquer uma das quatro tabelas, preservando exportações anteriores.
+
+`apresentar_indicadores()` mostra participações com duas casas e custos com **oito casas decimais**,
+com cabeçalhos `USD/usuário ativo/mês` e `BRL/usuário ativo/mês`. Assim, valores inferiores a um
+centavo não ficam ocultos nos exemplos. Uma cópia recebe os textos de exibição, inclusive
+`Não aplicável`; os dados originais não são substituídos por texto ou arredondados.
+
+Os comandos executados na raiz, com a `.venv-win` existente, foram:
+
+```powershell
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest test_analise_estudo -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B -m unittest discover -q
+& '.\.venv-win\Scripts\python.exe' -X utf8 -B analise_estudo.py
+```
+
+A importação continua sem interação, leitura de arquivos, rede ou exportação. Código e testes do
+MVP e dos gráficos foram preservados; nenhum HTML foi regravado. A nova tabela não modifica as
+condições ou datas históricas nem representa uma nova release do MVP v0.1.0.
+
+#### Resultados e evidências desta etapa
+
+Em C05 foram confirmados **25% de entrada**, **75% de saída**, **USD 0.0044 por usuário ativo/mês**
+e **BRL 0.02556488 por usuário ativo/mês**. A apresentação mostra `US$ 0,00440000` e `R$ 0,02556488`.
+C02, C05 e C08 mantêm os mesmos custos por usuário, pois diferem apenas na escala sob as hipóteses
+atuais. Isso é consequência do modelo de cálculo, sem evidência empírica de economia de escala.
+
+Foram acrescentados **19 métodos** em `TestIndicadores`, sem remover testes anteriores. Cobrem os
+13 cenários com expectativas independentes, C05 e a igualdade de custos unitários, denominadores
+zero tratados separadamente, entrada gratuita, custos/tipos inválidos, total incoerente, IDs e
+usuários inválidos e inteiros escalares do Pandas. Também conferem divisões não exatas, contexto
+preservado, soma das participações, ordem e entrada intactas, ausência de recálculo pelo MVP,
+releitura exata de Decimal, None vazio no CSV, oito casas na apresentação e integração sem
+sobrescrever resultados diante de falha. Os testes usam arquivos temporários.
+
+**Resultado em 25/11/2026:** passaram os **66 métodos da análise** e os **290 métodos da suíte
+completa em 21 classes**: 188 do MVP, 66 da análise e 36 dos gráficos. Combinações de `subTest` não
+são métodos adicionais. A rotina real foi executada e exportou 13 indicadores sem alterar os três
+CSVs anteriores, cuja comparação de hashes confirmou conteúdo idêntico. A releitura dos campos
+financeiros do novo CSV preservou exatamente os Decimal, sem etapa intermediária em float.
+
+A conferência pontual de compatibilidade carregou os CSVs anteriores pelos leitores dos gráficos
+e construiu as figuras em memória, confirmando nove e quatro barras. Não houve nova inspeção
+visual, geração de imagens ou alteração dos HTMLs. Esse controle de compatibilidade é distinto
+dos testes automatizados e da revisão visual de 19/11/2026.
+
+O custo por usuário cobre **somente IA**: não inclui infraestrutura ou outras despesas e não
+demonstra, sozinho, economia de escala ou viabilidade financeira. Os resultados decorrem de
+hipóteses e condições fixas, sem dados observados de estudantes ou qualidade pedagógica comprovada.
+Indicadores estão implementados e conferidos; interpretação final, recomendações e relatório
+permanecem pendentes.
 
 ## 6. Unidade de análise e indicadores
 
@@ -819,27 +944,26 @@ Indicadores do estudo, com estágios distintos:
 - Quantidade mensal estimada de feedbacks: calculada.
 - Tokens mensais de entrada e de saída faturáveis: calculados.
 - Custo mensal de IA em USD e BRL: calculado.
-- Participação da entrada e da saída no custo mensal de IA: interpretação pontual de C05 conferida;
-  indicador ainda não incorporado à rotina para todos os cenários.
-- Custo mensal de IA por usuário ativo: ainda não incorporado, sem infraestrutura ou outras despesas.
+- Participação da entrada e da saída no custo mensal de IA: implementada para os 13 cenários.
+- Custo mensal de IA por usuário ativo em USD e BRL: implementado, somente IA.
 - Diferenças monetárias e percentuais entre políticas e variações de tokens: calculadas e exportadas.
 
-A rotina do estudo fornece consumos, custos e as duas comparações. Participações e custo por usuário
-não são colunas das exportações atuais nem novas funcionalidades do menu do MVP.
+A rotina do estudo fornece consumos, custos, as duas comparações e a tabela separada de indicadores
+da seção 5.11. Essa evolução não altera o menu ou o código do MVP.
 
 ### Participação no custo e custo por usuário
 
 Os custos dos componentes já estão exportados. Em **C05**, entrada é **US$ 0,55**, isto é, **25%**
 dos US$ 2,20 mensais; saída é **US$ 1,65**, ou **75%**. A conferência pontual usa `0.55 / 2.20`
 e `1.65 / 2.20`, multiplicados por 100, diretamente com Decimal. São componentes de uma hipótese,
-sem medição real ou comprovação de qualidade. As participações foram interpretadas para C05, mas
-não foram adicionadas como indicadores calculados ou colunas da rotina. O custo por usuário
-permanece futuro. As fórmulas correspondentes são:
+sem medição real ou comprovação de qualidade. A conferência inicialmente pontual foi ampliada
+para os 13 cenários na rotina de indicadores de 25/11/2026, conforme a seção 5.11. As fórmulas são:
 
 - Custo de entrada em USD = tokens mensais de entrada ÷ 1000000 × tarifa de entrada por milhão.
 - Custo de saída em USD = tokens mensais de saída ÷ 1000000 × tarifa de saída por milhão.
 - Participação de entrada (%) = 100 × custo de entrada em USD ÷ custo mensal de IA em USD.
 - Participação de saída (%) = 100 × custo de saída em USD ÷ custo mensal de IA em USD.
+- Custo mensal de IA por usuário em USD = custo mensal de IA em USD ÷ usuários ativos.
 - Custo mensal de IA por usuário em BRL = custo mensal de IA em BRL ÷ usuários ativos.
 
 As participações devem usar a mesma moeda no numerador e no denominador. Não somar ou dividir
@@ -899,9 +1023,10 @@ um percentual. A seção 5.7 distingue esse caso testado dos arquivos atuais com
    e custos dos 13 cenários, com condições fixas e Decimal financeiro. A execução foi conferida e
    a suíte passou. Isso não equivale a medição real de consumo ou teste de acesso à API.
 4. **Comparar — calculado e conferido:** seis pares de políticas por escala e quatro variações
-   de tokens contra C05, com diferenças, percentuais e denominadores documentados. A participação
-   dos componentes em C05 foi conferida pontualmente; a síntese interpretativa final permanece
-   pendente. Verificações aritméticas não comprovam comportamento real ou qualidade pedagógica.
+   de tokens contra C05, com diferenças, percentuais e denominadores documentados. Participações
+   e custos por usuário foram implementados e conferidos em 25/11/2026 para os 13 cenários.
+   A síntese interpretativa final permanece pendente. Verificações aritméticas não comprovam
+   comportamento real ou qualidade pedagógica.
 5. **Compartilhar — parcialmente implementado:** dois gráficos gerados em HTML offline: custo
    mensal por escala/política e sensibilidade dos tokens contra C05, conforme 5.8 e 5.9. A revisão
    visual está concluída no alcance da seção 5.10. Síntese interpretativa final e relatório
@@ -938,7 +1063,8 @@ Situação dos entregáveis:
   compartilhadas em `condicoes_fixas.csv`: concluídas. Validação e cálculo reproduzíveis
   implementados em `analise_estudo.py`; exportação dos 13 resultados concluída, conforme 5.6.
 - Comparações de políticas e tokens calculadas, conferidas e exportadas, conforme 5.7 e 6.
-  Síntese interpretativa final e recomendações ainda não produzidas.
+- Participações e custos por usuário implementados e exportados em `indicadores_cenarios.csv`,
+  conforme 5.11. Síntese interpretativa final e recomendações ainda não produzidas.
 - Dois gráficos implementados e gerados: custo mensal por escala/política e sensibilidade contra C05.
   Revisão visual concluída no alcance da seção 5.10, sem dashboard ou exportação em imagem
   neste escopo. Outros tamanhos e navegadores não foram validados.
@@ -968,10 +1094,9 @@ o estudo tenha sido aprovado pelo curso.
 1. Elaborar a síntese interpretativa dos custos e das comparações já calculadas, mantendo claros
    referências, denominadores, sinais e limites das hipóteses. Não apresentar relações aritméticas
    como descobertas sobre estudantes ou qualidade pedagógica.
-2. Avaliar os indicadores restantes e preparar o relatório, distinguindo resultados simulados de
-   dados observados. Participações gerais e custo por usuário continuam pendentes; não devem ser
-   tratados como indicadores já incorporados à rotina. Outros tamanhos de tela ou navegadores
-   exigem revisão própria, sem ampliar o alcance visual já confirmado.
+2. Interpretar os indicadores já calculados e preparar o relatório, distinguindo resultados
+   simulados de dados observados. Outros tamanhos de tela ou navegadores exigem revisão própria,
+   sem ampliar o alcance visual já confirmado.
 3. Formular recomendações condicionais e um plano de medição real, sem inferir aprendizagem pelo custo.
 4. Manter a v0.1.0 publicada como referência histórica, sem mover, substituir ou modificar sua tag.
    A rotina separada do estudo não representa automaticamente uma nova release.
@@ -981,8 +1106,8 @@ políticas e quatro de sensibilidade, com as conferências descritas nas seçõe
 gráfico implementado e gerado conforme 5.8 e segundo conforme 5.9, com revisão visual concluída
 no alcance e nas dimensões da seção 5.10.
 Pesquisa documental e cotação histórica fixa permanecem preservadas. Não foram comprovados acesso
-à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Indicadores restantes,
-síntese final, relatório e recomendações continuam pendentes.
+à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Os indicadores foram
+implementados e verificados em 25/11/2026; síntese final, relatório e recomendações permanecem pendentes.
 
-Esta atualização documental de 19/11/2026 não repete os cálculos ou os testes anteriores e não
-altera código, entradas ou resultados existentes. O funcionamento do MVP permanece preservado.
+Esta etapa de 25/11/2026 acrescenta cálculo, testes e exportação dos indicadores, com evidências
+na seção 5.11. O funcionamento do MVP e as condições históricas permanecem preservados.
