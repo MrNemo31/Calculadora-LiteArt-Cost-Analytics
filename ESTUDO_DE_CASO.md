@@ -6,7 +6,8 @@
 concluídos e conferidos. Os dois gráficos estão implementados, com revisão visual no alcance da
 seção 5.10. Participações de custo e custos por usuário ativo foram implementados e verificados em
 25/11/2026, conforme 5.11. A interpretação e as recomendações condicionais foram documentadas nessa
-data, conforme 5.12. Relatório final, revisão contra as orientações do curso e publicação do estudo
+data, conforme 5.12. O relatório final e suas duas imagens foram produzidos conforme 5.13.
+Revisão final de coerência, conferência das orientações do curso e preparação da publicação
 permanecem pendentes; piloto, coleta e avaliação pedagógica não foram executados.
 As condições fixas permanecem com pesquisa e referência de 18/11/2026; a pausa no desenvolvimento
 não atualizou modelo, tarifas, cotação ou datas históricas.
@@ -106,7 +107,7 @@ evidência de qualidade equivalente entre as variações.
 confirmados abaixo. Os CSVs de entrada foram preparados e conferidos pontualmente em 2026-11-18,
 conforme a seção 5.5. A validação e o cálculo foram concluídos na etapa da seção 5.6; as comparações
 estão registradas na seção 5.7; a interpretação e as recomendações propostas estão na seção 5.12.
-O relatório final permanece pendente. Não houve
+O relatório final está registrado na seção 5.13. Não houve
 chamadas pagas, solicitação de credenciais ou teste de acesso à conta.
 
 | Condição fixa do estudo | Valor ou definição | Moeda, unidade ou recorte |
@@ -426,7 +427,7 @@ A validação e o cálculo estão concluídos. As comparações monetárias e pe
 implementadas posteriormente, conforme a seção 5.7. Participações e custo por usuário foram
 incorporados em 25/11/2026, conforme a seção 5.11. Os gráficos estão nas seções 5.8 e 5.9;
 a revisão visual está registrada na seção 5.10; a interpretação e as recomendações propostas estão
-na seção 5.12. O relatório final permanece pendente.
+na seção 5.12. O relatório final está registrado na seção 5.13.
 
 ### 5.7. Políticas de feedback e sensibilidade dos tokens
 
@@ -736,7 +737,7 @@ sem novos testes persistentes ou recálculo dos custos.
 Na implementação dos gráficos, a validação foi estrutural, sem observação da renderização.
 A inspeção visual posterior e a correção estão na seção 5.10. Os indicadores então pendentes
 foram implementados na seção 5.11. A interpretação e as recomendações propostas estão na seção 5.12;
-o relatório final permanece pendente, sem dados reais de uso dos estudantes ou qualidade pedagógica
+o relatório final está registrado na seção 5.13, sem dados reais de uso ou qualidade pedagógica
 equivalente comprovada.
 
 ### 5.10. Revisão visual dos dois gráficos — 2026-11-19
@@ -814,8 +815,8 @@ navegadores, dispositivos móveis, toque ou outros modos de acesso não foram te
 validação universal de legibilidade, acessibilidade ou responsividade. As instruções de abertura
 manual dos HTMLs permanecem válidas. Ao encerrar essa revisão em 19/11/2026, os indicadores ainda
 eram uma próxima etapa; sua implementação posterior está na seção 5.11. A interpretação e as
-recomendações propostas estão na seção 5.12; o relatório final permanece pendente. O MVP v0.1.0 e
-sua tag permanecem preservados.
+recomendações propostas estão na seção 5.12; o relatório está registrado na seção 5.13.
+O MVP v0.1.0 e sua tag permanecem preservados.
 
 ### 5.11. Participações e custo mensal de IA por usuário — 2026-11-25
 
@@ -936,7 +937,7 @@ O custo por usuário cobre **somente IA**: não inclui infraestrutura ou outras 
 demonstra, sozinho, economia de escala ou viabilidade financeira. Os resultados decorrem de
 hipóteses e condições fixas, sem dados observados de estudantes ou qualidade pedagógica comprovada.
 Indicadores estão implementados e conferidos; a interpretação e as recomendações propostas estão
-registradas na seção 5.12. O relatório final permanece pendente.
+registradas na seção 5.12. O relatório final está registrado na seção 5.13.
 
 ### 5.12. Interpretação e recomendações condicionais — 2026-11-25
 
@@ -976,8 +977,52 @@ condições, denominadores e sinais; não encontrou divergências. Não foram ex
 Essas porcentagens e custos são resultados das hipóteses e fórmulas, sem evidências observadas dos
 estudantes ou medição de aprendizagem. Modelo, tarifas e cotação fixa de 5.8102 BRL/USD permanecem
 com as referências históricas de **18/11/2026**. Não houve pesquisa atual de preços ou câmbio.
-O próximo passo é compor o relatório final; a revisão contra as orientações do curso e a publicação
-do estudo permanecem pendentes.
+O relatório final foi produzido na etapa posterior da seção 5.13. A revisão final de coerência,
+a conferência das orientações do curso e a preparação da publicação permanecem pendentes.
+
+### 5.13. Relatório final e imagens dos gráficos — 2026-11-25
+
+**Produção do material:** 25/11/2026. **Atualização documental:** 25/11/2026. São etapas distintas,
+realizadas na mesma data, sem nova pesquisa de preços ou câmbio.
+
+[RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md) reúne contexto, dados, método, resultados, dois gráficos,
+recomendações condicionais, limitações, reprodução e declaração do apoio de IA. O relatório utiliza
+a interpretação da seção 5.12; não substitui as condições históricas nem altera o MVP v0.1.0.
+Os arquivos de imagem que acompanham o Markdown são:
+
+- [Custo mensal por escala e política](docs/imagens/custo_mensal_ia_por_escala_politica.png):
+  `docs/imagens/custo_mensal_ia_por_escala_politica.png`, com 2880×1300 pixels; nove barras C01 a C09.
+- [Sensibilidade do custo aos tokens](docs/imagens/sensibilidade_custo_ia_tokens.png):
+  `docs/imagens/sensibilidade_custo_ia_tokens.png`, com 2880×1200 pixels; quatro barras C10 a C13.
+
+Os PNGs foram exportados dos HTMLs existentes por `Plotly.toImage()` no Chrome instalado, com as
+páginas offline, sem instalar ferramentas, redesenhar figuras ou modificar os HTMLs. Na preparação
+do relatório, as imagens finais foram inspecionadas quanto a títulos, eixos, legendas, acentos,
+rótulos e nove/quatro barras, sem cortes ou sobreposições observados. Séries renderizadas e CSVs
+foram utilizados para conferir valores. Essa inspeção dos PNGs é distinta da revisão interativa
+de 19/11/2026 e dos testes estruturais; não amplia sua cobertura a outros dispositivos.
+
+A conferência pontual dos números releu os dois CSVs de entrada e os quatro de resultados,
+diretamente com Decimal, sem float intermediário. Foram verificados consumos e custos dos
+13 cenários, seis comparações, quatro sensibilidades e 13 indicadores, além das condições fixas
+repetidas nos resultados. Não foram encontradas divergências. Foram confirmados 14 links relativos
+no relatório e a preservação por hashes de 27 arquivos existentes; o Markdownlint não apontou
+problemas. Não houve nova execução da suíte ou da rotina de análise nem testes novos.
+
+As imagens estão fora de `resultados/` e não estão ignoradas pelo Git; foram preparadas para
+acompanhar o relatório no repositório. Os HTMLs interativos e os CSVs gerados continuam ignorados
+e podem ser regenerados com os comandos documentados no relatório e no README. Sua existência
+local não significa disponibilidade já publicada no GitHub.
+
+Modelo, tarifas e câmbio fixo de 5.8102 BRL/USD preservam suas datas históricas de 18/11/2026.
+Os resultados continuam hipotéticos, sem uso real observado ou qualidade pedagógica comprovada.
+Recomendações e plano de medição foram formulados; piloto, coleta real e avaliação pedagógica
+continuam futuros, sem política definitivamente adotada.
+
+**Situação:** relatório e imagens produzidos, sem publicação nesta etapa. Permanecem a revisão
+final de coerência, a conferência das orientações específicas do curso, inclusive o apoio de IA,
+e a preparação da publicação. A produção do relatório não encerra o estudo nem comprova aprovação
+pelo Google, avaliação pelo curso ou revisão final aprovada pelo responsável.
 
 ## 6. Unidade de análise e indicadores
 
@@ -1076,8 +1121,8 @@ um percentual. A seção 5.7 distingue esse caso testado dos arquivos atuais com
    comportamento real ou qualidade pedagógica.
 5. **Compartilhar — parcialmente implementado:** dois gráficos gerados em HTML offline: custo
    mensal por escala/política e sensibilidade dos tokens contra C05, conforme 5.8 e 5.9. A revisão
-   visual está concluída no alcance da seção 5.10. A síntese interpretativa está produzida; relatório,
-   revisão contra as orientações do curso e publicação do estudo permanecem pendentes.
+   visual está concluída no alcance da seção 5.10. Síntese, relatório e PNGs estão produzidos,
+   conforme 5.12 e 5.13; revisão final, orientações do curso e publicação permanecem pendentes.
 6. **Agir — propostas formuladas, execução pendente:** recomendações condicionais e plano de medição
    estão documentados na seção 5.12. Piloto, coleta de dados e avaliação pedagógica não foram realizados;
    nenhuma política foi adotada definitivamente com base nesta síntese.
@@ -1115,13 +1160,13 @@ Situação dos entregáveis:
   conforme 5.11. Interpretação e recomendações condicionais produzidas em
   [INTERPRETACAO_ESTUDO.md](INTERPRETACAO_ESTUDO.md), conforme 5.12; ações propostas não executadas.
 - Dois gráficos implementados e gerados: custo mensal por escala/política e sensibilidade contra C05.
-  Revisão visual concluída no alcance da seção 5.10, sem dashboard ou exportação em imagem
-  neste escopo. Outros tamanhos e navegadores não foram validados.
+  Revisão visual concluída no alcance da seção 5.10; os dois PNGs do relatório foram exportados e
+  inspecionados conforme 5.13, sem dashboard. Outros tamanhos e navegadores não foram validados.
 - Relatório final com pergunta, fontes, preparação, resultados, dois gráficos, recomendações
-  condicionais e limitações: ainda não produzido. Revisão contra as orientações do curso e
-  publicação do estudo também permanecem pendentes.
-- Registro transparente do apoio de IA, a preparar para a entrega conforme as orientações da
-  atividade, distinguindo sua contribuição das decisões e conferências realizadas pelo estudante.
+  condicionais e limitações: produzido em [RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md), com duas
+  imagens conforme 5.13. Revisão final, orientações do curso e publicação permanecem pendentes.
+- Apoio de IA descrito no relatório; sua adequação às orientações específicas da atividade ainda
+  precisa ser conferida, sem atribuir decisões ou verificações pessoais não confirmadas.
 
 Critérios para encerrar a análise futuramente:
 
@@ -1141,9 +1186,8 @@ o estudo tenha sido aprovado pelo curso.
 
 ## 10. Próximo passo
 
-1. Elaborar o relatório final com pergunta, fontes, preparação dos dados, resultados, os dois
-   gráficos existentes, interpretação, recomendações condicionais e limitações. Utilizar
-   [INTERPRETACAO_ESTUDO.md](INTERPRETACAO_ESTUDO.md) sem tratar estimativas como dados observados.
+1. Realizar a revisão final de coerência de [RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md), suas imagens,
+   fontes e materiais de apoio, sem tratar estimativas como dados observados ou presumir aprovação.
 2. Revisar o relatório contra as orientações da atividade do curso, inclusive a transparência
    sobre apoio de IA. Essa conferência e a publicação do estudo ainda não ocorreram.
 3. Preparar a publicação após a revisão. Piloto, coleta e avaliação pedagógica continuam propostas
@@ -1159,10 +1203,13 @@ no alcance e nas dimensões da seção 5.10.
 Pesquisa documental e cotação histórica fixa permanecem preservadas. Não foram comprovados acesso
 à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Os indicadores foram
 implementados e verificados em 25/11/2026. A interpretação e as recomendações condicionais foram
-documentadas nessa data, conforme 5.12; relatório final, revisão do curso e publicação permanecem
-pendentes. Nenhuma ação de piloto, coleta ou avaliação pedagógica foi executada.
+documentadas nessa data, conforme 5.12. Relatório final e imagens estão produzidos conforme 5.13;
+revisão final de coerência, orientações do curso e publicação permanecem pendentes.
+Nenhuma ação de piloto, coleta ou avaliação pedagógica foi executada.
 
 A etapa dos indicadores de 25/11/2026 acrescentou cálculo, testes e exportação, conforme 5.11.
 A etapa posterior de interpretação acrescentou somente a síntese e as propostas da seção 5.12;
-esta atualização registra esse avanço sem nova execução de testes, cálculos ou gráficos.
+A etapa do relatório acrescentou o texto e duas imagens exportadas dos HTMLs existentes, conforme
+5.13. Esta atualização registra os materiais sem nova execução de testes, cálculos, exportações
+ou inspeção visual.
 O funcionamento do MVP e as condições históricas permanecem preservados.

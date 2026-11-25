@@ -2167,3 +2167,57 @@ testes de código nem cálculos novamente. O MVP v0.1.0 publicado e sua tag perm
 gráficos, recomendações e limitações. Revisar as orientações do curso e preparar a publicação do
 estudo continuam pendentes; a síntese não declara conclusão ou aprovação pelo curso ou pelo Google.
 Não houve instalações, commit ou push.
+
+## 46. Relatório final do estudo e imagens dos gráficos
+
+**Data desta atualização documental:** 25/11/2026.
+
+**Data da elaboração e das verificações registradas:** 25/11/2026. Produção do relatório e
+atualização deste histórico são etapas distintas, sem mudar as condições históricas de 18/11/2026.
+
+**Etapa:** relatório e imagens produzidos; revisão final, orientações do curso e publicação pendentes.
+
+**Objetivo dos pedidos:** reunir o estudo em um relatório com figuras legíveis, recomendações
+fundamentadas e limites explícitos, preservando o MVP e os arquivos de cálculo.
+
+**Síntese dos pedidos relacionados — não é uma citação literal:**
+
+Preparar RELATORIO_ESTUDO.md e exportar duas imagens dos gráficos existentes, sem alterar dados,
+fórmulas ou condições históricas. Conferir números e legibilidade, explicar como reproduzir o
+estudo e declarar o apoio de IA. Depois, atualizar somente README.md, ESTUDO_DE_CASO.md e este
+registro, distinguindo material produzido, verificações realizadas e publicação ainda pendente.
+
+**Material produzido:** [RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md) reúne resumo, contexto, dados,
+método, resultados, dois gráficos, recomendações condicionais, limitações e reprodução. As imagens
+foram criadas em `docs/imagens/custo_mensal_ia_por_escala_politica.png` (2880×1300) e
+`docs/imagens/sensibilidade_custo_ia_tokens.png` (2880×1200), com links relativos no relatório.
+Ficam fora de resultados/ para acompanhar o Markdown no repositório, enquanto os quatro CSVs
+gerados e os dois HTMLs podem ser regenerados pelas rotinas existentes.
+
+**Verificações realizadas na preparação do relatório:** a releitura dos seis CSVs diretamente
+com Decimal conferiu consumos e custos dos 13 cenários, seis comparações de políticas, quatro
+sensibilidades, 13 indicadores e condições fixas, sem divergências. Foram preservados os valores
+completos, com arredondamento somente na apresentação.
+
+Os PNGs foram exportados dos HTMLs existentes pelo próprio Plotly, com Plotly.toImage() no Chrome
+instalado e páginas offline, sem instalar ferramentas nem redesenhar figuras. As imagens finais
+foram inspecionadas: títulos, eixos, legendas, acentos, rótulos e nove/quatro barras estavam legíveis,
+sem cortes ou sobreposições observados. As séries renderizadas foram conferidas com os CSVs.
+Isso não substitui testes estruturais nem amplia a revisão interativa histórica a outros aparelhos.
+
+Foram confirmados 14 links relativos, dimensões dos PNGs, imagens não ignoradas pelo Git e
+preservação por hashes dos 27 arquivos existentes, incluindo HTMLs e CSVs. O Markdownlint do
+relatório passou sem problemas. O navegador temporário foi encerrado e seu perfil exclusivo
+removido após conferir o caminho. Não houve nova execução da suíte ou da análise, novos testes,
+consulta de preços/câmbio ou alteração de documentos existentes naquela etapa.
+
+Nesta atualização, somente os três documentos autorizados registram o material produzido.
+Relatório, interpretação, imagens e demais alterações pendentes foram preservados; não houve
+nova inspeção visual, exportação, cálculo ou execução de testes de código.
+
+**Limites e próximos passos:** recomendações são propostas condicionais; nenhuma política foi
+definitivamente adotada. Piloto, coleta e avaliação pedagógica continuam futuros. Permanecem a
+revisão final de coerência, a conferência das instruções específicas do curso e do registro do
+apoio de IA e a preparação da publicação. O estudo ainda não foi publicado ou declarado aprovado
+pelo Google ou avaliado pelo curso. O MVP v0.1.0 publicado e sua tag permanecem preservados.
+Não houve instalações, commit, push ou publicação.

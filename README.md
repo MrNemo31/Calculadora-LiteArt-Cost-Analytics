@@ -526,11 +526,26 @@ já estão implementadas e exportadas.** A atualização documental de 19/11/202
 sem atualizar as condições fixas. Os dois gráficos foram implementados e gerados em 19/11/2026,
 conforme abaixo. A revisão visual foi concluída no Chrome nas dimensões informadas. As participações
 e os custos por usuário foram implementados e conferidos em **25/11/2026**. A interpretação e a
-formulação de recomendações condicionais foram concluídas nessa data; o relatório final permanece
-como próxima entrega.
+formulação de recomendações condicionais foram concluídas nessa data. O relatório final e as duas
+imagens estão produzidos; revisão final, conferência das orientações do curso e publicação do
+estudo permanecem pendentes.
 As conferências não comprovam acesso pela conta da API, consumo real de tokens, configuração de
 raciocínio testada ou qualidade pedagógica equivalente. O estudo não está concluído, aprovado pelo
 curso ou validado pelo Google.
+
+### Relatório final do estudo
+
+**[Ler o relatório final — RELATORIO_ESTUDO.md](RELATORIO_ESTUDO.md)**
+
+O relatório reúne contexto, dados, método, resultados, dois gráficos, recomendações condicionais
+e limitações. As duas imagens em `docs/imagens/` acompanham o relatório nos arquivos preparados
+para o repositório. Os HTMLs interativos e os quatro CSVs de resultados ficam fora do Git e podem
+ser regenerados pelos comandos de reprodução abaixo.
+
+O material foi produzido e conferido no alcance documentado, mas o estudo ainda não foi publicado,
+aprovado pelo Google ou avaliado pelo curso. Permanecem a revisão final de coerência, a conferência
+das orientações específicas da atividade e a preparação da publicação. O estudo é separado do
+MVP v0.1.0 publicado e não representa uma nova release da calculadora.
 
 ### Interpretação e recomendações propostas
 
@@ -540,8 +555,8 @@ constantes e apresenta recomendações condicionais, acompanhadas de um plano de
 uso, tokens faturáveis e qualidade dos feedbacks.
 
 Nenhuma política foi adotada definitivamente ou demonstrada como pedagogicamente superior.
-Piloto, coleta de dados e avaliação pedagógica não foram executados. O próximo passo é compor
-o relatório final com os dois gráficos existentes, as recomendações e as limitações.
+Piloto, coleta de dados e avaliação pedagógica não foram executados. A interpretação e as propostas
+já integram o relatório final; sua produção não significa execução dessas ações.
 
 ### Indicadores do estudo
 
@@ -615,8 +630,9 @@ restauração dos eixos. Uma sobreposição entre título e referência no segun
 os HTMLs foram regenerados e revistos. As instruções de abertura manual permanecem as mesmas.
 
 A revisão não cobre telas menores, dispositivos móveis ou outros navegadores. As evidências e o
-alcance estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md). Exportação em imagem e dashboard não foram
-implementados.
+alcance estão em [ESTUDO_DE_CASO.md](ESTUDO_DE_CASO.md). A rotina gera HTMLs; os PNGs do relatório
+foram exportados separadamente pelo navegador. Exportação automática em imagem pela rotina e
+dashboard não foram implementados.
 
 A **v0.1.0 permanece o MVP publicado**, com sua tag preservada. A rotina do estudo reutiliza suas
 funções e não representa automaticamente uma nova release da calculadora.
@@ -631,9 +647,9 @@ instruções, com os 188 testes aprovados. A v0.1.0 está publicada como MVP de 
 [notas da versão](RELEASE_NOTES.md) registram os materiais de sua preparação. Essa distribuição
 não representa hospedagem de dashboard.
 
-O próximo passo do estudo é elaborar o relatório final com pergunta, fontes, preparação, resultados,
-dois gráficos, a interpretação já produzida, recomendações condicionais e limitações. A revisão
-contra as orientações do curso e a publicação do estudo permanecem pendentes.
+O relatório final do estudo e suas imagens estão produzidos. Os próximos passos são a revisão
+final de coerência, a conferência das orientações específicas do curso, inclusive a declaração do
+apoio de IA, e a preparação da publicação. O estudo ainda não foi publicado.
 A revisão dos HTMLs em outros tamanhos ou navegadores depende de uma conferência própria, sem
 ampliar automaticamente o alcance já comprovado.
 As relações verificadas pelas fórmulas não são evidências empíricas sobre estudantes.
@@ -642,8 +658,8 @@ A tag v0.1.0 permanece preservada como referência histórica.
 Ambientes e resultados gerados permanecem fora do versionamento: `.venv/` e `resultados/` pelas
 regras da raiz, e `.venv-win/` pelo `.gitignore` criado dentro desse ambiente.
 
-Catálogo e seleção de modelos, comparação entre provedores, demais gráficos e exportação em
-imagem, dashboard com Streamlit, retomada de infraestrutura e orçamento e análises avançadas
+Catálogo e seleção de modelos, comparação entre provedores, demais gráficos e exportação automática
+em imagem, dashboard com Streamlit, retomada de infraestrutura e orçamento e análises avançadas
 ficam para depois. Os dois gráficos Plotly do estudo estão implementados, conforme descrito acima.
 Comparar custos não exige chamadas reais às APIs nem comprova equivalência pedagógica.
 
