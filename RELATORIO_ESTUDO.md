@@ -1,7 +1,12 @@
 # Custos estimados dos feedbacks de IA do LiteArt
 
-**Relatório do estudo de caso — preparado em 25/11/2026 para revisão antes da publicação.**
+**Relatório do estudo de caso — preparado em 25/11/2026 e publicado no repositório GitHub.**
 Condições históricas de preços e câmbio: 18/11/2026. Não houve atualização dessas referências.
+
+**Estado confirmado em 26/11/2026:** o responsável informou a publicação e a conferência das
+imagens e links na apresentação publicada. Concluiu o Google Data Analytics Professional
+Certificate utilizando o estudo como capstone, sem data exata informada. Isso não demonstra
+avaliação individual deste relatório, nota ou endosso do Google.
 
 ## 1. Resumo
 
@@ -303,7 +308,8 @@ verificações pessoais ou decisões que não foram confirmadas.
 
 O relatório reúne o planejamento, os resultados e a
 [interpretação fundamentada](docs/INTERPRETACAO_ESTUDO.md), com recomendações ainda propostas.
-Antes da publicação e entrega, permanece necessária a revisão dos materiais e das instruções
-específicas do curso, inclusive a forma de declarar o apoio de IA. Não se declara aprovação pelo
-Google nem atendimento já conferido de todas as exigências da atividade. Nenhum piloto, coleta
-de dados ou avaliação pedagógica foi realizado, e este material não foi publicado nesta tarefa.
+A publicação e o uso como capstone foram confirmados pelo responsável, assim como a conclusão do
+certificado. São confirmações posteriores à preparação de 25/11/2026, sem data exata de publicação
+ou conclusão informada. Não se infere nota, avaliação individual deste relatório ou endosso do
+Google. Nenhum piloto, coleta de dados ou avaliação pedagógica foi realizado. As verificações
+históricas descritas neste relatório não foram executadas novamente nesta atualização documental.

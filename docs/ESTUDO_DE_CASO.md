@@ -2,23 +2,29 @@
 
 **Data do planejamento:** 18/11/2026.
 
+**Situação atual — atualização documental de 26/11/2026:** estudo e
+[relatório](../RELATORIO_ESTUDO.md) publicados no mesmo repositório do MVP v0.1.0. O responsável
+confirmou a conferência das imagens e dos links na apresentação publicada e a conclusão do Google
+Data Analytics Professional Certificate com este estudo como capstone. Não foram informadas datas
+exatas desses eventos. Não se infere avaliação individual do relatório, nota ou endosso do Google.
+
 **Navegação atual:** este documento está em `docs/`; testes estão em `tests/`. Os caminhos textuais
 de dados, resultados e imagens e os comandos de reprodução partem da raiz do projeto, onde os
 três scripts permanecem. Os links relativos consideram a pasta de cada documento.
 
-**Atualização documental:** 25/11/2026. Preparação, validação, cálculo dos 13 cenários e comparações
+**Registro histórico até 25/11/2026:** preparação, validação, cálculo dos 13 cenários e comparações
 concluídos e conferidos. Os dois gráficos estão implementados, com revisão visual no alcance da
 seção 5.10. Participações de custo e custos por usuário ativo foram implementados e verificados em
 25/11/2026, conforme 5.11. A interpretação e as recomendações condicionais foram documentadas nessa
 data, conforme 5.12. O relatório final e suas duas imagens foram produzidos conforme 5.13.
 A revisão técnica final local de 25/11/2026 não encontrou divergências materiais, conforme 5.14.
-Conferência das orientações do curso e preparação da publicação permanecem pendentes; piloto,
-coleta e avaliação pedagógica não foram executados.
+Naquela revisão, conferência das orientações do curso e publicação ainda eram pendências.
+Os estados atuais estão no topo; piloto, coleta e avaliação pedagógica não foram executados.
 As condições fixas permanecem com pesquisa e referência de 18/11/2026; a pausa no desenvolvimento
 não atualizou modelo, tarifas, cotação ou datas históricas.
-O estudo se destina ao Google Data Analytics Professional Certificate, sem aprovação formal do
-curso ou validação pelo Google. As orientações da atividade, inclusive sobre apoio de IA, deverão
-ser conferidas antes da entrega.
+As seções datadas preservam evidências e encaminhamentos de cada etapa. Menções a publicação ou
+relatório pendentes nas seções 5.1 a 5.14 são históricas, não bloqueios atuais. O uso como capstone
+e a conclusão do certificado não comprovam uma avaliação individual deste material pelo curso.
 
 ## 1. Contexto e objetivo
 
@@ -1156,11 +1162,11 @@ um percentual. A seção 5.7 distingue esse caso testado dos arquivos atuais com
    e custos por usuário foram implementados e conferidos em 25/11/2026 para os 13 cenários.
    A interpretação está documentada na seção 5.12. Verificações aritméticas não comprovam
    comportamento real ou qualidade pedagógica.
-5. **Compartilhar — parcialmente implementado:** dois gráficos gerados em HTML offline: custo
+5. **Compartilhar — material publicado:** dois gráficos gerados em HTML offline: custo
    mensal por escala/política e sensibilidade dos tokens contra C05, conforme 5.8 e 5.9. A revisão
    visual está concluída no alcance da seção 5.10. Síntese, relatório e PNGs estão produzidos,
-   conforme 5.12 e 5.13. A revisão técnica local está em 5.14; orientações do curso e publicação
-   permanecem pendentes.
+   conforme 5.12 e 5.13. A revisão técnica local está em 5.14; o responsável confirmou depois
+   a publicação e a conferência de imagens/links no GitHub, conforme a situação atual.
 6. **Agir — propostas formuladas, execução pendente:** recomendações condicionais e plano de medição
    estão documentados na seção 5.12. Piloto, coleta de dados e avaliação pedagógica não foram realizados;
    nenhuma política foi adotada definitivamente com base nesta síntese.
@@ -1182,7 +1188,8 @@ Decimal, sem reutilizar os textos monetários do terminal.
   o recorte utilizado, sem apresentar suas referências como permanentemente atuais.
 - A projeção anual constante não simula crescimento, sazonalidade ou mudanças de consumo e câmbio.
 - O custo cobre somente IA; não representa o custo operacional completo ou a viabilidade do LiteArt.
-- A adequação do trabalho às orientações e à avaliação do curso ainda precisará ser conferida.
+- O uso como capstone e a conclusão do certificado não demonstram nota, avaliação individual
+  deste relatório ou endosso do Google.
 
 ## 9. Entregáveis e critérios de conclusão
 
@@ -1202,12 +1209,12 @@ Situação dos entregáveis:
   inspecionados conforme 5.13, sem dashboard. Outros tamanhos e navegadores não foram validados.
 - Relatório final com pergunta, fontes, preparação, resultados, dois gráficos, recomendações
   condicionais e limitações: produzido em [RELATORIO_ESTUDO.md](../RELATORIO_ESTUDO.md), com duas
-  imagens conforme 5.13. Revisão técnica local realizada conforme 5.14; revisão pelo responsável,
-  orientações do curso e publicação permanecem pendentes.
-- Apoio de IA descrito no relatório; sua adequação às orientações específicas da atividade ainda
-  precisa ser conferida, sem atribuir decisões ou verificações pessoais não confirmadas.
+  imagens conforme 5.13. Revisão técnica local realizada conforme 5.14; publicação e conferência
+  de imagens/links na apresentação publicada confirmadas pelo responsável, sem data exata informada.
+- Apoio de IA descrito no relatório e no histórico, sem atribuir decisões ou verificações pessoais
+  não confirmadas. Certificado concluído com o estudo como capstone, sem inferir avaliação individual.
 
-Critérios para encerrar a análise futuramente:
+Critérios de qualidade definidos no planejamento:
 
 - Os 13 cenários estão presentes, identificados e sem duplicidade de combinações.
 - C05 permanece a referência de tokens, e as políticas usam a referência da mesma escala.
@@ -1220,20 +1227,18 @@ Critérios para encerrar a análise futuramente:
 - Conclusões distinguem estimativas, hipóteses e evidências reais, sem inferir qualidade pelo custo.
 - Tabela, gráficos e relatório respondem à pergunta, respeitam os limites e registram o apoio de IA.
 
-A matriz está documentada; isso não significa que esses critérios já tenham sido atendidos ou que
-o estudo tenha sido aprovado pelo curso.
+A publicação e o uso como capstone não comprovam avaliação formal desses critérios nem validam
+empiricamente as hipóteses. As evidências de cálculo e revisão permanecem nas seções correspondentes.
 
 ## 10. Próximo passo
 
-1. Revisar os materiais pelo responsável, considerando a revisão técnica local da seção 5.14,
-   sem tratar estimativas como dados observados ou presumir aprovação.
-2. Revisar o relatório contra as orientações da atividade do curso, inclusive a transparência
-   sobre apoio de IA. Essa conferência e a publicação do estudo ainda não ocorreram.
-3. Preparar a publicação após a revisão. Piloto, coleta e avaliação pedagógica continuam propostas
-   futuras, sem inferir aprendizagem pelo custo. Outros tamanhos de tela ou navegadores exigem
-   revisão própria, sem ampliar o alcance visual já confirmado.
-4. Manter a v0.1.0 publicada como referência histórica, sem mover, substituir ou modificar sua tag.
-   A rotina separada do estudo não representa automaticamente uma nova release.
+1. Manter relatório, fontes e instruções de reprodução coerentes com os arquivos publicados,
+   preservando as condições históricas da análise.
+2. Definir um piloto apenas se houver decisão de prosseguir com medições reais. Uso, tokens e
+   avaliação pedagógica continuam propostas futuras, sem inferir aprendizagem pelo custo.
+3. Conferir outros tamanhos de tela ou navegadores se necessário, sem ampliar automaticamente
+   o alcance das revisões documentadas ou presumir testes de dispositivos não observados.
+4. Preservar a tag v0.1.0 do MVP. A publicação do estudo não cria uma nova release da calculadora.
 
 **Concluído:** preparação, validação, cálculo e exportação dos 13 cenários; seis comparações de
 políticas e quatro de sensibilidade, com as conferências descritas nas seções 5.6 e 5.7. Primeiro
@@ -1243,8 +1248,9 @@ Pesquisa documental e cotação histórica fixa permanecem preservadas. Não for
 à conta, configuração de raciocínio, consumo real ou qualidade pedagógica. Os indicadores foram
 implementados e verificados em 25/11/2026. A interpretação e as recomendações condicionais foram
 documentadas nessa data, conforme 5.12. Relatório final e imagens estão produzidos conforme 5.13;
-revisão técnica local de coerência realizada conforme 5.14. Revisão pelo responsável, orientações
-do curso e publicação permanecem pendentes.
+revisão técnica local de coerência realizada conforme 5.14. Publicação do estudo, conferência de
+imagens/links publicados e conclusão do certificado com o estudo como capstone foram confirmadas
+pelo responsável, sem datas exatas ou avaliação individual do relatório informadas.
 Nenhuma ação de piloto, coleta ou avaliação pedagógica foi executada.
 
 A etapa dos indicadores de 25/11/2026 acrescentou cálculo, testes e exportação, conforme 5.11.

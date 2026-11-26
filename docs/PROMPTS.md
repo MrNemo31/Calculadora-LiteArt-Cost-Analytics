@@ -2302,3 +2302,46 @@ Dados, resultados, HTMLs, imagens, dependências, configurações e ambientes pe
 locais. As execuções dos scripts mantêm os comandos anteriores; a validação usa as integrações
 com diretórios temporários da suíte, sem regenerar resultados ou gráficos do projeto.
 Não houve commit, push, alteração de tag ou publicação.
+
+## 49. README enxuto e estados atuais de publicação
+
+**Data desta atualização documental:** 26/11/2026, distinta das datas de preparação, pesquisa,
+implementação e testes preservadas nos registros anteriores.
+
+**Objetivo do pedido:** facilitar a primeira leitura, reduzir repetição e distinguir o estado
+publicado do projeto das pendências históricas, sem alterar código ou condições do estudo.
+
+**Confirmações fornecidas pelo responsável:** o MVP v0.1.0 e o estudo/relatório foram publicados
+no mesmo repositório; imagens e links foram conferidos na apresentação publicada. O responsável
+concluiu o Google Data Analytics Professional Certificate utilizando o estudo como capstone.
+Datas exatas de publicação e conclusão não foram informadas. Essas confirmações não demonstram
+nota, avaliação individual do relatório ou endosso do Google; não foram tratadas como nova
+inspeção remota realizada nesta revisão.
+
+**Organização documental:** README reduzido de 718 para 188 linhas, com apresentação, relatório
+e uma imagem existente, funcionalidades, instalação/exemplo, comandos, limitações e referências.
+Conversões de entrada, contratos de retorno, validação por registro, preservação de Decimal,
+dtype object e detalhes de formatação foram realocados para a seção 5 do planejamento.
+A ampliação das dependências em 19/11/2026 ganhou referência na seção 8, separada da validação
+limpa original de 14/11/2026, que não foi repetida com Plotly.
+
+Matriz, condições, fontes, verificações e testes do estudo já estão em ESTUDO_DE_CASO.md; resultados
+e recomendações permanecem no relatório e na interpretação. Esquema das nove colunas do MVP e
+entrega da versão permanecem nas notas; as evidências de instalação limpa e precisão estão no
+planejamento. Esses blocos não foram duplicados integralmente para substituir o README anterior.
+
+**Estados corrigidos:** síntese atual no planejamento, relatório e metodologia disponíveis,
+publicação do MVP separada da publicação do estudo e conclusão do certificado separada da
+avaliação individual. A preparação das notas em 14/11/2026 e os encaminhamentos de 25/11/2026
+continuam identificados como históricos. Pendências antigas de tag/publicação não são bloqueios
+atuais. Piloto, uso observado e avaliação pedagógica continuam futuros.
+
+**Verificações:** conferência de links relativos, imagem, arquivos e sintaxe dos comandos atuais;
+Markdownlint nos documentos afetados, sem instalar ferramentas. Comparação do diff e dos hashes
+dos arquivos fora do escopo documental para preservar código, testes, dados, resultados, imagens,
+dependências e configurações. A tag v0.1.0 continua em
+`10cc485cde5d1c00a743611017fac58f226b7458`.
+
+Os 290 métodos aprovados em 25/11/2026 são evidência histórica, não testes executados nesta revisão.
+Nenhum prompt antigo foi reescrito. Não houve testes de código, consulta atual de preços/câmbio,
+instalação, commit, push ou nova release nesta tarefa.

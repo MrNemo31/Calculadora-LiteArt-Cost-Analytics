@@ -1,7 +1,13 @@
 # v0.1.0 — LiteArt Cost Analytics: MVP de custos de IA no terminal
 
-Proposta de notas preparada em 14/11/2026 para revisão e posterior publicação.
-Esta versão ainda não foi publicada, e nenhuma tag foi criada nesta preparação.
+**Estado atual — 26/11/2026:** MVP v0.1.0 publicado no GitHub, conforme confirmação do responsável,
+sem data exata de publicação informada. A tag aponta para
+`10cc485cde5d1c00a743611017fac58f226b7458`. O estudo e o relatório foram publicados no mesmo
+repositório, separadamente da release do programa de terminal.
+
+Estas notas foram preparadas em **14/11/2026**, antes da publicação posterior. Naquela preparação
+não foram criadas tags nem publicada a release. Os registros finais deste documento preservam
+esse contexto histórico e não são pendências atuais.
 
 ## Finalidade
 
@@ -60,7 +66,7 @@ anual de R$ 26,40 e R$ 132,00. Essa taxa é didática, não uma cotação perman
 A instalação pode precisar de internet. Depois dela, o modo com cotação manual funciona sem rede;
 a consulta automática ao BCB exige conexão. Não há chamadas às APIs dos modelos de IA.
 
-## Ambiente e verificação
+## Ambiente e verificação — registros históricos de 14/11/2026
 
 - Ambiente efetivamente validado: Python convencional 3.14.10 x64, `win-amd64`, Windows 11,
   build 26300. Outras versões, sistemas e computadores não foram validados.
@@ -106,11 +112,16 @@ pela adoção da MIT neste projeto.
 
 ## Evoluções futuras
 
-Catálogo e seleção de modelos, comparação de provedores, gráficos e dashboard, retomada de
+Catálogo e seleção de modelos, comparação de provedores, novos gráficos e dashboard, retomada de
 infraestrutura e orçamento e análises avançadas permanecem futuras. Não são funcionalidades
 obrigatórias para fechar esta versão e não estão disponíveis no menu atual.
+Os dois gráficos do estudo foram produzidos posteriormente e integram o relatório publicado;
+isso não altera retroativamente as funcionalidades da v0.1.0.
 
-## Referência da revisão e publicação posterior
+## Histórico da preparação em 14/11/2026
+
+O registro e o roteiro abaixo descrevem a preparação anterior à publicação confirmada no topo.
+Expressões como “sem commit” e “versão proposta” referem-se àquele momento.
 
 Branch revisada: `main`. Commit base conferido:
 `3ebf7f745e6389fa239f7a4dc43057f6e07af11e`.

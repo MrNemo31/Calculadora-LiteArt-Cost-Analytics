@@ -1,8 +1,20 @@
 # Planejamento — LiteArt Cost Analytics
 
-Planejamento iniciado na Etapa 1 e revisado em 14/11/2026 conforme o código e os testes atuais.
-As pesquisas mantêm suas datas históricas; esta revisão não atualiza tarifas. O MVP é a calculadora
-no terminal. Dashboard e análise completa dos custos de software são evoluções posteriores.
+## Situação atual — atualização documental de 26/11/2026
+
+O MVP de terminal v0.1.0 e o [estudo com relatório](../RELATORIO_ESTUDO.md) estão publicados no mesmo
+repositório GitHub. O responsável confirmou a conferência das imagens e dos links na apresentação
+publicada e a conclusão do Google Data Analytics Professional Certificate, usando o estudo como
+capstone. Não foram informadas datas exatas de publicação ou de conclusão do certificado.
+Essas confirmações não demonstram nota, avaliação individual do relatório ou endosso do Google.
+
+O MVP calcula somente custos de IA. O estudo acrescenta análise de cenários, indicadores e dois
+gráficos, sem nova release automática da calculadora. Piloto, coleta de uso e avaliação pedagógica
+continuam futuros. Dashboard e custos operacionais completos são evoluções posteriores.
+
+Planejamento iniciado na Etapa 1, com revisão técnica histórica de 14/11/2026. As pesquisas mantêm
+suas datas e condições; esta atualização não consulta preços ou câmbio. As seções datadas preservam
+a situação de cada etapa, inclusive pendências já superadas, sem substituir esta síntese atual.
 
 ## 1. Pergunta principal
 
@@ -65,17 +77,18 @@ coluna de saldo saíram do bloco principal; não são opções do menu. Os exper
 históricos, e sua retomada dependerá de novo incremento. Não há função autônoma de orçamento a
 apresentar como disponível.
 
-### Próxima entrega e recursos ainda planejados
+### Entregas publicadas e recursos ainda planejados
 
 A fonte foi definida e a consulta BCB/SGS série 1 com opção manual está implementada e testada.
 A organização de dependências e a validação em ambiente virtual novo foram concluídas em
 14/11/2026, com instalação, suíte e execuções na cópia temporária. O alcance é o Windows e o
-interpretador registrados na seção 8; não é validação universal. A revisão final da documentação e
-a publicação da primeira versão do MVP no terminal são tratadas na seção 10: a revisão técnica
-foi concluída e as notas foram preparadas; aprovação dos materiais e publicação continuam pendentes.
+interpretador registrados na seção 8; não é validação universal. A preparação da publicação está
+preservada como histórico na seção 10. A v0.1.0 e o estudo já foram publicados, conforme a síntese
+atual; a publicação não é um bloqueio pendente.
 
-Catálogo e seleção de modelos, comparação de provedores, gráficos, dashboard, integração futura de
-infraestrutura e orçamento e análises avançadas não fazem parte dessa entrega.
+Catálogo e seleção de modelos, comparação de provedores, dashboard, integração futura de
+infraestrutura e orçamento e análises avançadas não fazem parte do MVP. Os dois gráficos do estudo
+já estão implementados e publicados no relatório, separadamente da calculadora.
 A arquitetura de referência do LiteArt continua Flutter, backend Node.js/NestJS e PostgreSQL,
 com Firebase como alternativa em estudo. O [README](../README.md) descreve a execução atual.
 
@@ -160,6 +173,35 @@ acrescentada às nove colunas como metadado.
 CSV não preserva tipos Python: ao recuperar valores financeiros, ler como texto e converter
 diretamente para `Decimal`, sem float intermediário. Prever a mesma regra para o futuro catálogo.
 Não reutilizar resultados como se fossem as hipóteses de entrada.
+
+### Referência técnica de leitura e apresentação do MVP
+
+Detalhes antes concentrados no README ficam aqui como referência, sem alteração de funcionamento.
+`ler_cenarios_csv()` lê valores como texto, sem transformar campos vazios em NaN, e
+`ler_cenario_terminal()` recebe textos de `input()`. Ambas reutilizam
+`converter_hipotese_consumo()`: usuários são convertidos diretamente para int e as outras cinco
+hipóteses para float, segundo os contratos atuais. Isso não converte os valores financeiros para
+float. A leitura CSV retorna uma lista com `nome` e `hipoteses_consumo`; a manual retorna um
+dicionário equivalente, encaminhado como lista de um elemento ao fluxo comum.
+
+Erros de campo identificam registro de dados, contado a partir de 1, e coluna, não a linha física.
+Arquivo inexistente preserva FileNotFoundError; validações levantam ValueError sem resultados
+parciais. Nome e campos são limpos de espaços externos. Colunas ausentes/inesperadas, registros
+malformados, vazio ou somente cabeçalho são rejeitados. No manual, somente o campo inválido repete.
+
+`resumos_cenarios` conserva Decimal; `tabela_cenarios` usa
+`pd.DataFrame.from_records(resumos_cenarios, coerce_float=False)`. As quatro colunas financeiras
+têm dtype object, que permite guardar objetos Python, mas não comprova sozinho o tipo Decimal.
+Os testes verificam explicitamente `isinstance(valor, Decimal)`.
+
+`formatar_moeda_br()` usa `:,.2f` diretamente no Decimal e troca os separadores, independentemente
+da configuração regional: Decimal("1400") aparece como `1.400,00`. Os formatadores de
+`DataFrame.to_string()` acrescentam R$ ou US$ somente na apresentação. Não substituem os dados
+por texto, arredondam intermediários ou aplicam formatação monetária às contagens.
+
+Na identificação cambial, `5.00` aparece como `R$ 5,0000 por US$ 1,00` e `5.1234567890` como
+`R$ 5,1234567890 por US$ 1,00`, preservando as casas adicionais da taxa manual. A seção 6 detalha
+consulta, cancelamento e validação; a seção 8 preserva as evidências de instalação e precisão.
 
 ## 6. Registro dos preços e suas fontes
 
@@ -661,7 +703,7 @@ O ambiente validado usou Python convencional **3.14.10 x64**, compilação MSC p
 plataforma `win-amd64`, em **Windows 11, build 26300**. O interpretador base foi identificado pela
 `.venv-win` existente, sem usar MSYS2, alterar PATH ou modificar o Python global.
 
-O único pacote externo importado diretamente pelo código e pelos testes é Pandas. O arquivo fixa
+Na validação histórica de 14/11/2026, o pacote externo direto era Pandas. O arquivo então fixava
 `pandas==3.1.0`, `numpy==2.5.4`, `python-dateutil==4.0.0` e `tzdata==2026.6`, conforme os metadados
 instalados e testados. Os três últimos são dependências indiretas necessárias nesse conjunto.
 Biblioteca padrão, pip e ferramentas opcionais não entram no arquivo. As versões fixadas auxiliam
@@ -700,7 +742,18 @@ A pasta temporária e seu ambiente foram removidos após a verificação do cami
 A validação abrange um ambiente virtual novo neste Windows, não uma reinstalação do Python,
 outro computador ou outros sistemas. Na etapa de validação, o arquivo de dependências ainda não
 estava versionado; na revisão final ele já integra o commit local, junto do código e CSV de exemplo.
-Isso não significa que exista uma tag ou release publicada.
+Naquela etapa, validar o ambiente não comprovava publicação. A v0.1.0 foi publicada posteriormente,
+conforme a situação atual, sem data precisa informada.
+
+### Ampliação das dependências para os gráficos — histórico de 19/11/2026
+
+Foram acrescentados Plotly 7.1.0 como dependência direta e Narwhals 2.29.0/Packaging 26.3 como
+indiretas, preservando as quatro versões anteriores. O pip check registrado não encontrou
+dependências ausentes ou conflitantes. Não foram instalados Kaleido, navegadores, Dash ou
+ferramentas opcionais. A instalação limpa de 14/11/2026 não foi repetida com o conjunto ampliado.
+O [estudo](ESTUDO_DE_CASO.md) detalha a implementação e os testes; o arquivo
+[requirements.txt](../requirements.txt) conserva as versões fixadas. Essa organização não é um
+lock completo nem garantia de reprodução em outros sistemas.
 
 ## 9. Limitações e melhorias posteriores
 
@@ -728,13 +781,15 @@ mudanças de câmbio e tarifas. A série diária não é cotação em tempo real
   esses metadados ainda não fazem parte das nove colunas exportadas.
 - Retomar infraestrutura, capacidade e orçamento em incrementos próprios. Reutilizar as funções
   preservadas, sem inferir capacidade a partir de mensalidades ou tratar saldo como lucro.
-- Comparar políticas de feedback nos acertos; simular crescimento, receita Premium, custo por
-  usuário e ponto de equilíbrio. Ainda não há receitas nem essas análises no fluxo atual.
-- Criar gráficos com Plotly, começando por barras do custo mensal de IA por cenário. Barras
-  empilhadas de IA e infraestrutura dependem da retomada desse escopo; diferenciar projeção anual
-  constante de crescimento mensal.
-- Planejar exportação gráfica em PNG e JPEG e, opcionalmente, HTML interativo. A exportação estática
-  programática pode exigir Kaleido e Chrome/Chromium compatível; avaliar instalação nessa etapa.
+- Comparação de políticas de feedback e custo por usuário já existem na rotina separada do estudo.
+  Sua eventual integração ao fluxo principal do MVP continua futura. Simulação de crescimento,
+  receita Premium e ponto de equilíbrio ainda não foram implementados.
+- Os dois gráficos Plotly de políticas/escala e sensibilidade dos tokens já existem no estudo.
+  Integrá-los ao MVP ou criar novos gráficos são evoluções futuras. Barras empilhadas de IA e
+  infraestrutura dependem da retomada desse escopo; projeção anual constante não simula crescimento.
+- Os HTMLs interativos offline e os PNGs do relatório já existem. Automatizar a exportação gráfica
+  em PNG e JPEG continua futuro. A exportação estática programática pode exigir Kaleido e
+  Chrome/Chromium compatível; avaliar instalação nessa etapa.
   Referência consultada em 06/11/2026:
   [exportação estática do Plotly](https://plotly.com/python/static-image-export/).
 - Criar posteriormente dashboard com Streamlit: entradas, seleção de modelos, envio de CSV,
@@ -749,7 +804,11 @@ com Firebase como alternativa em estudo. Nenhuma estimativa comprova a capacidad
 Uma medição real de tokens exigirá esforço de raciocínio, amostra e método definidos. Isso não
 bloqueia a simulação didática nem faz parte do próximo incremento.
 
-## 10. Roteiro incremental para fechar o MVP
+## 10. Histórico de fechamento do MVP e próximos passos
+
+As etapas de preparação abaixo são registros históricos de 14/11/2026. Menções a tag proposta,
+arquivos sem commit ou publicação pendente descrevem aquela preparação. O estado atual está no
+topo: MVP e estudo publicados, sem necessidade de recriar a tag ou a release.
 
 ### Etapas concluídas
 
@@ -787,7 +846,7 @@ A licença permite uso, modificação e distribuição, inclusive comercial, man
 Dependências e fontes de dados conservam suas próprias licenças e condições, separadas desta decisão.
 A finalização da licença não significa que a primeira release tenha sido publicada.
 
-### Pendências para publicar
+### Registro histórico — pendências na preparação de 14/11/2026
 
 - Revisar e aprovar os materiais finais da versão.
 - Incorporar os ajustes finais em um commit e enviá-lo ao GitHub, em tarefa própria.
@@ -798,3 +857,15 @@ Publicação, tag e release permanecem pendentes. Esta revisão não faz commit 
 Catálogo, seleção de modelos, infraestrutura, orçamento, gráficos, dashboard e análises avançadas
 continuam posteriores, conforme a seção 9. O MVP é a calculadora no terminal; seu fechamento não
 depende de publicar um dashboard ou acrescentar funcionalidades a esse escopo.
+
+### Próximos passos atuais — 26/11/2026
+
+- Manter instruções e links coerentes com os arquivos publicados, preservando a tag v0.1.0.
+- Planejar medições reais de uso, tokens faturáveis e qualidade se houver decisão de executar
+  um piloto; a publicação e o capstone não substituem essas evidências.
+- Avaliar catálogo/seleção de modelos, comparação de provedores, exportação automática de imagens,
+  dashboard e retomada de infraestrutura/orçamento como incrementos futuros, sem ampliar o MVP
+  retroativamente. Os dois gráficos atuais do estudo já estão disponíveis no relatório.
+
+Publicação do MVP, disponibilização do estudo e conclusão do certificado são estados distintos,
+confirmados pelo responsável. Não se infere avaliação individual do relatório ou endosso do Google.

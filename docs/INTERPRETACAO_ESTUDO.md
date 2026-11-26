@@ -2,9 +2,10 @@
 
 **Data da interpretação e conferência:** 25/11/2026.
 
-**Situação:** síntese analítica para preparar o relatório final. As recomendações são propostas
-condicionais, sem decisões aprovadas atribuídas ao responsável pelo projeto. Este documento não
-declara o estudo concluído, aprovado pelo curso ou validado pelo Google.
+**Situação atual — 26/11/2026:** síntese que fundamenta o
+[relatório publicado](../RELATORIO_ESTUDO.md). A situação de publicação e do curso está no
+[estudo de caso](ESTUDO_DE_CASO.md). As recomendações continuam condicionais, sem política
+definitivamente adotada, piloto ou avaliação pedagógica realizados.
 
 ## 1. Resposta à pergunta principal
 
@@ -270,7 +271,10 @@ eles são instruções de reprodução e não foram executados nesta tarefa:
 A referência histórica do MVP permanece a v0.1.0 publicada; a interpretação usa os arquivos
 produzidos pela rotina separada do estudo, sem alterar essa versão ou sua tag.
 
-### Próximo passo
+### Encaminhamento histórico de 25/11/2026
+
+O texto abaixo registra a proposta anterior à elaboração e à publicação posterior do relatório,
+agora disponível no link da situação atual. Não representa uma pendência de publicação.
 
 Elaborar o relatório final com a pergunta principal, os dois gráficos existentes, esta síntese,
 as recomendações condicionais e as limitações. Os gráficos previstos para composição são
